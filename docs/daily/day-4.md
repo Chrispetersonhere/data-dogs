@@ -21,12 +21,12 @@
 - `docs/architecture/erd-v1.md`
 - `docs/daily/day-4.md`
 
-## Validation commands run
+## Validation commands run (PowerShell)
 - `git diff -- packages/db docs/architecture/erd-v1.md`
-- `pnpm lint`
-- `pnpm typecheck`
-- `pnpm --filter web test`
-- `pnpm --filter web build`
+- `pnpm lint` (completed; Turbo reported no lint tasks configured yet)
+- `pnpm typecheck` (passed for `web` and `@data-dogs/ui`)
+- `pnpm --filter web test` (completed; package currently prints "no automated tests configured yet")
+- `pnpm --filter web build` (passed with successful Next.js production build)
 - `pytest services/ingest-sec/tests -q`
 - `pytest services/parse-xbrl/tests -q`
 - `pytest services/parse-proxy/tests -q`
@@ -34,5 +34,6 @@
 - `pytest services/market-data/tests -q`
 
 ## Risks / follow-ups
-- Repo currently lacks Python service test directories, so the default Day 4 pytest palette may fail in this bootstrap state.
+- Python verification commands are currently blocked on Windows where `pytest` is not installed/available on PATH.
+- Add a Python toolchain bootstrap step for contributors who need to run service-level tests locally.
 - When DB runtime tooling is introduced, wire this migration into the project’s migration runner and add migration smoke tests in CI.
