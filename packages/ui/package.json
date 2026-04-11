@@ -10,7 +10,8 @@
     "./components/ui": "./src/components/ui/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --max-warnings=0"
   },
   "peerDependencies": {
     "react": "^19.0.0"
