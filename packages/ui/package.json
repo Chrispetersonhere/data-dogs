@@ -1,0 +1,22 @@
+{
+  "name": "@data-dogs/ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles/tokens": "./src/styles/tokens.ts",
+    "./components/layout": "./src/components/layout/index.ts",
+    "./components/ui": "./src/components/ui/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "typescript": "^5.9.3"
+  }
+}
