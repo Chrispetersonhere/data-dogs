@@ -1,0 +1,6 @@
+# Runtime dependencies (expected for ingestion runner wiring)
+boto3>=1.39.0
+psycopg2-binary>=2.9.9
+
+# Test dependencies
+pytest>=8.0.0

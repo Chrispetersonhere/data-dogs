@@ -1,31 +1,51 @@
 # Data Dogs
 
-Execution-first planning repository for building a SEC-native financial data product.
+Monorepo for building a SEC-native financial data platform, with active implementation underway.
 
-## Current Focus
-This repository is currently in **planning mode only**.
+## Current State
+Implemented baseline project scaffolding and initial product code:
+- **Monorepo + build orchestration:** pnpm workspace + Turbo task graph.
+- **Web app shell:** Next.js app in `apps/web`.
+- **Shared UI package:** reusable primitives in `packages/ui`.
+- **DB package skeleton:** SQL schema/migration scaffolding in `packages/db`.
+- **SEC ingest service foundation:** Python SEC client with throttling/retry/timeout behavior and unit tests in `services/ingest-sec`.
+- **CI baseline:** lint, typecheck, JS tests, and Python service tests.
 
-We are not implementing product code yet. We are establishing:
-- roadmap documents,
-- definitions of done,
-- operating constraints,
-- and execution checklists.
+## Run Locally
+### Prerequisites
+- Node.js 20+
+- pnpm 10+
+- Python 3.12+ (for Python service tests)
 
-## Planning Documents
-- `docs/roadmap/90-day-roadmap.md` — phased 90-day build plan.
-- `docs/roadmap/v1-scope.md` — v1 scope boundaries and non-goals.
-- `docs/checklists/daily-done.md` — daily completion checklist.
-- `docs/checklists/weekly-done.md` — weekly completion checklist.
-- `docs/checklists/monthly-done.md` — monthly completion checklist.
-- `docs/checklists/codex-operating-brief.md` — non-negotiable operating rules for Codex.
+### Install dependencies
+```bash
+pnpm install
+```
 
-- `docs/product/codex-execution-archive.md` — stored day-by-day execution reference (archive only).
+### Start the web app
+```bash
+pnpm --filter web dev
+```
 
-## Principles
-- SEC-native, filings-first architecture.
-- Raw-first ingestion, normalize-second transformation.
-- Point-in-time correctness and provenance for every artifact.
-- Production-safe increments and narrow PR-sized execution.
+### Optional local infra
+A Docker Compose setup is available under `infra/docker/docker-compose.yml` for local Postgres/Redis/MinIO and service wiring.
 
-## Next Step
-Finalize and approve planning docs, then begin Day 1 execution from the roadmap.
+## Validation Commands
+### Monorepo checks
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+### Python ingest-sec tests
+```bash
+python -m pip install -r services/ingest-sec/requirements.txt
+PYTHONPATH=services/ingest-sec python -m pytest services/ingest-sec/tests -q
+```
+
+## Documentation
+- `docs/operations/local-dev.md` — local dev + infrastructure notes.
+- `docs/operations/sec-client.md` — SEC client behavior and troubleshooting.
+- `docs/roadmap/90-day-roadmap.md` — phased plan.
