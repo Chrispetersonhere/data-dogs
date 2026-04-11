@@ -30,3 +30,4 @@
 - Persistent `EACCES` on `node_modules/eslint` after cleanup indicates host ACL/protection issues; documented ACL reset + repo relocation path.
 - Added Windows fallback to reinstall with `--node-linker=hoisted` and guidance for Controlled Folder Access environments.
 - Added deterministic fallback: fresh clone into neutral path with fail-fast install (no silent error suppression) when repair-in-place keeps failing.
+- Fresh-clone fallback now captures `remote.origin.url` from the existing repo to avoid placeholder clone URLs.

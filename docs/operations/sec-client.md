@@ -167,24 +167,29 @@ If your machine enforces Windows Defender Controlled Folder Access, allow `node.
 If `EACCES` persists after all cleanup, stop trying to repair the current working tree. Create a fresh clone in a neutral path and reinstall without suppressing errors:
 
 ```powershell
-# 1) Start clean in a short neutral path
+# 1) Capture your current repo remote BEFORE leaving the repo folder
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+$repoUrl = git config --get remote.origin.url
+if (-not $repoUrl) { throw "remote.origin.url not set; run this from your existing cloned repo" }
+
+# 2) Start clean in a short neutral path and clone from the captured remote
 Set-Location C:\
 if (Test-Path .\dev\data-dogs-clean) { Remove-Item -Recurse -Force .\dev\data-dogs-clean }
-git clone https://github.com/<your-org>/data-dogs.git C:\dev\data-dogs-clean
+git clone $repoUrl C:\dev\data-dogs-clean
 Set-Location C:\dev\data-dogs-clean
 
-# 2) Keep pnpm store outside repo
+# 3) Keep pnpm store outside repo
 pnpm config set store-dir "$env:LOCALAPPDATA\pnpm\store\v10"
 
-# 3) Install (no ErrorAction silencing; fail fast)
+# 4) Install (no ErrorAction silencing; fail fast)
 pnpm install --force --node-linker=hoisted
 
-# 4) Verify JS toolchain
+# 5) Verify JS toolchain
 pnpm lint
 pnpm typecheck
 pnpm --filter web build
 
-# 5) Verify SEC tests
+# 6) Verify SEC tests
 python -m pytest services/ingest-sec/tests -q
 ```
 
