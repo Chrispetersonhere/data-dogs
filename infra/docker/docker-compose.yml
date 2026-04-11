@@ -1,0 +1,106 @@
+name: data-dogs-local
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: data-dogs-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: data_dogs
+      POSTGRES_PASSWORD: data_dogs
+      POSTGRES_DB: data_dogs
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U data_dogs -d data_dogs"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: data-dogs-clickhouse
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --query 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  object-storage:
+    image: minio/minio:RELEASE.2025-01-20T14-49-07Z
+    container_name: data-dogs-object-storage
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9001:9001"
+      - "19000:9000"
+    volumes:
+      - object_storage_data:/data
+
+  web:
+    image: node:20-bookworm
+    container_name: data-dogs-web
+    working_dir: /workspace
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      object-storage:
+        condition: service_started
+    command: >-
+      bash -lc "corepack enable && pnpm install && pnpm --filter web dev --hostname 0.0.0.0 --port 3000"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://data_dogs:data_dogs@postgres:5432/data_dogs
+      CLICKHOUSE_URL: http://clickhouse:8123
+      S3_ENDPOINT: http://object-storage:9000
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../../:/workspace
+
+  ingest-sec:
+    image: python:3.12-slim
+    container_name: data-dogs-ingest-sec
+    working_dir: /workspace
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      object-storage:
+        condition: service_started
+    command: >-
+      bash -lc "python -m http.server 8080"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      DATABASE_URL: postgresql://data_dogs:data_dogs@postgres:5432/data_dogs
+      CLICKHOUSE_URL: http://clickhouse:8123
+      S3_ENDPOINT: http://object-storage:9000
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../../:/workspace
+
+volumes:
+  postgres_data:
+  clickhouse_data:
+  object_storage_data:
