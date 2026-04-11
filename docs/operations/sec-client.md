@@ -71,3 +71,33 @@ pnpm install
 pnpm lint
 pnpm typecheck
 ```
+
+## Windows troubleshooting (exact errors)
+
+If you see `Cannot find path 'C:\workspace\data-dogs'`, that is expected on Windows because `/workspace/...` is a Linux path. Stay in your existing repo path, for example:
+
+```powershell
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+```
+
+If you see `pytest : The term 'pytest' is not recognized`, run tests through Python:
+
+```powershell
+python -m pip install pytest
+python -m pytest services/ingest-sec/tests -q
+```
+
+If you see `'turbo' is not recognized`, install workspace dependencies:
+
+```powershell
+pnpm install
+pnpm lint
+pnpm typecheck
+```
+
+If `pnpm --filter web build` fails with `Cannot find module ...\\next\\dist\\bin\\next`, dependencies for `apps/web` are missing; run:
+
+```powershell
+pnpm install
+pnpm --filter web build
+```
