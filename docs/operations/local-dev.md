@@ -4,10 +4,11 @@ This project supports **local-only development infrastructure** via Docker Compo
 No staging or production infrastructure is included in this repository.
 
 ## Prerequisites
-- Docker Engine with Docker Compose v2
+- Docker Desktop / Docker Engine with Docker Compose v2 available on PATH.
 - Node.js 20+
 - pnpm 10+
 - Python 3.12+
+- On Windows: run shell scripts through **Git Bash** or **WSL**.
 
 ## Services
 The local stack defined in `infra/docker/docker-compose.yml` includes:
@@ -21,24 +22,35 @@ The local stack defined in `infra/docker/docker-compose.yml` includes:
 From repository root:
 
 ```bash
-./infra/scripts/bootstrap.sh
+bash infra/scripts/bootstrap.sh
 ```
 
 That script validates compose config and starts core data infrastructure.
 
-To start all services:
+## Docker command checks
+Before running compose commands, verify Docker is installed and available:
+
+```bash
+docker --version
+docker compose version
+```
+
+If PowerShell reports `docker : The term 'docker' is not recognized...`, install Docker Desktop and restart your terminal session.
+
+## Compose lifecycle
+Start all services:
 
 ```bash
 docker compose -f infra/docker/docker-compose.yml up -d
 ```
 
-To stop all services:
+Stop all services:
 
 ```bash
 docker compose -f infra/docker/docker-compose.yml down
 ```
 
-To remove data volumes as well:
+Remove volumes as well:
 
 ```bash
 docker compose -f infra/docker/docker-compose.yml down -v
