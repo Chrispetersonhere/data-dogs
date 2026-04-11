@@ -24,5 +24,5 @@
 - `pnpm lint; if ($LASTEXITCODE -ne 0) { Write-Host "lint failed (allowed for bootstrap)" }`
 - `pnpm typecheck; if ($LASTEXITCODE -ne 0) { Write-Host "typecheck failed (allowed for bootstrap)" }`
 - `pnpm verify:workspace`
-- `where.exe git`
-- `git diff --name-only` (run only when Git CLI is available in shell PATH)
+- `pnpm verify:git-cli`
+- Optional (only if Git CLI exists): `git diff --name-only`

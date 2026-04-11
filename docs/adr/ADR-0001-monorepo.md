@@ -27,4 +27,4 @@ Adopt a pnpm workspace with Turborepo task orchestration at the repository root.
 ### Trade-offs
 - Lint/typecheck/test/build behavior is intentionally skeletal until package-level scripts/configs exist.
 - Further ADRs will be needed for framework-specific lint and test standards.
-- Local verification of changed files assumes a working Git CLI in the user shell.
+- Git-based diff verification is optional for Day 2 bootstrap checks and requires Git CLI availability in PATH.
