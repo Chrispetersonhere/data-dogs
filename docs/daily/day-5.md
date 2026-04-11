@@ -45,3 +45,4 @@
 - On Windows, `infra/scripts/bootstrap.sh` must be executed from Git Bash/WSL (or via `bash infra/scripts/bootstrap.sh` in PowerShell).
 - If `bash` is unavailable on Windows, equivalent PowerShell bootstrap commands are documented in `docs/operations/local-dev.md`.
 - On Windows, Docker CLI can be present while daemon is stopped; `docker compose up` requires Docker Desktop/Engine to be running.
+- Web container install runs with `CI=true` to avoid `pnpm` non-TTY abort loops during startup.

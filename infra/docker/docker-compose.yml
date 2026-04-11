@@ -86,7 +86,7 @@ services:
     volumes:
       - ../..:/workspace
     command: >-
-      bash -lc "corepack enable && pnpm install --no-frozen-lockfile && pnpm --filter web dev -- --hostname 0.0.0.0 --port 3000"
+      bash -lc "corepack enable && CI=true pnpm install --no-frozen-lockfile && pnpm --filter web dev -- --hostname 0.0.0.0 --port 3000"
     environment:
       NODE_ENV: development
       NEXT_TELEMETRY_DISABLED: "1"

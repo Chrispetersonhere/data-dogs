@@ -107,3 +107,4 @@ docker compose -f infra/docker/docker-compose.yml down -v
 - If `pytest` is not installed locally, use `python -m pip install pytest` and run tests with `python -m pytest ...`.
 - If `docker` is not installed, all compose/bootstrap steps will fail until Docker Desktop (or Docker Engine + Compose) is installed and on PATH.
 - If `docker compose up` fails with `open //./pipe/docker_engine` on Windows, Docker Desktop is installed but the daemon is not running yet; start Docker Desktop and wait until it reports Engine running.
+- The `web` compose service sets `CI=true` during `pnpm install` to avoid non-interactive TTY prompts in container startup.
