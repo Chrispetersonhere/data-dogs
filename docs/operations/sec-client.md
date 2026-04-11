@@ -101,3 +101,28 @@ If `pnpm --filter web build` fails with `Cannot find module ...\\next\\dist\\bin
 pnpm install
 pnpm --filter web build
 ```
+
+If `pnpm install` fails with `EACCES` / `ENOENT` under `node_modules\\.pnpm\\...`, your install is partially corrupted/locked. Run this full reset in **PowerShell**:
+
+```powershell
+# 1) Stop node/pnpm processes that may lock files
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process pnpm -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# 2) Remove install artifacts
+Remove-Item -Recurse -Force .\node_modules -ErrorAction SilentlyContinue
+Remove-Item -Force .\pnpm-lock.yaml -ErrorAction SilentlyContinue
+
+# 3) Prune pnpm store cache metadata
+pnpm store prune
+
+# 4) Clean reinstall
+pnpm install --force
+
+# 5) Re-run checks
+pnpm lint
+pnpm typecheck
+pnpm --filter web build
+```
+
+If removal still fails, move the repo outside sync-protected folders and retry (for example outside OneDrive-controlled paths), then rerun the reset steps above.
