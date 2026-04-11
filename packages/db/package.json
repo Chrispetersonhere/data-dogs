@@ -1,0 +1,12 @@
+{
+  "name": "@data-dogs/db",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit src/index.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
