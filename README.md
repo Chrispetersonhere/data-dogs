@@ -19,6 +19,8 @@ We are not implementing product code yet. We are establishing:
 - `docs/checklists/monthly-done.md` — monthly completion checklist.
 - `docs/checklists/codex-operating-brief.md` — non-negotiable operating rules for Codex.
 
+- `docs/product/codex-execution-archive.md` — stored day-by-day execution reference (archive only).
+
 ## Principles
 - SEC-native, filings-first architecture.
 - Raw-first ingestion, normalize-second transformation.
