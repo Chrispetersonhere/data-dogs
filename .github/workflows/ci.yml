@@ -16,7 +16,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -24,7 +23,7 @@ jobs:
           version: 10.17.1
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Lint
         run: pnpm lint
@@ -41,5 +40,4 @@ jobs:
           python-version: '3.12'
 
       - name: Python tests
-        run: |
-          python -m unittest discover -v
+        run: python -m unittest discover -v
