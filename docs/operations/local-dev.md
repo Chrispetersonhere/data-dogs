@@ -17,6 +17,7 @@ No staging or production infrastructure is included.
 ## Prerequisites
 
 - Docker with Docker Compose v2
+- Docker Desktop/Engine daemon running
 - Node.js 20+
 - Corepack enabled (`corepack enable`)
 - For Windows: run shell scripts through **Git Bash** or **WSL** (PowerShell does not natively execute `.sh` scripts)
@@ -69,6 +70,7 @@ Get-Command docker -ErrorAction SilentlyContinue
 Get-Command node -ErrorAction SilentlyContinue
 Get-Command pnpm -ErrorAction SilentlyContinue
 Get-Command python -ErrorAction SilentlyContinue
+docker version
 ```
 
 Start services:
@@ -104,3 +106,4 @@ docker compose -f infra/docker/docker-compose.yml down -v
 - CI test steps for Python services are conditional and skip missing directories with explicit logs.
 - If `pytest` is not installed locally, use `python -m pip install pytest` and run tests with `python -m pytest ...`.
 - If `docker` is not installed, all compose/bootstrap steps will fail until Docker Desktop (or Docker Engine + Compose) is installed and on PATH.
+- If `docker compose up` fails with `open //./pipe/docker_engine` on Windows, Docker Desktop is installed but the daemon is not running yet; start Docker Desktop and wait until it reports Engine running.

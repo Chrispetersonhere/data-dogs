@@ -14,14 +14,18 @@ if ! docker compose version >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! command -v corepack >/dev/null 2>&1; then
-  echo "error: corepack is required to provision pnpm" >&2
-  exit 1
-fi
-
 cd "$ROOT_DIR"
 
-corepack enable
+if command -v pnpm >/dev/null 2>&1; then
+  echo "pnpm detected in PATH; skipping corepack enable"
+else
+  if ! command -v corepack >/dev/null 2>&1; then
+    echo "error: neither pnpm nor corepack is available in PATH" >&2
+    exit 1
+  fi
+  corepack enable
+fi
+
 pnpm install --no-frozen-lockfile
 
 docker compose -f "$COMPOSE_FILE" up -d
