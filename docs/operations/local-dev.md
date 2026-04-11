@@ -8,7 +8,7 @@ No staging or production infrastructure is included in this repository.
 - Node.js 20+
 - pnpm 10+
 - Python 3.12+
-- On Windows: run shell scripts through **Git Bash** or **WSL**.
+- Optional on Windows: Git Bash or WSL if you want to run `bootstrap.sh`.
 
 ## Services
 The local stack defined in `infra/docker/docker-compose.yml` includes:
@@ -18,65 +18,49 @@ The local stack defined in `infra/docker/docker-compose.yml` includes:
 - `web` (Next.js app)
 - `ingest-sec` (local placeholder service process)
 
-## Quick start
-From repository root:
-
-```bash
-bash infra/scripts/bootstrap.sh
-```
-
-That script validates compose config and starts core data infrastructure.
-
-## Docker command checks
+## Docker command checks (Windows/PowerShell first)
 Before running compose commands, verify Docker is installed and available:
 
-```bash
+```powershell
 docker --version
 docker compose version
 ```
 
 If PowerShell reports `docker : The term 'docker' is not recognized...`, install Docker Desktop and restart your terminal session.
 
-
-## Windows quick-start (PowerShell)
-1. Install Docker Desktop and ensure "docker" is available in a **new** PowerShell session:
-
-```powershell
-docker --version
-docker compose version
-```
-
-2. Run the bootstrap script from Git Bash or WSL (recommended for `.sh` scripts):
+## Bootstrap options
+### Option A: bootstrap script (requires bash)
+Run from repository root:
 
 ```powershell
 bash infra/scripts/bootstrap.sh
 ```
 
-3. Manage services from PowerShell once Docker is available:
+If PowerShell reports `bash : The term 'bash' is not recognized...`, install Git for Windows (Git Bash) or WSL.
+
+### Option B: PowerShell-only (no bash required)
+Start the core infrastructure directly:
 
 ```powershell
-docker compose -f infra/docker/docker-compose.yml up -d
-docker compose -f infra/docker/docker-compose.yml down
+docker compose -f infra/docker/docker-compose.yml up -d postgres clickhouse object-storage
 ```
-
-If `bash` is not installed, use Git for Windows (Git Bash) or WSL.
 
 ## Compose lifecycle
 Start all services:
 
-```bash
+```powershell
 docker compose -f infra/docker/docker-compose.yml up -d
 ```
 
 Stop all services:
 
-```bash
+```powershell
 docker compose -f infra/docker/docker-compose.yml down
 ```
 
 Remove volumes as well:
 
-```bash
+```powershell
 docker compose -f infra/docker/docker-compose.yml down -v
 ```
 
@@ -92,13 +76,13 @@ docker compose -f infra/docker/docker-compose.yml down -v
 ## Acceptance checks
 Validate compose file:
 
-```bash
+```powershell
 docker compose -f infra/docker/docker-compose.yml config
 ```
 
 Run CI-equivalent checks locally:
 
-```bash
+```powershell
 pnpm install
 pnpm lint
 pnpm typecheck
@@ -106,10 +90,24 @@ pnpm --filter web test
 python -c "import sys,unittest; suite=unittest.defaultTestLoader.discover('.'); total=suite.countTestCases(); print(f'Discovered {total} Python unittest test case(s).'); sys.exit(0) if total==0 else sys.exit(0 if unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful() else 1)"
 ```
 
-
-## CI workflow content check (PowerShell-safe)
-Use this one-line command in PowerShell (no heredoc syntax):
+## CI workflow content check (PowerShell-safe; no quote-escaping traps)
+Use this native PowerShell check instead of a Python one-liner with nested quotes:
 
 ```powershell
-python -c 'from pathlib import Path; ci=Path(".github/workflows/ci.yml").read_text(); required=["push:","pull_request:","pnpm install --no-frozen-lockfile","pnpm lint","pnpm typecheck","pnpm --filter web test","unittest.defaultTestLoader.discover"]; missing=[x for x in required if x not in ci]; print("OK" if not missing else f"MISSING: {missing}"); raise SystemExit(0 if not missing else 1)'
+$ci = Get-Content -Raw .github/workflows/ci.yml
+$required = @(
+  'push:'
+  'pull_request:'
+  'pnpm install --no-frozen-lockfile'
+  'pnpm lint'
+  'pnpm typecheck'
+  'pnpm --filter web test'
+  'unittest.defaultTestLoader.discover'
+)
+$missing = $required | Where-Object { -not $ci.Contains($_) }
+if ($missing.Count -gt 0) {
+  Write-Host "MISSING: $($missing -join ', ')"
+  exit 1
+}
+Write-Host 'OK'
 ```

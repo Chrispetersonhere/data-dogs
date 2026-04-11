@@ -5,7 +5,8 @@
 - Added `infra/scripts/bootstrap.sh` to validate and bring up core infrastructure quickly.
 - Added GitHub Actions CI workflow to run install, lint, typecheck, web tests, and Python tests on push and pull request events, with `pnpm install --no-frozen-lockfile` for repos without a committed lockfile and a no-tests-safe unittest runner.
 - Added local development operations runbook with startup/teardown and verification commands.
-- Added Windows-oriented troubleshooting guidance for missing Docker CLI / shell mismatch, including a PowerShell-specific quick-start path.
+- Added Windows-oriented troubleshooting guidance for missing Docker CLI / missing bash and documented a PowerShell-only fallback that does not require bash.
+- Replaced fragile quote-heavy Python `-c` YAML-content verification examples with a native PowerShell validation block.
 - Kept scope constrained to local development and CI only (no staging/prod infrastructure).
 
 ## Files touched
@@ -15,11 +16,16 @@
 - `docs/operations/local-dev.md`
 - `docs/daily/day-5.md`
 
+## Why the reported commands failed
+- `docker` commands failed because Docker CLI is not installed or not available on PATH in the calling PowerShell session.
+- `bash infra/scripts/bootstrap.sh` failed because bash is not installed on the host shell.
+- The previous workflow-content check failed in user execution due shell quoting issues around nested string delimiters in `python -c`; native PowerShell validation avoids this class of failure.
+
 ## Validation commands run
-- `python -c "import sys,unittest; suite=unittest.defaultTestLoader.discover('.'); total=suite.countTestCases(); print(f'Discovered {total} Python unittest test case(s).'); sys.exit(0) if total==0 else sys.exit(0 if unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful() else 1)"
+- `python -c "import sys,unittest; suite=unittest.defaultTestLoader.discover('.'); total=suite.countTestCases(); print(f'Discovered {total} Python unittest test case(s).'); sys.exit(0) if total==0 else sys.exit(0 if unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful() else 1)"`
 - `python -c "from pathlib import Path; ci=Path('.github/workflows/ci.yml').read_text(); required=['push:','pull_request:','pnpm install --no-frozen-lockfile','pnpm lint','pnpm typecheck','pnpm --filter web test','unittest.defaultTestLoader.discover']; missing=[x for x in required if x not in ci]; print('OK' if not missing else f'MISSING: {missing}'); raise SystemExit(0 if not missing else 1)"`
 
 ## Risks / follow-ups
+- Docker-based acceptance checks require local Docker Desktop/Engine and cannot pass when `docker` is absent from PATH.
 - `ingest-sec` is currently wired as a minimal placeholder container process until the real service module is introduced.
 - CI Python step runs `unittest discover`; if/when pytest-based Python services are added, update CI to install test dependencies and execute those suites explicitly.
-- Docker-based acceptance checks require local Docker Desktop/Engine and cannot pass when `docker` is absent from PATH.
