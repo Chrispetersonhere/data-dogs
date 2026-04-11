@@ -13,7 +13,10 @@
     "verify:git-cli": "node -e \"const cp=require('child_process');try{cp.execSync(process.platform==='win32'?'where git':'command -v git',{stdio:'pipe'});console.log('git cli available')}catch(e){console.log('git cli NOT available in PATH')}\""
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
     "eslint": "^9.38.0",
+    "eslint-config-next": "15.3.1",
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
     "typescript": "^5.9.3"
