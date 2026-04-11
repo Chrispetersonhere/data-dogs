@@ -27,13 +27,13 @@
 - `pnpm typecheck` (passed for `web` and `@data-dogs/ui`)
 - `pnpm --filter web test` (completed; package currently prints "no automated tests configured yet")
 - `pnpm --filter web build` (passed with successful Next.js production build)
-- `pytest services/ingest-sec/tests -q`
-- `pytest services/parse-xbrl/tests -q`
-- `pytest services/parse-proxy/tests -q`
-- `pytest services/id-master/tests -q`
-- `pytest services/market-data/tests -q`
+- `py -m pytest services/ingest-sec/tests -q`
+- `py -m pytest services/parse-xbrl/tests -q`
+- `py -m pytest services/parse-proxy/tests -q`
+- `py -m pytest services/id-master/tests -q`
+- `py -m pytest services/market-data/tests -q`
 
 ## Risks / follow-ups
-- Python verification commands are currently blocked on Windows where `pytest` is not installed/available on PATH.
-- Add a Python toolchain bootstrap step for contributors who need to run service-level tests locally.
+- Python test command is available, but the referenced service test directories are currently absent from this repository snapshot.
+- `pnpm --filter web build` generates local workspace artifacts (`apps/web/next-env.d.ts`, `apps/web/tsconfig.tsbuildinfo`) that should not be treated as Day 4 schema changes.
 - When DB runtime tooling is introduced, wire this migration into the project’s migration runner and add migration smoke tests in CI.
