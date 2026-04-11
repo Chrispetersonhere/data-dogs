@@ -105,3 +105,11 @@ pnpm typecheck
 pnpm --filter web test
 python -m unittest discover -v
 ```
+
+
+## CI workflow content check (PowerShell-safe)
+Use this one-line command in PowerShell (no heredoc syntax):
+
+```powershell
+python -c "from pathlib import Path; ci=Path('.github/workflows/ci.yml').read_text(); required=['pnpm install --no-frozen-lockfile','pnpm lint','pnpm typecheck','pnpm --filter web test','python -m unittest discover -v']; missing=[x for x in required if x not in ci]; print('OK' if not missing else f'MISSING: {missing}'); raise SystemExit(0 if not missing else 1)"
+```
