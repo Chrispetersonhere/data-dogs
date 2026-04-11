@@ -8,7 +8,8 @@
     "typecheck": "turbo run typecheck --continue",
     "test": "turbo run test --continue",
     "build": "turbo run build --continue",
-    "format": "prettier --check ."
+    "format": "prettier --check .",
+    "verify:workspace": "node -e \"const fs=require('fs');['package.json','pnpm-workspace.yaml','turbo.json','tsconfig.base.json'].forEach(f=>{if(!fs.existsSync(f)){throw new Error('missing '+f)}});const p=require('./package.json');['lint','typecheck','test','build','format'].forEach(s=>{if(!p.scripts[s]){throw new Error('missing script '+s)}});console.log('workspace baseline verified')\""
   },
   "devDependencies": {
     "eslint": "^9.38.0",

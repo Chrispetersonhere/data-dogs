@@ -21,6 +21,8 @@
 
 ## Verification Plan
 - `pnpm install`
-- `pnpm lint || true`
-- `pnpm typecheck || true`
-- `git diff --name-only`
+- `pnpm lint; if ($LASTEXITCODE -ne 0) { Write-Host "lint failed (allowed for bootstrap)" }`
+- `pnpm typecheck; if ($LASTEXITCODE -ne 0) { Write-Host "typecheck failed (allowed for bootstrap)" }`
+- `pnpm verify:workspace`
+- `where.exe git`
+- `git diff --name-only` (run only when Git CLI is available in shell PATH)
