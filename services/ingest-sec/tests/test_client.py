@@ -1,46 +1,16 @@
 from __future__ import annotations
 
-import importlib.util
 import socket
-import sys
-import types
 import urllib.error
-from pathlib import Path
 
 import pytest
 
-
-def _load_sec_modules():
-    root = Path(__file__).resolve().parents[1] / "src"
-    package_name = "ingest_sec_src"
-
-    package = types.ModuleType(package_name)
-    package.__path__ = [str(root)]
-    sys.modules[package_name] = package
-
-    loaded = {}
-    for module_name in ("config", "logging", "client"):
-        full_name = f"{package_name}.{module_name}"
-        spec = importlib.util.spec_from_file_location(full_name, root / f"{module_name}.py")
-        assert spec and spec.loader
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[full_name] = module
-        spec.loader.exec_module(module)
-        loaded[module_name] = module
-    return loaded
-
-
-MODULES = _load_sec_modules()
-client_mod = MODULES["client"]
-config_mod = MODULES["config"]
-
-SECClient = client_mod.SECClient
-SECResponse = client_mod.SECResponse
-SECClientTimeoutError = client_mod.SECClientTimeoutError
-SECClientConfig = config_mod.SECClientConfig
+from src.client import SECClient, SECClientTimeoutError, SECResponse
+from src.config import SECClientConfig
 
 
 class FakeClock:
+
     def __init__(self) -> None:
         self.now_value = 0.0
         self.sleep_calls: list[float] = []
