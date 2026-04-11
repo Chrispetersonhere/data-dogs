@@ -1,0 +1,105 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: data-dogs-postgres
+    environment:
+      POSTGRES_DB: datadogs
+      POSTGRES_USER: datadogs
+      POSTGRES_PASSWORD: datadogs
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datadogs -d datadogs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: data-dogs-clickhouse
+    environment:
+      CLICKHOUSE_DB: datadogs
+      CLICKHOUSE_USER: datadogs
+      CLICKHOUSE_PASSWORD: datadogs
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  object-storage:
+    image: minio/minio:RELEASE.2026-03-30T05-01-07Z
+    container_name: data-dogs-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9001:9001"
+      - "9002:9000"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    image: node:22-alpine
+    container_name: data-dogs-web
+    working_dir: /workspace
+    command: >
+      sh -lc "
+      corepack enable &&
+      (pnpm install --frozen-lockfile || pnpm install) &&
+      pnpm --filter web dev --hostname 0.0.0.0 --port 3000
+      "
+    volumes:
+      - ../../:/workspace
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      object-storage:
+        condition: service_healthy
+
+  ingest-sec:
+    image: python:3.12-slim
+    container_name: data-dogs-ingest-sec
+    working_dir: /workspace
+    command: >
+      sh -lc "
+      if [ -d services/ingest-sec ]; then
+        if [ -f services/ingest-sec/requirements.txt ]; then
+          pip install --no-cache-dir -r services/ingest-sec/requirements.txt;
+        fi;
+        python -m pytest services/ingest-sec/tests -q;
+      else
+        echo 'services/ingest-sec is not present yet; container started for local wiring validation.' &&
+        tail -f /dev/null;
+      fi
+      "
+    volumes:
+      - ../../:/workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+      object-storage:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  clickhouse-data:
+  minio-data:
