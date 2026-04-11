@@ -1,0 +1,21 @@
+{
+  "name": "data-dogs",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.17.1",
+  "scripts": {
+    "lint": "turbo run lint --continue",
+    "typecheck": "turbo run typecheck --continue",
+    "test": "turbo run test --continue",
+    "build": "turbo run build --continue",
+    "format": "prettier --check .",
+    "verify:workspace": "node -e \"const fs=require('fs');['package.json','pnpm-workspace.yaml','turbo.json','tsconfig.base.json'].forEach(f=>{if(!fs.existsSync(f)){throw new Error('missing '+f)}});const p=require('./package.json');['lint','typecheck','test','build','format'].forEach(s=>{if(!p.scripts[s]){throw new Error('missing script '+s)}});console.log('workspace baseline verified')\"",
+    "verify:git-cli": "node -e \"const cp=require('child_process');try{cp.execSync(process.platform==='win32'?'where git':'command -v git',{stdio:'pipe'});console.log('git cli available')}catch(e){console.log('git cli NOT available in PATH')}\""
+  },
+  "devDependencies": {
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.3"
+  }
+}
