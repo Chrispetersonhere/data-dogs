@@ -31,3 +31,4 @@
 - Added Windows fallback to reinstall with `--node-linker=hoisted` and guidance for Controlled Folder Access environments.
 - Added deterministic fallback: fresh clone into neutral path with fail-fast install (no silent error suppression) when repair-in-place keeps failing.
 - Fresh-clone fallback now captures `remote.origin.url` from the existing repo to avoid placeholder clone URLs.
+- Fresh-clone fallback now also captures current git branch and clones that branch so service test paths match in the clean workspace.

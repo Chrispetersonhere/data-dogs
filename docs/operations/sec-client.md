@@ -171,12 +171,18 @@ If `EACCES` persists after all cleanup, stop trying to repair the current workin
 Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
 $repoUrl = git config --get remote.origin.url
 if (-not $repoUrl) { throw "remote.origin.url not set; run this from your existing cloned repo" }
+$branch = git rev-parse --abbrev-ref HEAD
+if (-not $branch) { throw "Unable to determine current branch" }
 
-# 2) Start clean in a short neutral path and clone from the captured remote
+# 2) Start clean in a short neutral path and clone the same branch
 Set-Location C:\
 if (Test-Path .\dev\data-dogs-clean) { Remove-Item -Recurse -Force .\dev\data-dogs-clean }
-git clone $repoUrl C:\dev\data-dogs-clean
+git clone --branch $branch $repoUrl C:\dev\data-dogs-clean
 Set-Location C:\dev\data-dogs-clean
+
+# If your branch is local-only, push first from the original repo, then rerun clone:
+#   Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+#   git push -u origin $branch
 
 # 3) Keep pnpm store outside repo
 pnpm config set store-dir "$env:LOCALAPPDATA\pnpm\store\v10"
