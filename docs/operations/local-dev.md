@@ -19,13 +19,20 @@ No staging or production infrastructure is included.
 - Docker with Docker Compose v2
 - Node.js 20+
 - Corepack enabled (`corepack enable`)
+- For Windows: run shell scripts through **Git Bash** or **WSL** (PowerShell does not natively execute `.sh` scripts)
 
 ## Bootstrap local environment
 
-From repository root:
+From repository root (bash shell):
 
 ```bash
 infra/scripts/bootstrap.sh
+```
+
+Windows PowerShell equivalent:
+
+```powershell
+bash infra/scripts/bootstrap.sh
 ```
 
 This script will:
@@ -38,6 +45,12 @@ This script will:
 Validate compose file:
 
 ```bash
+docker compose -f infra/docker/docker-compose.yml config
+```
+
+PowerShell:
+
+```powershell
 docker compose -f infra/docker/docker-compose.yml config
 ```
 
@@ -72,3 +85,4 @@ docker compose -f infra/docker/docker-compose.yml down -v
 - The `services/ingest-sec` code directory is not present in this snapshot.
 - The compose service is still created so networking and environment wiring are preserved for local integration.
 - CI test steps for Python services are conditional and skip missing directories with explicit logs.
+- If `pytest` is not installed locally, use `python -m pip install pytest` and run tests with `python -m pytest ...`.

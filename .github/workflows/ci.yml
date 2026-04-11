@@ -53,8 +53,8 @@ jobs:
           run_if_present() {
             local test_dir="$1"
             if [ -d "$test_dir" ]; then
-              echo "Running pytest $test_dir -q"
-              pytest "$test_dir" -q
+              echo "Running python -m pytest $test_dir -q"
+              python -m pytest "$test_dir" -q
             else
               echo "Skipping $test_dir (directory not present in this repository snapshot)"
             fi
