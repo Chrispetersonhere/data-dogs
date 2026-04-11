@@ -126,3 +126,36 @@ pnpm --filter web build
 ```
 
 If removal still fails, move the repo outside sync-protected folders and retry (for example outside OneDrive-controlled paths), then rerun the reset steps above.
+
+### Deep diagnosis for persistent `EACCES` on `node_modules\\eslint`
+
+If `pnpm install --force` still fails immediately with `EACCES ... lstat ...\\node_modules\\eslint` after process-kill + cleanup, the failure is typically Windows filesystem policy/ACL related (not SEC client code).
+
+Use this exact PowerShell triage:
+
+```powershell
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+
+# 1) Confirm ACL/ownership on project folder
+Get-Acl . | Format-List
+
+# 2) Ensure folder is writable by current user
+icacls . /grant "$env:USERNAME:(OI)(CI)F" /T
+
+# 3) Remove read-only flags recursively
+attrib -R .\* /S /D
+
+# 4) Move repo to a neutral path outside protected folders
+Set-Location C:\Users\lolvi\Documents\GitHub
+Move-Item .\data-dogs C:\dev\data-dogs
+Set-Location C:\dev\data-dogs
+
+# 5) Reinstall in new location
+pnpm store prune
+pnpm install --force
+pnpm lint
+pnpm typecheck
+pnpm --filter web build
+```
+
+If step 4 is not possible, run PowerShell as Administrator and retry steps 2–5.
