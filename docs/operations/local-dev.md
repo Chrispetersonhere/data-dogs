@@ -35,6 +35,14 @@ Windows PowerShell equivalent:
 bash infra/scripts/bootstrap.sh
 ```
 
+If `bash` is not installed on Windows, run the bootstrap steps directly in PowerShell:
+
+```powershell
+corepack enable
+pnpm install --no-frozen-lockfile
+docker compose -f infra/docker/docker-compose.yml up -d
+```
+
 This script will:
 1. validate `docker`, `docker compose`, and `corepack`
 2. run `pnpm install --no-frozen-lockfile`
@@ -52,6 +60,15 @@ PowerShell:
 
 ```powershell
 docker compose -f infra/docker/docker-compose.yml config
+```
+
+Recommended PowerShell preflight checks:
+
+```powershell
+Get-Command docker -ErrorAction SilentlyContinue
+Get-Command node -ErrorAction SilentlyContinue
+Get-Command pnpm -ErrorAction SilentlyContinue
+Get-Command python -ErrorAction SilentlyContinue
 ```
 
 Start services:
@@ -86,3 +103,4 @@ docker compose -f infra/docker/docker-compose.yml down -v
 - The compose service is still created so networking and environment wiring are preserved for local integration.
 - CI test steps for Python services are conditional and skip missing directories with explicit logs.
 - If `pytest` is not installed locally, use `python -m pip install pytest` and run tests with `python -m pytest ...`.
+- If `docker` is not installed, all compose/bootstrap steps will fail until Docker Desktop (or Docker Engine + Compose) is installed and on PATH.

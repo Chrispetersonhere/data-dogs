@@ -43,3 +43,4 @@
 - The `ingest-sec` compose service is wiring-ready but code-light in this snapshot; once the service exists, replace keepalive command with actual startup command.
 - If a lockfile is introduced, switch install commands to frozen lockfile mode in CI/bootstrap.
 - On Windows, `infra/scripts/bootstrap.sh` must be executed from Git Bash/WSL (or via `bash infra/scripts/bootstrap.sh` in PowerShell).
+- If `bash` is unavailable on Windows, equivalent PowerShell bootstrap commands are documented in `docs/operations/local-dev.md`.
