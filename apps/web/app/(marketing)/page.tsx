@@ -11,6 +11,8 @@ import {
   typographyTokens
 } from '@data-dogs/ui';
 
+import styles from './page.module.css';
+
 const tabs = [
   { id: 'overview', label: 'Overview' },
   { id: 'performance', label: 'Performance' },
@@ -18,6 +20,14 @@ const tabs = [
 ] as const;
 
 const filters = ['All Portfolios', 'Equities', 'Credit', 'Macro'] as const;
+
+
+const tableCellStyle = {
+  padding: `${spacingTokens['3']} ${spacingTokens['5']}`,
+  borderTop: `1px solid ${colorTokens.border.subtle}`,
+  fontSize: typographyTokens.fontSize.sm,
+  color: colorTokens.text.secondary
+} as const;
 
 export default function MarketingPage() {
   return (
@@ -43,7 +53,7 @@ export default function MarketingPage() {
 
         <section>
           <SectionHeader title="Metric Cards" subtitle="High-signal KPIs with restrained visual emphasis." />
-          <div className="stats-grid">
+          <div className={styles.statsGrid} style={{ gap: spacingTokens['4'] }}>
             <StatCard label="Net IRR" value="14.2%" delta="+120 bps vs benchmark" />
             <StatCard label="Drawdown" value="-6.8%" delta="Contained within risk policy" />
             <StatCard label="Sharpe Ratio" value="1.34" delta="3Y trailing" />
@@ -66,16 +76,16 @@ export default function MarketingPage() {
           <SectionHeader title="Premium Table Shell" subtitle="Structured shell for dense tabular intelligence." />
           <PremiumTableShell title="Top Holdings" columns={['Issuer', 'Weight', 'YTD Return', 'Volatility']}>
             <tr>
-              <td className="table-cell">US Treasury 10Y</td>
-              <td className="table-cell">18.4%</td>
-              <td className="table-cell">3.1%</td>
-              <td className="table-cell">4.8%</td>
+              <td className={styles.tableCell} style={tableCellStyle}>US Treasury 10Y</td>
+              <td className={styles.tableCell} style={tableCellStyle}>18.4%</td>
+              <td className={styles.tableCell} style={tableCellStyle}>3.1%</td>
+              <td className={styles.tableCell} style={tableCellStyle}>4.8%</td>
             </tr>
             <tr>
-              <td className="table-cell">Global Equity Value</td>
-              <td className="table-cell">22.7%</td>
-              <td className="table-cell">6.4%</td>
-              <td className="table-cell">9.2%</td>
+              <td className={styles.tableCell} style={tableCellStyle}>Global Equity Value</td>
+              <td className={styles.tableCell} style={tableCellStyle}>22.7%</td>
+              <td className={styles.tableCell} style={tableCellStyle}>6.4%</td>
+              <td className={styles.tableCell} style={tableCellStyle}>9.2%</td>
             </tr>
           </PremiumTableShell>
         </section>
@@ -89,33 +99,6 @@ export default function MarketingPage() {
         </section>
       </main>
 
-      <style jsx>{`
-        .stats-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: ${spacingTokens['4']};
-        }
-
-        .table-cell {
-          padding: ${spacingTokens['3']} ${spacingTokens['5']};
-          border-top: 1px solid ${colorTokens.border.subtle};
-          font-size: ${typographyTokens.fontSize.sm};
-          color: ${colorTokens.text.secondary};
-          white-space: nowrap;
-        }
-
-        @media (min-width: 768px) {
-          .stats-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
-
-        @media (min-width: 1200px) {
-          .stats-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-          }
-        }
-      `}</style>
     </PageContainer>
   );
 }
