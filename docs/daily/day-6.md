@@ -6,7 +6,7 @@
 - Implemented production-safe HTTP client controls: throttling, timeout, retries, and exponential backoff.
 - Added structured JSON logging support for request attempts, retries, failures, and file downloads.
 - Added generic GET helper and raw file download helper.
-- Added tests covering throttle behavior, retry behavior, and timeout handling.
+- Added tests covering throttle behavior, retry behavior, and timeout handling (including URL error timeout mapping).
 
 ## Files changed
 

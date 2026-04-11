@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import socket
 import threading
 import urllib.error
 import urllib.parse
@@ -62,6 +63,8 @@ class SECClient:
         self._next_allowed_time = 0.0
 
     def get(self, url: str, params: Mapping[str, str] | None = None) -> SECResponse:
+        if not url.strip():
+            raise ValueError("url must be non-empty")
         request_url = self._build_url(url, params)
         attempt = 0
 
@@ -90,7 +93,7 @@ class SECClient:
                     raise SECClientTimeoutError(f"Timeout for {request_url}") from exc
                 self._sleep_backoff(attempt, request_url, "timeout")
             except urllib.error.URLError as exc:
-                is_timeout = isinstance(exc.reason, TimeoutError)
+                is_timeout = isinstance(exc.reason, (TimeoutError, socket.timeout))
                 if is_timeout and attempt > self._config.max_retries:
                     raise SECClientTimeoutError(f"Timeout for {request_url}") from exc
                 if attempt > self._config.max_retries:
@@ -124,7 +127,7 @@ class SECClient:
     def _throttle(self) -> None:
         with self._rate_lock:
             now = self._now_fn()
-            if now < self._next_allowed_time:
+            while now < self._next_allowed_time:
                 delay = self._next_allowed_time - now
                 self._sleep_fn(delay)
                 now = self._now_fn()

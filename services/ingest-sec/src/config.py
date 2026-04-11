@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+SEC_MAX_FAIR_ACCESS_RPS = 10.0
+
 
 @dataclass(frozen=True)
 class SECClientConfig:
@@ -35,6 +37,10 @@ class SECClientConfig:
             raise ValueError("user_agent must be a non-empty declared contact string")
         if self.requests_per_second <= 0:
             raise ValueError("requests_per_second must be > 0")
+        if self.requests_per_second > SEC_MAX_FAIR_ACCESS_RPS:
+            raise ValueError(
+                f"requests_per_second must be <= {SEC_MAX_FAIR_ACCESS_RPS} to stay within SEC fair-access guidance"
+            )
         if self.request_timeout_seconds <= 0:
             raise ValueError("request_timeout_seconds must be > 0")
         if self.max_retries < 0:

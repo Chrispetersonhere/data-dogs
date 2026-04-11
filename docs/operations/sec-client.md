@@ -37,6 +37,7 @@ export SEC_MAX_RETRIES="3"
 - Retryable HTTP statuses: `429`, `500`, `502`, `503`, `504`.
 - Timeout and network errors are retried until `max_retries` is exhausted.
 - Throttle is enforced centrally in the client and cannot be bypassed by helper methods.
+- `SEC_REQUESTS_PER_SECOND` is validated not to exceed `10` requests/second (SEC fair-access ceiling).
 - Structured logs are emitted as JSON to standard output.
 
 ## Verification

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import importlib.util
+import socket
 import sys
 import types
+import urllib.error
 from pathlib import Path
 
 import pytest
@@ -106,3 +108,16 @@ def test_timeout_handling_raises_specific_error() -> None:
 
     with pytest.raises(SECClientTimeoutError):
         client.get("https://data.sec.gov/submissions/timeout.json")
+
+
+def test_timeout_handling_from_urlerror_raises_specific_error() -> None:
+    clock = FakeClock()
+
+    def transport(url: str, headers: dict[str, str], timeout: float) -> SECResponse:
+        raise urllib.error.URLError(socket.timeout("timed out"))
+
+    cfg = SECClientConfig(user_agent="ResearchLab/1.0 (ops@example.com)", requests_per_second=10.0, max_retries=0)
+    client = SECClient(cfg, transport=transport, now_fn=clock.now, sleep_fn=clock.sleep)
+
+    with pytest.raises(SECClientTimeoutError):
+        client.get("https://data.sec.gov/submissions/timeout-urlerror.json")
