@@ -117,7 +117,7 @@ Remove-Item -Force .\pnpm-lock.yaml -ErrorAction SilentlyContinue
 pnpm store prune
 
 # 4) Clean reinstall
-pnpm install --force
+pnpm install --force --node-linker=hoisted
 
 # 5) Re-run checks
 pnpm lint
@@ -140,7 +140,7 @@ Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
 Get-Acl . | Format-List
 
 # 2) Ensure folder is writable by current user
-icacls . /grant "$env:USERNAME:(OI)(CI)F" /T
+icacls . /grant "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)F" /T
 
 # 3) Remove read-only flags recursively
 attrib -R .\* /S /D
@@ -152,10 +152,12 @@ Set-Location C:\dev\data-dogs
 
 # 5) Reinstall in new location
 pnpm store prune
-pnpm install --force
+pnpm install --force --node-linker=hoisted
 pnpm lint
 pnpm typecheck
 pnpm --filter web build
 ```
 
 If step 4 is not possible, run PowerShell as Administrator and retry steps 2–5.
+
+If your machine enforces Windows Defender Controlled Folder Access, allow `node.exe` and `pnpm` (or run in a non-protected path such as `C:\dev\...`) before reinstalling.

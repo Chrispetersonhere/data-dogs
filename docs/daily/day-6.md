@@ -28,3 +28,4 @@
 - Windows local verification requires platform-correct commands (`python -m pytest`, Windows paths, and `pnpm install` before turbo-based scripts).
 - On Windows, interrupted or locked installs can corrupt `node_modules/.pnpm`; documented a full reset workflow for `EACCES`/`ENOENT` recovery.
 - Persistent `EACCES` on `node_modules/eslint` after cleanup indicates host ACL/protection issues; documented ACL reset + repo relocation path.
+- Added Windows fallback to reinstall with `--node-linker=hoisted` and guidance for Controlled Folder Access environments.
