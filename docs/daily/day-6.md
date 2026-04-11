@@ -19,7 +19,7 @@
 
 ## Validation commands
 
-- `pytest services/ingest-sec/tests -q`
+- `python -m pytest services/ingest-sec/tests -q`
 
 ## Risks / follow-ups
 

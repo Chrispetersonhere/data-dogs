@@ -42,8 +42,32 @@ export SEC_MAX_RETRIES="3"
 
 ## Verification
 
-Run service tests:
+Run service tests (cross-platform):
 
 ```bash
-pytest services/ingest-sec/tests -q
+python -m pytest services/ingest-sec/tests -q
+```
+
+Windows PowerShell copy/paste verification:
+
+```powershell
+# From repo root (if already in repo, skip Set-Location)
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+
+# Ensure Python is available
+python --version
+
+# Install pytest if missing
+python -m pip install pytest
+
+# Run ingest-sec tests
+python -m pytest services/ingest-sec/tests -q
+```
+
+If `pnpm lint` / `pnpm typecheck` fails with `'turbo' is not recognized`, install dependencies first:
+
+```powershell
+pnpm install
+pnpm lint
+pnpm typecheck
 ```
