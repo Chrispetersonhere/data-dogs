@@ -1,12 +1,15 @@
-import { PageContainer, SectionHeader } from '../../../../packages/ui/src/components/layout';
 import {
   EmptyState,
   FilterChip,
+  PageContainer,
   PremiumTableShell,
+  SectionHeader,
   StatCard,
-  TabStrip
-} from '../../../../packages/ui/src/components/ui';
-import { colorTokens, spacingTokens, typographyTokens } from '../../../../packages/ui/src/styles/tokens';
+  TabStrip,
+  colorTokens,
+  spacingTokens,
+  typographyTokens
+} from '@data-dogs/ui';
 
 const tabs = [
   { id: 'overview', label: 'Overview' },

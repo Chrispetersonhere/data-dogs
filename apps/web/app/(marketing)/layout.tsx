@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { colorTokens, typographyTokens } from '../../../../packages/ui/src/styles/tokens';
+import { colorTokens, typographyTokens } from '@data-dogs/ui';
 
 type MarketingLayoutProps = {
   children: ReactNode;
