@@ -3,9 +3,9 @@
 ## Scope completed
 - Added local-only Docker Compose stack with required services: Postgres, ClickHouse, object storage emulator, web app, and ingest-sec.
 - Added `infra/scripts/bootstrap.sh` to validate and bring up core infrastructure quickly.
-- Added GitHub Actions CI workflow to run install, lint, typecheck, web tests, and Python tests.
+- Added GitHub Actions CI workflow to run install, lint, typecheck, web tests, and Python tests on push and pull request events.
 - Added local development operations runbook with startup/teardown and verification commands.
-- Added Windows-oriented troubleshooting guidance for missing Docker CLI / shell mismatch.
+- Added Windows-oriented troubleshooting guidance for missing Docker CLI / shell mismatch, including a PowerShell-specific quick-start path.
 - Kept scope constrained to local development and CI only (no staging/prod infrastructure).
 
 ## Files touched

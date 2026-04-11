@@ -37,6 +37,30 @@ docker compose version
 
 If PowerShell reports `docker : The term 'docker' is not recognized...`, install Docker Desktop and restart your terminal session.
 
+
+## Windows quick-start (PowerShell)
+1. Install Docker Desktop and ensure "docker" is available in a **new** PowerShell session:
+
+```powershell
+docker --version
+docker compose version
+```
+
+2. Run the bootstrap script from Git Bash or WSL (recommended for `.sh` scripts):
+
+```powershell
+bash infra/scripts/bootstrap.sh
+```
+
+3. Manage services from PowerShell once Docker is available:
+
+```powershell
+docker compose -f infra/docker/docker-compose.yml up -d
+docker compose -f infra/docker/docker-compose.yml down
+```
+
+If `bash` is not installed, use Git for Windows (Git Bash) or WSL.
+
 ## Compose lifecycle
 Start all services:
 
