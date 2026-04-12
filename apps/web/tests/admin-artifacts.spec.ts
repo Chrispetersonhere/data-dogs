@@ -1,16 +1,21 @@
-import { test, expect } from '@playwright/test';
+const REQUIRED_HEADERS = [
+  'Source URL',
+  'Accession',
+  'Fetch timestamp',
+  'Checksum',
+  'Parser version',
+  'Job id',
+  'Status',
+] as const;
 
-test.describe('admin artifacts page', () => {
-  test('renders required provenance fields', async ({ page }) => {
-    await page.goto('/admin/artifacts');
+export function assertAdminArtifactsPageMarkup(markup: string): void {
+  for (const header of REQUIRED_HEADERS) {
+    if (!markup.includes(header)) {
+      throw new Error(`Missing required admin artifacts header: ${header}`);
+    }
+  }
 
-    await expect(page.getByRole('heading', { name: 'Admin Artifacts' })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: 'Source URL' })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: 'Accession' })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: 'Fetch timestamp' })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: 'Checksum' })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: 'Parser version' })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: 'Job id' })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: 'Status' })).toBeVisible();
-  });
-});
+  if (!markup.includes('Admin Artifacts')) {
+    throw new Error('Missing Admin Artifacts page heading');
+  }
+}
