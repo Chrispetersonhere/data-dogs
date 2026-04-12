@@ -143,13 +143,34 @@ Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
 Get-Process pnpm -ErrorAction SilentlyContinue | Stop-Process -Force
 
 # clean local install artifacts
-if (Test-Path .\node_modules) { Remove-Item -Recurse -Force .\node_modules }
+if (Test-Path ./node_modules) { Remove-Item -Recurse -Force ./node_modules }
 if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
 
 # clear pnpm metadata and reinstall with hoisted linker
 pnpm store prune
 pnpm install --force --node-linker=hoisted --no-frozen-lockfile
 ```
+
+If install/build fails with `EACCES` on Linux-only optional packages (for example `@unrs/resolver-binding-linux-x64-gnu` or `@img/sharp-libvips-linux-x64`), your `node_modules` tree was likely created by WSL/Linux and then reused from Windows PowerShell. Use this exact reset in **PowerShell**:
+
+```powershell
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+
+# robust workspace cleanup (ACL repair + attribute reset + remove)
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\reset-node-modules.ps1
+
+# keep pnpm store in user profile and reinstall for Windows only
+pnpm config set store-dir "$env:LOCALAPPDATA\pnpm\store\v10"
+pnpm install --force --node-linker=hoisted --no-frozen-lockfile
+
+# verify
+pnpm --filter web typecheck
+pnpm --filter web build
+```
+
+Important:
+- Do not alternate installs between WSL and native Windows PowerShell in the same checkout.
+- If you need both environments, keep two clones (for example `C:\dev\data-dogs-win` and `\\wsl$\Ubuntu\home\<you>\data-dogs-wsl`).
 
 Then rerun:
 
@@ -160,7 +181,7 @@ pnpm --filter web test
 pnpm --filter web build
 ```
 
-If the recovery block still fails with `EACCES` or `Remove-Item` path errors, use this deterministic fallback:
+If the recovery block still fails with `EACCES`, use this deterministic fallback:
 
 ```powershell
 # 1) Run PowerShell as Administrator for ACL repair, then return to repo
@@ -170,11 +191,8 @@ Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
 icacls . /grant "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)F" /T
 attrib -R .\* /S /D
 
-# 3) Force-remove node_modules with cmd (more reliable than Remove-Item for deep trees)
-cmd /c rmdir /s /q node_modules
-cmd /c rmdir /s /q packages\db\node_modules
-cmd /c rmdir /s /q packages\ui\node_modules
-cmd /c rmdir /s /q apps\web\node_modules
+# 3) Run the robust cleanup script again as Administrator
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\reset-node-modules.ps1
 if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
 
 # 4) Keep pnpm store outside the repo and reinstall
@@ -203,13 +221,15 @@ pnpm --filter web build
 ```
 
 Why the first recovery can still fail:
-- `Remove-Item -Recurse -Force` in PowerShell can partially fail on deep pnpm trees/symlinks, leaving broken entries behind.
-- A later install can then fail in workspace package paths (for example `packages\db\node_modules\typescript\package.json`) even after root cleanup.
-- Using `cmd /c rmdir /s /q` for root and package-level `node_modules` is more reliable for this specific failure mode.
+- Standard `Remove-Item -Recurse -Force` can partially fail on deep pnpm trees/symlinks or locked files, leaving broken entries behind.
+- A later install can then fail in workspace package paths (for example `packages/db/node_modules/typescript/package.json`) even after root cleanup.
+- The helper script applies ACL/attribute normalization before deletion and uses `cmd` for final removal, which is more reliable for these Windows-specific edge cases.
 
 Expected notes:
 - `services/parse-xbrl/tests`, `services/parse-proxy/tests`, `services/id-master/tests`, and `services/market-data/tests` are currently absent in this repository snapshot; pytest will report missing paths for those commands.
 - `turbo is not recognized` and `Cannot find module ... next` both indicate install did not complete; resolve install first, then rerun checks.
+- If `pnpm install` warns that build scripts were ignored for `sharp` or `unrs-resolver`, pull latest repo changes first; `pnpm-workspace.yaml` now explicitly allows those builds.
+- If `pnpm install` reports repeated `WARN Failed to remove ...` under `node_modules/.pnpm`, treat the workspace install tree as corrupted. Run the reset script, reinstall with `--force`, and if warnings persist move to the documented fresh-clone fallback in `C:\dev`.
 
 ## Notes on current repository state
 
