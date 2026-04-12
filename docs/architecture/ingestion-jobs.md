@@ -46,7 +46,7 @@ Key transitions:
 - **Duplicate-write protection:** because checkpoint advances only after successful unit processing, resumed jobs skip already-committed units under the framework contract.
 
 ## Testing contract
-Day 8 acceptance test coverage in `test_jobs_base.py` verifies:
+Day 8 acceptance test coverage in `test_jobs_base.py` verifies (run with `python -m pytest ...` for Windows compatibility):
 - lifecycle fields are populated as required,
 - failed jobs can resume from checkpoint,
 - resumed jobs do not duplicate writes,

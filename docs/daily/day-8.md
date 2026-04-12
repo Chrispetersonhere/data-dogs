@@ -16,9 +16,19 @@
 - `docs/daily/day-8.md`
 
 ## Verification commands
-- `pytest services/ingest-sec/tests/test_jobs_base.py -q`
+- `python -m pytest services/ingest-sec/tests/test_jobs_base.py -q`
+- `python -m pytest services/ingest-sec/tests -q`
 
 ## Notes
 - No distributed queueing or Celery was introduced.
 - Job resume mechanics are local and checkpoint-driven.
 - Idempotency is explicit and covered by tests.
+
+
+## Windows PowerShell quick verification
+```powershell
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+python -m pip install pytest
+python -m pytest services/ingest-sec/tests/test_jobs_base.py -q
+python -m pytest services/ingest-sec/tests -q
+```
