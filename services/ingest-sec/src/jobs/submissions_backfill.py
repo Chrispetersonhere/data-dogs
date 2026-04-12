@@ -39,10 +39,10 @@ class SubmissionsBackfillJob(BaseIngestionJob[str]):
         source_url = f"https://data.sec.gov/submissions/CIK{cik.zfill(10)}.json"
 
         submission_json = self._fetcher(cik)
-        artifact = self._raw_store.store_raw_submission(
-            cik=cik,
+        artifact = self._raw_store.store_raw_artifact(
+            subject_key=cik,
             source_url=source_url,
-            submission_json=submission_json,
+            payload=submission_json,
             parser_version=self._parser_version,
             job_id=self.job_id,
         )
@@ -53,4 +53,4 @@ class SubmissionsBackfillJob(BaseIngestionJob[str]):
             raw_checksum=artifact.checksum_sha256,
         )
         self._raw_store.stage_filing_headers(staging_rows)
-        self._raw_store.persist_checkpoint(job_id=self.job_id, cik=cik)
+        self._raw_store.persist_checkpoint(job_id=self.job_id, unit_key=cik)

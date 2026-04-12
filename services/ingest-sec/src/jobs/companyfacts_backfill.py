@@ -44,14 +44,14 @@ class CompanyFactsBackfillJob(BaseIngestionJob[str]):
         source_url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik.zfill(10)}.json"
         payload = self._fetcher(cik)
 
-        artifact = self._raw_store.store_raw_submission(
-            cik=cik,
+        artifact = self._raw_store.store_raw_artifact(
+            subject_key=cik,
             source_url=source_url,
-            submission_json=payload,
+            payload=payload,
             parser_version=self._parser_version,
             job_id=self.job_id,
         )
 
         metadata = parse_companyfacts_metadata(cik=cik, payload=payload, raw_checksum=artifact.checksum_sha256)
         self._staged_metadata_by_cik[cik] = metadata
-        self._raw_store.persist_checkpoint(job_id=self.job_id, cik=cik)
+        self._raw_store.persist_checkpoint(job_id=self.job_id, unit_key=cik)
