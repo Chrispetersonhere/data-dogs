@@ -99,6 +99,43 @@ docker compose -f infra/docker/docker-compose.yml down -v
 - MinIO S3 API (host): `http://localhost:9001`
 - MinIO Console (host): `http://localhost:9002`
 
+
+## Windows PowerShell: copy/paste verification from zero
+
+Use this exact sequence from a normal PowerShell prompt:
+
+```powershell
+# 1) Go to your existing clone path (do NOT use /workspace/... on Windows)
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+
+# 2) Verify required tools
+node --version
+pnpm --version
+python --version
+
+# 3) Install JS dependencies first (fixes "turbo is not recognized" and missing next binary)
+pnpm install --no-frozen-lockfile
+
+# 4) Run JS checks
+pnpm lint
+pnpm typecheck
+pnpm --filter web test
+pnpm --filter web build
+
+# 5) Ensure pytest is available, then run Python checks
+python -m pip install --upgrade pip
+python -m pip install pytest
+python -m pytest services/ingest-sec/tests -q
+python -m pytest services/parse-xbrl/tests -q
+python -m pytest services/parse-proxy/tests -q
+python -m pytest services/id-master/tests -q
+python -m pytest services/market-data/tests -q
+```
+
+Expected notes:
+- `services/parse-xbrl/tests`, `services/parse-proxy/tests`, `services/id-master/tests`, and `services/market-data/tests` are currently absent in this repository snapshot; pytest will report missing paths for those commands.
+- If `pnpm lint`/`pnpm typecheck` still fail after install, re-run `pnpm install --force` once and retry.
+
 ## Notes on current repository state
 
 - The `ingest-sec` compose service is intentionally wiring-only in Week 1 and keeps the container running for manual service command execution.
