@@ -5,7 +5,7 @@
 - Added internal admin QA dashboard with filter controls for `jobId` and parser, backed by provenance ledger rows.
 - Added failed artifact table and parser failure summary for operational triage.
 - Added direct link from each failure row to artifact inspection path on `/admin/artifacts`.
-- Added a QA page spec helper that asserts core dashboard markup and artifact-link presence.
+- Added executable QA page tests (node test runner via `tsx`) that assert core dashboard markup and artifact-link presence.
 
 ## Files touched
 - `apps/web/app/admin/jobs/page.tsx`
@@ -35,3 +35,5 @@
 - If `pnpm exec ...` fails with `'sh' is not recognized`, run `pnpm config delete script-shell`, `pnpm config delete --location=user script-shell`, and `pnpm config delete --location=global script-shell`, then reopen PowerShell before reinstalling dependencies.
 - Use `powershell -ExecutionPolicy Bypass -File .\scripts\windows\reset-node-modules.ps1` for cleanup instead of raw `Remove-Item`, because pnpm trees can have long/locked paths on Windows.
 - If cleanup still cannot remove `node_modules`, rerun PowerShell as Administrator and run the cleanup script again.
+
+- web test script now runs `tsx --test tests/*.spec.ts` so `pnpm --filter web test -- admin-qa.spec.ts` executes real assertions.

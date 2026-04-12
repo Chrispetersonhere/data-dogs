@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node -e \"console.log('web: no automated tests configured yet')\"",
+    "test": "tsx --test tests/*.spec.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0"
   },
@@ -20,6 +20,7 @@
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "tsx": "^4.20.6"
   }
 }
