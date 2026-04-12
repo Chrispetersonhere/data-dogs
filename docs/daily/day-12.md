@@ -29,3 +29,9 @@
 - Admin flow remains internal-only via `ADMIN_ENABLED=true` gate.
 - QA dashboard intentionally exposes parser errors and artifact paths without suppressing failure detail.
 - Admin API now derives jobs/failures from provenance ledger rows to avoid detached mock datasets while preserving fields (`sourceUrl`, `accession`, `fetchTimestamp`, `checksum`, `parserVersion`, `jobId`).
+
+
+## Windows verification notes
+- If `pnpm exec ...` fails with `'sh' is not recognized`, run `pnpm config delete script-shell` and reopen PowerShell before reinstalling dependencies.
+- Use `powershell -ExecutionPolicy Bypass -File .\scripts\windows\reset-node-modules.ps1` for cleanup instead of raw `Remove-Item`, because pnpm trees can have long/locked paths on Windows.
+- If cleanup still cannot remove `node_modules`, rerun PowerShell as Administrator and run the cleanup script again.
