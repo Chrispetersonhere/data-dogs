@@ -56,13 +56,7 @@ services:
     volumes:
       - ../..:/workspace
     command: >-
-      bash -lc "
-      if [ -d services/ingest-sec ]; then
-        echo 'ingest-sec source detected; container ready for local runs.';
-      else
-        echo 'services/ingest-sec not present in this repo snapshot; keeping container alive for local wiring.';
-      fi;
-      tail -f /dev/null"
+      bash -lc "echo 'ingest-sec runtime container started; run service commands manually in this environment.'; tail -f /dev/null"
     environment:
       POSTGRES_URL: postgresql://data_dogs:data_dogs@postgres:5432/data_dogs
       CLICKHOUSE_URL: http://clickhouse:8123
