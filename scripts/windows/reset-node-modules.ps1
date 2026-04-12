@@ -17,12 +17,12 @@ foreach ($target in $targets) {
   }
 
   Write-Host "Resetting ACL/attributes for $target ..."
-  cmd /c "takeown /f \"$target\" /r /d y >nul 2>&1" | Out-Null
-  cmd /c "icacls \"$target\" /grant \"$($env:USERNAME):(OI)(CI)F\" /T /C >nul 2>&1" | Out-Null
-  cmd /c "attrib -R \"$target\" /S /D >nul 2>&1" | Out-Null
+  & takeown /f $target /r /d y | Out-Null
+  & icacls $target /grant "$($env:USERNAME):(OI)(CI)F" /T /C | Out-Null
+  & attrib -R $target /S /D | Out-Null
 
   Write-Host "Removing $target ..."
-  cmd /c "rmdir /s /q \"$target\""
+  cmd /c ('rmdir /s /q "{0}"' -f $target)
 
   if (Test-Path -LiteralPath $target) {
     throw "Failed to remove $target"
