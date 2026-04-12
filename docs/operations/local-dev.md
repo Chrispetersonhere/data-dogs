@@ -151,6 +151,34 @@ pnpm store prune
 pnpm install --force --node-linker=hoisted --no-frozen-lockfile
 ```
 
+If install/build fails with `EACCES` on Linux-only optional packages (for example `@unrs/resolver-binding-linux-x64-gnu` or `@img/sharp-libvips-linux-x64`), your `node_modules` tree was likely created by WSL/Linux and then reused from Windows PowerShell. Use this exact reset in **PowerShell**:
+
+```powershell
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+
+# stop potential file-locking processes
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process pnpm -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# remove mixed-OS install artifacts
+cmd /c rmdir /s /q node_modules
+cmd /c rmdir /s /q apps\web\node_modules
+cmd /c rmdir /s /q packages\ui\node_modules
+cmd /c rmdir /s /q packages\db\node_modules
+
+# keep pnpm store in user profile and reinstall for Windows only
+pnpm config set store-dir "$env:LOCALAPPDATA\pnpm\store\v10"
+pnpm install --force --node-linker=hoisted --no-frozen-lockfile
+
+# verify
+pnpm --filter web typecheck
+pnpm --filter web build
+```
+
+Important:
+- Do not alternate installs between WSL and native Windows PowerShell in the same checkout.
+- If you need both environments, keep two clones (for example `C:\dev\data-dogs-win` and `\\wsl$\Ubuntu\home\<you>\data-dogs-wsl`).
+
 Then rerun:
 
 ```powershell
