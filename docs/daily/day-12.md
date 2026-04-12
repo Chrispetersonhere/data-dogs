@@ -32,6 +32,6 @@
 
 
 ## Windows verification notes
-- If `pnpm exec ...` fails with `'sh' is not recognized`, run `pnpm config delete script-shell`, `pnpm config delete --location=global script-shell`, then `pnpm config set script-shell "C:\\Windows\\System32\\cmd.exe" --location=global` and reopen PowerShell before reinstalling dependencies.
+- If `pnpm exec ...` fails with `'sh' is not recognized`, run `pnpm config delete script-shell`, `pnpm config delete --location=user script-shell`, and `pnpm config delete --location=global script-shell`, then reopen PowerShell before reinstalling dependencies.
 - Use `powershell -ExecutionPolicy Bypass -File .\scripts\windows\reset-node-modules.ps1` for cleanup instead of raw `Remove-Item`, because pnpm trees can have long/locked paths on Windows.
 - If cleanup still cannot remove `node_modules`, rerun PowerShell as Administrator and run the cleanup script again.
