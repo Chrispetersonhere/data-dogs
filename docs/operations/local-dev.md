@@ -96,13 +96,12 @@ docker compose -f infra/docker/docker-compose.yml down -v
 - Web app: `http://localhost:3000`
 - PostgreSQL: `localhost:5432`
 - ClickHouse HTTP: `http://localhost:8123`
-- MinIO S3 API: `http://localhost:9001`
-- MinIO Console: `http://localhost:9002`
+- MinIO S3 API (host): `http://localhost:9001`
+- MinIO Console (host): `http://localhost:9002`
 
 ## Notes on current repository state
 
-- The `services/ingest-sec` code directory is not present in this snapshot.
-- The compose service is still created so networking and environment wiring are preserved for local integration.
+- The `ingest-sec` compose service is intentionally wiring-only in Week 1 and keeps the container running for manual service command execution.
 - CI test steps for Python services are conditional and skip missing directories with explicit logs.
 - If `pytest` is not installed locally, use `python -m pip install pytest` and run tests with `python -m pytest ...`.
 - If `docker` is not installed, all compose/bootstrap steps will fail until Docker Desktop (or Docker Engine + Compose) is installed and on PATH.

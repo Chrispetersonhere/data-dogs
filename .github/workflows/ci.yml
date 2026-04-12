@@ -59,18 +59,37 @@ jobs:
         run: |
           set -euo pipefail
 
-          run_if_present() {
-            local test_dir="$1"
-            if [ -d "$test_dir" ]; then
-              echo "Running python -m pytest $test_dir -q"
-              PYTHONPATH="$(dirname "$test_dir")" python -m pytest "$test_dir" -q
-            else
-              echo "Skipping $test_dir (directory not present in this repository snapshot)"
-            fi
-          }
+          if [ -d services/ingest-sec/tests ]; then
+            echo "Running python -m pytest services/ingest-sec/tests -q"
+            PYTHONPATH="services/ingest-sec" python -m pytest services/ingest-sec/tests -q
+          else
+            echo "Skipping services/ingest-sec/tests (directory not present in this repository snapshot)"
+          fi
 
-          run_if_present services/ingest-sec/tests
-          run_if_present services/parse-xbrl/tests
-          run_if_present services/parse-proxy/tests
-          run_if_present services/id-master/tests
-          run_if_present services/market-data/tests
+          if [ -d services/parse-xbrl/tests ]; then
+            echo "Running python -m pytest services/parse-xbrl/tests -q"
+            PYTHONPATH="services/parse-xbrl" python -m pytest services/parse-xbrl/tests -q
+          else
+            echo "Skipping services/parse-xbrl/tests (directory not present in this repository snapshot)"
+          fi
+
+          if [ -d services/parse-proxy/tests ]; then
+            echo "Running python -m pytest services/parse-proxy/tests -q"
+            PYTHONPATH="services/parse-proxy" python -m pytest services/parse-proxy/tests -q
+          else
+            echo "Skipping services/parse-proxy/tests (directory not present in this repository snapshot)"
+          fi
+
+          if [ -d services/id-master/tests ]; then
+            echo "Running python -m pytest services/id-master/tests -q"
+            PYTHONPATH="services/id-master" python -m pytest services/id-master/tests -q
+          else
+            echo "Skipping services/id-master/tests (directory not present in this repository snapshot)"
+          fi
+
+          if [ -d services/market-data/tests ]; then
+            echo "Running python -m pytest services/market-data/tests -q"
+            PYTHONPATH="services/market-data" python -m pytest services/market-data/tests -q
+          else
+            echo "Skipping services/market-data/tests (directory not present in this repository snapshot)"
+          fi
