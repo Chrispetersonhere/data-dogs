@@ -229,6 +229,7 @@ Expected notes:
 - `services/parse-xbrl/tests`, `services/parse-proxy/tests`, `services/id-master/tests`, and `services/market-data/tests` are currently absent in this repository snapshot; pytest will report missing paths for those commands.
 - `turbo is not recognized` and `Cannot find module ... next` both indicate install did not complete; resolve install first, then rerun checks.
 - If `pnpm install` warns that build scripts were ignored for `sharp` or `unrs-resolver`, pull latest repo changes first; `pnpm-workspace.yaml` now explicitly allows those builds.
+- If `pnpm install` reports repeated `WARN Failed to remove ...` under `node_modules/.pnpm`, treat the workspace install tree as corrupted. Run the reset script, reinstall with `--force`, and if warnings persist move to the documented fresh-clone fallback in `C:\dev`.
 
 ## Notes on current repository state
 
