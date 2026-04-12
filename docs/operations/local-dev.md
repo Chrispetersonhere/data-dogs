@@ -144,6 +144,7 @@ Get-Process pnpm -ErrorAction SilentlyContinue | Stop-Process -Force
 
 # clean local install artifacts
 if (Test-Path ./node_modules) { Remove-Item -Recurse -Force ./node_modules }
+if (Test-Path .\node_modules) { Remove-Item -Recurse -Force .\node_modules }
 if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
 
 # clear pnpm metadata and reinstall with hoisted linker
@@ -182,6 +183,7 @@ pnpm --filter web build
 ```
 
 If the recovery block still fails with `EACCES`, use this deterministic fallback:
+If the recovery block still fails with `EACCES` or `Remove-Item` path errors, use this deterministic fallback:
 
 ```powershell
 # 1) Run PowerShell as Administrator for ACL repair, then return to repo
@@ -193,6 +195,11 @@ attrib -R .\* /S /D
 
 # 3) Run the robust cleanup script again as Administrator
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\reset-node-modules.ps1
+# 3) Force-remove node_modules with cmd (more reliable than Remove-Item for deep trees)
+cmd /c rmdir /s /q node_modules
+cmd /c rmdir /s /q packages\db\node_modules
+cmd /c rmdir /s /q packages\ui\node_modules
+cmd /c rmdir /s /q apps\web\node_modules
 if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
 
 # 4) Keep pnpm store outside the repo and reinstall
@@ -224,6 +231,9 @@ Why the first recovery can still fail:
 - Standard `Remove-Item -Recurse -Force` can partially fail on deep pnpm trees/symlinks or locked files, leaving broken entries behind.
 - A later install can then fail in workspace package paths (for example `packages/db/node_modules/typescript/package.json`) even after root cleanup.
 - The helper script applies ACL/attribute normalization before deletion and uses `cmd` for final removal, which is more reliable for these Windows-specific edge cases.
+- `Remove-Item -Recurse -Force` in PowerShell can partially fail on deep pnpm trees/symlinks, leaving broken entries behind.
+- A later install can then fail in workspace package paths (for example `packages\db\node_modules\typescript\package.json`) even after root cleanup.
+- Using `cmd /c rmdir /s /q` for root and package-level `node_modules` is more reliable for this specific failure mode.
 
 Expected notes:
 - `services/parse-xbrl/tests`, `services/parse-proxy/tests`, `services/id-master/tests`, and `services/market-data/tests` are currently absent in this repository snapshot; pytest will report missing paths for those commands.
