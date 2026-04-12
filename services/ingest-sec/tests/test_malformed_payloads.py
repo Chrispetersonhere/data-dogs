@@ -60,3 +60,31 @@ def test_malformed_payload_rerun_does_not_duplicate_raw_or_staged_rows() -> None
     assert second.state.value == 'finished'
     assert len(raw_store.raw_artifacts) == 1
     assert raw_store.staging_filing_headers == []
+
+
+def test_malformed_payload_non_list_recent_fields_do_not_stage_character_rows() -> None:
+    def fetcher(cik: str) -> dict:
+        return {
+            'cik': cik,
+            'filings': {
+                'recent': {
+                    'accessionNumber': 'not-a-list',
+                    'filingDate': '2024-01-10',
+                }
+            },
+        }
+
+    job_store = InMemoryJobStore()
+    raw_store = InMemoryRawStore()
+    job = SubmissionsBackfillJob(
+        job_id='malformed-day14-1',
+        issuers=['0001652044'],
+        fetcher=fetcher,
+        job_store=job_store,
+        raw_store=raw_store,
+    )
+
+    result = job.run()
+
+    assert result.state.value == 'finished'
+    assert raw_store.staging_filing_headers == []

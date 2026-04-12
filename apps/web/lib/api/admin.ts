@@ -5,7 +5,7 @@ export type AdminJobState = 'queued' | 'running' | 'failed' | 'completed';
 export type AdminJob = {
   id: string;
   state: AdminJobState;
-  parser: 'xbrl' | 'proxy' | 'sec';
+  parser: AdminParser;
   startedAt: string;
   finishedAt?: string;
 };
@@ -18,22 +18,24 @@ export type FailedArtifact = {
   checksum: string;
   parserVersion: string;
   jobId: string;
-  parser: 'xbrl' | 'proxy' | 'sec';
+  parser: AdminParser;
   errorCode: string;
   errorMessage: string;
 };
 
 export type ParserFailureSummary = {
-  parser: 'xbrl' | 'proxy' | 'sec';
+  parser: AdminParser;
   failures: number;
 };
 
+export type AdminParser = 'xbrl' | 'proxy' | 'sec';
+
 export type AdminQaFilters = {
   jobId?: string;
-  parser?: string;
+  parser?: AdminParser;
 };
 
-function mapParser(parserVersion: string): 'xbrl' | 'proxy' | 'sec' {
+function mapParser(parserVersion: string): AdminParser {
   const normalized = parserVersion.toLowerCase();
 
   if (normalized.includes('proxy')) {
