@@ -66,17 +66,15 @@ function mapJobState(status: string): AdminJobState {
 }
 
 function artifactPathFromSourceUrl(sourceUrl: string, accession: string): string {
-  try {
-    const parsed = new URL(sourceUrl);
-    const trimmedPath = parsed.pathname.replace(/^\//, '');
-    if (trimmedPath.length > 0) {
-      return trimmedPath;
-    }
-  } catch {
-    // Preserve operation if URL parsing fails; use accession fallback.
+  const withoutProtocol = sourceUrl.replace(/^[a-z]+:\/\//i, '');
+  const firstSlash = withoutProtocol.indexOf('/');
+
+  if (firstSlash === -1) {
+    return accession;
   }
 
-  return accession;
+  const path = withoutProtocol.slice(firstSlash + 1);
+  return path.length > 0 ? path : accession;
 }
 
 export async function getAdminJobs(): Promise<AdminJob[]> {
