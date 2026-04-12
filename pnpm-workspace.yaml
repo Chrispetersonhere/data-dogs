@@ -3,3 +3,6 @@ packages:
   - "packages/*"
   - "services/*"
   - "docs"
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver
