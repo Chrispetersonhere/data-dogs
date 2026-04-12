@@ -43,10 +43,10 @@ class FramesBackfillJob(BaseIngestionJob[str]):
         source_url = f"https://data.sec.gov/api/xbrl/frames/{frame_key}.json"
         payload = self._fetcher(frame_key)
 
-        artifact = self._raw_store.store_raw_submission(
-            cik=frame_key,
+        artifact = self._raw_store.store_raw_artifact(
+            subject_key=frame_key,
             source_url=source_url,
-            submission_json=payload,
+            payload=payload,
             parser_version=self._parser_version,
             job_id=self.job_id,
         )
@@ -60,4 +60,4 @@ class FramesBackfillJob(BaseIngestionJob[str]):
             "raw_checksum_sha256": artifact.checksum_sha256,
         }
         self._staged_metadata_by_frame[frame_key] = metadata
-        self._raw_store.persist_checkpoint(job_id=self.job_id, cik=frame_key)
+        self._raw_store.persist_checkpoint(job_id=self.job_id, unit_key=frame_key)
