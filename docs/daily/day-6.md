@@ -23,7 +23,7 @@
 
 ## Risks / follow-ups
 
-- The repository snapshot does not yet include the full ingest-sec runtime package scaffolding; tests dynamically load modules from `services/ingest-sec/src` to keep scope constrained.
+- The ingest-sec runtime remains intentionally minimal in Week 1; tests validate the client modules directly from `services/ingest-sec/src`.
 - Before deploying, wire this client into the ingest job orchestration entrypoint and verify production SEC rate limits with real credentials and network policies.
 - Windows local verification requires platform-correct commands (`python -m pytest`, Windows paths, and `pnpm install` before turbo-based scripts).
 - On Windows, interrupted or locked installs can corrupt `node_modules/.pnpm`; documented a full reset workflow for `EACCES`/`ENOENT` recovery.
