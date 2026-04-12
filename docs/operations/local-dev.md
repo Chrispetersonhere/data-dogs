@@ -160,6 +160,45 @@ pnpm --filter web test
 pnpm --filter web build
 ```
 
+If the recovery block still fails with `EACCES` or `Remove-Item` path errors, use this deterministic fallback:
+
+```powershell
+# 1) Run PowerShell as Administrator for ACL repair, then return to repo
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+
+# 2) Repair ACL/attributes on the working tree
+icacls . /grant "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)F" /T
+attrib -R .\* /S /D
+
+# 3) Force-remove node_modules with cmd (more reliable than Remove-Item for deep trees)
+cmd /c rmdir /s /q node_modules
+if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
+
+# 4) Keep pnpm store outside the repo and reinstall
+pnpm config set store-dir "$env:LOCALAPPDATA\pnpm\store\v10"
+pnpm install --force --node-linker=hoisted --no-frozen-lockfile
+```
+
+If this still fails in `C:\Users\...\Documents`, do a fresh clone in a neutral path (`C:\dev`) and retry there:
+
+```powershell
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+$repoUrl = git config --get remote.origin.url
+$branch = git rev-parse --abbrev-ref HEAD
+
+Set-Location C:\
+if (Test-Path .\dev\data-dogs-clean) { Remove-Item -Recurse -Force .\dev\data-dogs-clean }
+git clone --branch $branch $repoUrl C:\dev\data-dogs-clean
+Set-Location C:\dev\data-dogs-clean
+
+pnpm config set store-dir "$env:LOCALAPPDATA\pnpm\store\v10"
+pnpm install --force --node-linker=hoisted --no-frozen-lockfile
+pnpm lint
+pnpm typecheck
+pnpm --filter web test
+pnpm --filter web build
+```
+
 Expected notes:
 - `services/parse-xbrl/tests`, `services/parse-proxy/tests`, `services/id-master/tests`, and `services/market-data/tests` are currently absent in this repository snapshot; pytest will report missing paths for those commands.
 - `turbo is not recognized` and `Cannot find module ... next` both indicate install did not complete; resolve install first, then rerun checks.

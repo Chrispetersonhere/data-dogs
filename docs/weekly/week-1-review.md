@@ -20,4 +20,4 @@
 2. Introduce missing Python service test suites or explicitly remove them from required local command palettes until implemented.
 3. Add integration checks that verify raw-artifact provenance fields are persisted end-to-end.
 4. Add CI artifact/reporting for ingestion lineage invariants (source URL, accession, fetch timestamp, checksum, parser version, job id).
-5. Continue tightening command runbooks, with platform-specific copy/paste verification flows and deterministic Windows install-recovery steps.
+5. Continue tightening command runbooks, with platform-specific copy/paste verification flows and deterministic Windows install-recovery and fresh-clone fallback steps.
