@@ -2,7 +2,7 @@
 
 ## Scope completed
 - Added internal admin jobs page listing job state and linking directly to QA failures for each job.
-- Added internal admin QA dashboard with filter controls for `jobId` and parser.
+- Added internal admin QA dashboard with filter controls for `jobId` and parser, backed by provenance ledger rows.
 - Added failed artifact table and parser failure summary for operational triage.
 - Added direct link from each failure row to artifact inspection path on `/admin/artifacts`.
 - Added a QA page spec helper that asserts core dashboard markup and artifact-link presence.
@@ -28,4 +28,4 @@
 ## Notes
 - Admin flow remains internal-only via `ADMIN_ENABLED=true` gate.
 - QA dashboard intentionally exposes parser errors and artifact paths without suppressing failure detail.
-- Artifact rows preserve provenance-critical fields in the admin API payload (`sourceUrl`, `accession`, `fetchTimestamp`, `checksum`, `parserVersion`, `jobId`).
+- Admin API now derives jobs/failures from provenance ledger rows to avoid detached mock datasets while preserving fields (`sourceUrl`, `accession`, `fetchTimestamp`, `checksum`, `parserVersion`, `jobId`).
