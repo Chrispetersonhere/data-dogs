@@ -96,13 +96,124 @@ docker compose -f infra/docker/docker-compose.yml down -v
 - Web app: `http://localhost:3000`
 - PostgreSQL: `localhost:5432`
 - ClickHouse HTTP: `http://localhost:8123`
-- MinIO S3 API: `http://localhost:9001`
-- MinIO Console: `http://localhost:9002`
+- MinIO S3 API (host): `http://localhost:9001`
+- MinIO Console (host): `http://localhost:9002`
+
+
+## Windows PowerShell: copy/paste verification from zero
+
+Use this exact sequence from a normal PowerShell prompt:
+
+```powershell
+# 1) Go to your existing clone path (do NOT use /workspace/... on Windows)
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+
+# 2) Verify required tools
+node --version
+pnpm --version
+python --version
+
+# 3) Install JS dependencies first (fixes "turbo is not recognized" and missing next binary)
+pnpm install --no-frozen-lockfile
+
+# IMPORTANT: only continue to step 4 if install succeeds.
+# If install fails with EACCES on node_modules\eslint, run the recovery block below, then retry install once.
+
+# 4) Run JS checks
+pnpm lint
+pnpm typecheck
+pnpm --filter web test
+pnpm --filter web build
+
+# 5) Ensure pytest is available, then run Python checks
+python -m pip install --upgrade pip
+python -m pip install pytest
+python -m pytest services/ingest-sec/tests -q
+python -m pytest services/parse-xbrl/tests -q
+python -m pytest services/parse-proxy/tests -q
+python -m pytest services/id-master/tests -q
+python -m pytest services/market-data/tests -q
+```
+
+If install fails with `EACCES ... node_modules\eslint` on Windows, run this exact recovery block in PowerShell from repo root:
+
+```powershell
+# stop any locking processes
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process pnpm -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# clean local install artifacts
+if (Test-Path .\node_modules) { Remove-Item -Recurse -Force .\node_modules }
+if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
+
+# clear pnpm metadata and reinstall with hoisted linker
+pnpm store prune
+pnpm install --force --node-linker=hoisted --no-frozen-lockfile
+```
+
+Then rerun:
+
+```powershell
+pnpm lint
+pnpm typecheck
+pnpm --filter web test
+pnpm --filter web build
+```
+
+If the recovery block still fails with `EACCES` or `Remove-Item` path errors, use this deterministic fallback:
+
+```powershell
+# 1) Run PowerShell as Administrator for ACL repair, then return to repo
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+
+# 2) Repair ACL/attributes on the working tree
+icacls . /grant "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)F" /T
+attrib -R .\* /S /D
+
+# 3) Force-remove node_modules with cmd (more reliable than Remove-Item for deep trees)
+cmd /c rmdir /s /q node_modules
+cmd /c rmdir /s /q packages\db\node_modules
+cmd /c rmdir /s /q packages\ui\node_modules
+cmd /c rmdir /s /q apps\web\node_modules
+if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
+
+# 4) Keep pnpm store outside the repo and reinstall
+pnpm config set store-dir "$env:LOCALAPPDATA\pnpm\store\v10"
+pnpm install --force --node-linker=hoisted --no-frozen-lockfile
+```
+
+If this still fails in `C:\Users\...\Documents`, do a fresh clone in a neutral path (`C:\dev`) and retry there:
+
+```powershell
+Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
+$repoUrl = git config --get remote.origin.url
+$branch = git rev-parse --abbrev-ref HEAD
+
+Set-Location C:\
+if (Test-Path .\dev\data-dogs-clean) { Remove-Item -Recurse -Force .\dev\data-dogs-clean }
+git clone --branch $branch $repoUrl C:\dev\data-dogs-clean
+Set-Location C:\dev\data-dogs-clean
+
+pnpm config set store-dir "$env:LOCALAPPDATA\pnpm\store\v10"
+pnpm install --force --node-linker=hoisted --no-frozen-lockfile
+pnpm lint
+pnpm typecheck
+pnpm --filter web test
+pnpm --filter web build
+```
+
+Why the first recovery can still fail:
+- `Remove-Item -Recurse -Force` in PowerShell can partially fail on deep pnpm trees/symlinks, leaving broken entries behind.
+- A later install can then fail in workspace package paths (for example `packages\db\node_modules\typescript\package.json`) even after root cleanup.
+- Using `cmd /c rmdir /s /q` for root and package-level `node_modules` is more reliable for this specific failure mode.
+
+Expected notes:
+- `services/parse-xbrl/tests`, `services/parse-proxy/tests`, `services/id-master/tests`, and `services/market-data/tests` are currently absent in this repository snapshot; pytest will report missing paths for those commands.
+- `turbo is not recognized` and `Cannot find module ... next` both indicate install did not complete; resolve install first, then rerun checks.
 
 ## Notes on current repository state
 
-- The `services/ingest-sec` code directory is not present in this snapshot.
-- The compose service is still created so networking and environment wiring are preserved for local integration.
+- The `ingest-sec` compose service is intentionally wiring-only in Week 1 and keeps the container running for manual service command execution.
 - CI test steps for Python services are conditional and skip missing directories with explicit logs.
 - If `pytest` is not installed locally, use `python -m pip install pytest` and run tests with `python -m pytest ...`.
 - If `docker` is not installed, all compose/bootstrap steps will fail until Docker Desktop (or Docker Engine + Compose) is installed and on PATH.
