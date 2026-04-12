@@ -6,6 +6,7 @@ import {
   getParserFailureSummary,
   type AdminParser,
 } from '../../../lib/api/admin';
+import { getFailedArtifacts, getParserFailureSummary } from '../../../lib/api/admin';
 
 export const metadata = {
   title: 'Admin QA',
@@ -49,6 +50,7 @@ export default async function AdminQaPage({ searchParams }: AdminQaPageProps): P
   const params = searchParams ? await searchParams : {};
   const jobId = firstValue(params.jobId)?.trim() || undefined;
   const parser = parseParserFilter(firstValue(params.parser)?.trim());
+  const parser = firstValue(params.parser)?.trim() || undefined;
 
   const failedArtifacts = await getFailedArtifacts({ jobId, parser });
   const parserSummary = await getParserFailureSummary({ jobId, parser });

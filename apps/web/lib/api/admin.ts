@@ -6,6 +6,7 @@ export type AdminJob = {
   id: string;
   state: AdminJobState;
   parser: AdminParser;
+  parser: 'xbrl' | 'proxy' | 'sec';
   startedAt: string;
   finishedAt?: string;
 };
@@ -19,6 +20,7 @@ export type FailedArtifact = {
   parserVersion: string;
   jobId: string;
   parser: AdminParser;
+  parser: 'xbrl' | 'proxy' | 'sec';
   errorCode: string;
   errorMessage: string;
 };
@@ -36,6 +38,16 @@ export type AdminQaFilters = {
 };
 
 function mapParser(parserVersion: string): AdminParser {
+  parser: 'xbrl' | 'proxy' | 'sec';
+  failures: number;
+};
+
+export type AdminQaFilters = {
+  jobId?: string;
+  parser?: string;
+};
+
+function mapParser(parserVersion: string): 'xbrl' | 'proxy' | 'sec' {
   const normalized = parserVersion.toLowerCase();
 
   if (normalized.includes('proxy')) {
