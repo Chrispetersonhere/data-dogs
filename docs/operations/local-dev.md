@@ -172,6 +172,9 @@ attrib -R .\* /S /D
 
 # 3) Force-remove node_modules with cmd (more reliable than Remove-Item for deep trees)
 cmd /c rmdir /s /q node_modules
+cmd /c rmdir /s /q packages\db\node_modules
+cmd /c rmdir /s /q packages\ui\node_modules
+cmd /c rmdir /s /q apps\web\node_modules
 if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
 
 # 4) Keep pnpm store outside the repo and reinstall
@@ -198,6 +201,11 @@ pnpm typecheck
 pnpm --filter web test
 pnpm --filter web build
 ```
+
+Why the first recovery can still fail:
+- `Remove-Item -Recurse -Force` in PowerShell can partially fail on deep pnpm trees/symlinks, leaving broken entries behind.
+- A later install can then fail in workspace package paths (for example `packages\db\node_modules\typescript\package.json`) even after root cleanup.
+- Using `cmd /c rmdir /s /q` for root and package-level `node_modules` is more reliable for this specific failure mode.
 
 Expected notes:
 - `services/parse-xbrl/tests`, `services/parse-proxy/tests`, `services/id-master/tests`, and `services/market-data/tests` are currently absent in this repository snapshot; pytest will report missing paths for those commands.

@@ -5,11 +5,12 @@
 - Fixed naming/wording inconsistencies in Week 1 operations and daily logs.
 - Removed a premature shell abstraction in CI (`run_if_present`) in favor of explicit guarded test blocks.
 - Stabilized CI lint compatibility by pinning ESLint to the `.eslintrc`-compatible major version.
-- Tightened local infrastructure documentation to reflect current repository state and added a Windows PowerShell start-to-finish verification runbook, including explicit EACCES recovery steps and a deterministic fresh-clone fallback path.
+- Tightened local infrastructure documentation to reflect current repository state and added a Windows PowerShell start-to-finish verification runbook, including explicit EACCES recovery steps, package-level cleanup, and a deterministic fresh-clone fallback path.
 - Wrote the Week 1 review with `Done / Fragile / Next` sections.
 
 ## Files touched
 - `.github/workflows/ci.yml`
+- `README.md`
 - `package.json`
 - `infra/docker/docker-compose.yml`
 - `docs/operations/local-dev.md`
