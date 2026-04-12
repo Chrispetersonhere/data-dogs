@@ -156,22 +156,8 @@ If install/build fails with `EACCES` on Linux-only optional packages (for exampl
 ```powershell
 Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
 
-# stop potential file-locking processes
-Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
-Get-Process pnpm -ErrorAction SilentlyContinue | Stop-Process -Force
-
-# remove mixed-OS install artifacts
-$nodeModuleDirs = @(
-  "node_modules",
-  (Join-Path (Join-Path "apps" "web") "node_modules"),
-  (Join-Path (Join-Path "packages" "ui") "node_modules"),
-  (Join-Path (Join-Path "packages" "db") "node_modules")
-)
-foreach ($dir in $nodeModuleDirs) {
-  if (Test-Path -LiteralPath $dir) {
-    Remove-Item -LiteralPath $dir -Recurse -Force
-  }
-}
+# robust workspace cleanup (ACL repair + attribute reset + remove)
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\reset-node-modules.ps1
 
 # keep pnpm store in user profile and reinstall for Windows only
 pnpm config set store-dir "$env:LOCALAPPDATA\pnpm\store\v10"
@@ -195,7 +181,7 @@ pnpm --filter web test
 pnpm --filter web build
 ```
 
-If the recovery block still fails with `EACCES` or `Remove-Item` path errors, use this deterministic fallback:
+If the recovery block still fails with `EACCES`, use this deterministic fallback:
 
 ```powershell
 # 1) Run PowerShell as Administrator for ACL repair, then return to repo
@@ -205,18 +191,8 @@ Set-Location C:\Users\lolvi\Documents\GitHub\data-dogs
 icacls . /grant "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)F" /T
 attrib -R .\* /S /D
 
-# 3) Force-remove node_modules with PowerShell literal paths
-$nodeModuleDirs = @(
-  "node_modules",
-  (Join-Path (Join-Path "packages" "db") "node_modules"),
-  (Join-Path (Join-Path "packages" "ui") "node_modules"),
-  (Join-Path (Join-Path "apps" "web") "node_modules")
-)
-foreach ($dir in $nodeModuleDirs) {
-  if (Test-Path -LiteralPath $dir) {
-    Remove-Item -LiteralPath $dir -Recurse -Force
-  }
-}
+# 3) Run the robust cleanup script again as Administrator
+powershell -ExecutionPolicy Bypass -File .\scripts\windows\reset-node-modules.ps1
 if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
 
 # 4) Keep pnpm store outside the repo and reinstall
@@ -245,9 +221,9 @@ pnpm --filter web build
 ```
 
 Why the first recovery can still fail:
-- `Remove-Item -Recurse -Force` in PowerShell can partially fail on deep pnpm trees/symlinks, leaving broken entries behind.
+- Standard `Remove-Item -Recurse -Force` can partially fail on deep pnpm trees/symlinks or locked files, leaving broken entries behind.
 - A later install can then fail in workspace package paths (for example `packages/db/node_modules/typescript/package.json`) even after root cleanup.
-- PowerShell `Remove-Item -LiteralPath ... -Recurse -Force` avoids `cmd` path parsing edge cases and works reliably with workspace-relative paths when `Test-Path` checks are included.
+- The helper script applies ACL/attribute normalization before deletion and uses `cmd` for final removal, which is more reliable for these Windows-specific edge cases.
 
 Expected notes:
 - `services/parse-xbrl/tests`, `services/parse-proxy/tests`, `services/id-master/tests`, and `services/market-data/tests` are currently absent in this repository snapshot; pytest will report missing paths for those commands.
