@@ -3,15 +3,24 @@ from __future__ import annotations
 from typing import Any
 
 
+def _list_field(payload: dict[str, Any], key: str) -> list[Any]:
+    value = payload.get(key, [])
+    if isinstance(value, list):
+        return value
+    return []
+
+
 def parse_submission_headers(*, cik: str, submission_json: dict[str, Any], raw_checksum: str) -> list[dict[str, str]]:
     """Extract filing header staging rows from SEC submissions JSON."""
 
-    filings_recent = submission_json.get("filings", {}).get("recent", {})
-    accession_numbers = filings_recent.get("accessionNumber", []) or []
-    filing_dates = filings_recent.get("filingDate", []) or []
-    forms = filings_recent.get("form", []) or []
-    primary_documents = filings_recent.get("primaryDocument", []) or []
-    primary_doc_descriptions = filings_recent.get("primaryDocDescription", []) or []
+    filings = submission_json.get("filings")
+    filings_recent = filings.get("recent", {}) if isinstance(filings, dict) else {}
+
+    accession_numbers = _list_field(filings_recent, "accessionNumber")
+    filing_dates = _list_field(filings_recent, "filingDate")
+    forms = _list_field(filings_recent, "form")
+    primary_documents = _list_field(filings_recent, "primaryDocument")
+    primary_doc_descriptions = _list_field(filings_recent, "primaryDocDescription")
 
     rows: list[dict[str, str]] = []
     for idx, accession in enumerate(accession_numbers):

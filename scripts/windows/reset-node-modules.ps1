@@ -1,5 +1,13 @@
 $ErrorActionPreference = 'Stop'
 
+function Invoke-BestEffortCmd {
+  param(
+    [Parameter(Mandatory = $true)][string]$Command
+  )
+
+  cmd /c "$Command >nul 2>&1"
+}
+
 Write-Host 'Stopping node/pnpm processes (if running)...'
 Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
 Get-Process pnpm -ErrorAction SilentlyContinue | Stop-Process -Force
@@ -17,15 +25,21 @@ foreach ($target in $targets) {
   }
 
   Write-Host "Resetting ACL/attributes for $target ..."
-  & takeown /f $target /r /d y *> $null
-  & icacls $target /grant "$($env:USERNAME):(OI)(CI)F" /T /C *> $null
-  & attrib -R $target /S /D *> $null
+  Invoke-BestEffortCmd "takeown /f `"$target`" /r /d y"
+  Invoke-BestEffortCmd "icacls `"$target`" /grant `"$($env:USERNAME):(OI)(CI)F`" /T /C"
+  Invoke-BestEffortCmd "attrib -R `"$target`" /S /D"
 
   Write-Host "Removing $target ..."
-  cmd /c ('rmdir /s /q "{0}" >nul 2>&1' -f $target)
+  Invoke-BestEffortCmd "rmdir /s /q `"$target`""
 
   if (Test-Path -LiteralPath $target) {
-    throw "Failed to remove $target"
+    $absolute = (Resolve-Path -LiteralPath $target).Path
+    $longPath = "\\?\$absolute"
+    Invoke-BestEffortCmd "rmdir /s /q `"$longPath`""
+  }
+
+  if (Test-Path -LiteralPath $target) {
+    throw "Failed to remove $target. Re-run this script in elevated PowerShell (Run as Administrator)."
   }
 }
 
