@@ -116,6 +116,9 @@ python --version
 # 3) Install JS dependencies first (fixes "turbo is not recognized" and missing next binary)
 pnpm install --no-frozen-lockfile
 
+# IMPORTANT: only continue to step 4 if install succeeds.
+# If install fails with EACCES on node_modules\eslint, run the recovery block below, then retry install once.
+
 # 4) Run JS checks
 pnpm lint
 pnpm typecheck
@@ -132,9 +135,34 @@ python -m pytest services/id-master/tests -q
 python -m pytest services/market-data/tests -q
 ```
 
+If install fails with `EACCES ... node_modules\eslint` on Windows, run this exact recovery block in PowerShell from repo root:
+
+```powershell
+# stop any locking processes
+Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process pnpm -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# clean local install artifacts
+if (Test-Path .\node_modules) { Remove-Item -Recurse -Force .\node_modules }
+if (Test-Path .\pnpm-lock.yaml) { Remove-Item -Force .\pnpm-lock.yaml }
+
+# clear pnpm metadata and reinstall with hoisted linker
+pnpm store prune
+pnpm install --force --node-linker=hoisted --no-frozen-lockfile
+```
+
+Then rerun:
+
+```powershell
+pnpm lint
+pnpm typecheck
+pnpm --filter web test
+pnpm --filter web build
+```
+
 Expected notes:
 - `services/parse-xbrl/tests`, `services/parse-proxy/tests`, `services/id-master/tests`, and `services/market-data/tests` are currently absent in this repository snapshot; pytest will report missing paths for those commands.
-- If `pnpm lint`/`pnpm typecheck` still fail after install, re-run `pnpm install --force` once and retry.
+- `turbo is not recognized` and `Cannot find module ... next` both indicate install did not complete; resolve install first, then rerun checks.
 
 ## Notes on current repository state
 
