@@ -7,7 +7,7 @@
 - Added initial database schema and ERD for issuer/filing/artifact/parser lineage.
 - Added local Docker-based infrastructure and CI workflow for JS + Python checks.
 - Implemented production-safe SEC client controls (required User-Agent, throttling, timeouts, retries, structured logs) with focused tests.
-- Completed Day 7 stabilization cleanup for naming consistency, docs accuracy, and CI script simplification.
+- Completed Day 7 stabilization cleanup for naming consistency, docs accuracy, CI script simplification, and lint-tooling compatibility hardening.
 
 ## Fragile
 - Most Python service test suites referenced in global verification commands are still absent in this snapshot (`parse-xbrl`, `parse-proxy`, `id-master`, `market-data`).
