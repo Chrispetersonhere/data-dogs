@@ -1,19 +1,12 @@
 from __future__ import annotations
 
-import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "src" / "fs_dataset_ingest.py"
-SPEC = importlib.util.spec_from_file_location("fs_dataset_ingest", MODULE_PATH)
-assert SPEC and SPEC.loader
-fs_dataset_ingest = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = fs_dataset_ingest
-SPEC.loader.exec_module(fs_dataset_ingest)
-
-InMemoryFsDatasetStore = fs_dataset_ingest.InMemoryFsDatasetStore
-ingest_fs_dataset = fs_dataset_ingest.ingest_fs_dataset
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+from src.fs_dataset_ingest import InMemoryFsDatasetStore, ingest_fs_dataset
 
 
 def _sample_rows() -> list[dict[str, object]]:
@@ -142,3 +135,29 @@ def test_same_rows_different_period_type_are_distinct_staging_records() -> None:
     assert ytd["staged_count"] == 1
     assert len(store.staging_rows) == 2
     assert quarter["raw_checksum_sha256"] != ytd["raw_checksum_sha256"]
+
+
+def test_missing_required_field_raises_validation_error() -> None:
+    store = InMemoryFsDatasetStore()
+    rows = [
+        {
+            "issuer_cik": "0001652044",
+            "statement_code": "IS",
+            # line_item intentionally missing
+            "amount": 1,
+            "unit": "USD",
+        }
+    ]
+
+    with pytest.raises(ValueError, match="line_item"):
+        ingest_fs_dataset(
+            dataset_name="sec-fs-quarterly",
+            source_url="https://www.sec.gov/files/dera/data/financial-statement-data-sets/2024q4.zip",
+            period_start="2024-10-01",
+            period_end="2024-12-31",
+            period_type="quarter",
+            rows=rows,
+            store=store,
+        )
+
+    assert len(store.staging_rows) == 0

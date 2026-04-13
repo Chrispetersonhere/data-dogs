@@ -103,9 +103,9 @@ class InMemoryFsDatasetStore:
         inserted = 0
         with self._lock:
             for row in rows:
-                issuer_cik = str(row.get("issuer_cik", ""))
-                statement_code = str(row.get("statement_code", ""))
-                line_item = str(row.get("line_item", ""))
+                issuer_cik = _require_non_empty_text(row=row, field_name="issuer_cik")
+                statement_code = _require_non_empty_text(row=row, field_name="statement_code")
+                line_item = _require_non_empty_text(row=row, field_name="line_item")
 
                 key = (
                     dataset_name,
@@ -137,6 +137,13 @@ class InMemoryFsDatasetStore:
                 inserted += 1
 
         return inserted
+
+
+def _require_non_empty_text(*, row: dict[str, Any], field_name: str) -> str:
+    value = row.get(field_name)
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"missing required non-empty field: {field_name}")
+    return value.strip()
 
 
 def ingest_fs_dataset(

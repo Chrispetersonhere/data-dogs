@@ -7,6 +7,7 @@
 - Kept staging intentionally non-canonical: line items are stored as source-native labels with no mapping into normalized facts.
 - Added duplicate-safe behavior so reruns do not multiply raw artifacts or staged rows.
 - Tightened deduplication identity so period context (`period_type`) is part of staging uniqueness and raw checksum material.
+- Added required-field validation (`issuer_cik`, `statement_code`, `line_item`) so malformed rows fail fast instead of staging empty-string identifiers.
 
 ## Files touched
 - `services/parse-xbrl/src/fs_dataset_ingest.py`
