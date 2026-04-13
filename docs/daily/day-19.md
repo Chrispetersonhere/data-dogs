@@ -17,9 +17,11 @@
 - Future-observed backfills are excluded when `knowledge_as_of` is earlier than `observed_at`/`recorded_at`.
 
 ## Verification commands
-- `pytest services/id-master/tests/test_identifier_map.py -q`
-- `pytest services/id-master/tests/test_listing_history.py -q`
-- `pytest services/id-master/tests/test_point_in_time_queries.py -q`
+- `python -m pytest services/id-master/tests/test_identifier_map.py -q`
+- `python -m pytest services/id-master/tests/test_listing_history.py -q`
+- `python -m pytest services/id-master/tests/test_point_in_time_queries.py -q`
+- `python -m pytest services/id-master/tests -q`
+- `powershell -ExecutionPolicy Bypass -File scripts/windows/verify-day19.ps1`
 
 ## Guardrails respected
 - No lookahead leakage was introduced in point-in-time reads.
