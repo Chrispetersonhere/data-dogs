@@ -25,7 +25,7 @@ create table if not exists sec_fs_statement_staging (
   period_type text not null,
   raw_checksum_sha256 text not null references sec_fs_dataset_raw(raw_checksum_sha256),
   inserted_at timestamptz not null default now(),
-  unique (dataset_name, issuer_cik, statement_code, line_item, period_start, period_end)
+  unique (dataset_name, issuer_cik, statement_code, line_item, period_start, period_end, period_type)
 );
 
 create index if not exists sec_fs_statement_staging_period_idx

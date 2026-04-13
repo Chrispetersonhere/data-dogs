@@ -36,7 +36,7 @@ class InMemoryFsDatasetStore:
         self._lock = Lock()
         self._raw_by_checksum: dict[str, RawDatasetArtifact] = {}
         self._staging_rows: list[dict[str, Any]] = []
-        self._staging_keys: set[tuple[str, str, str, str, str, str]] = set()
+        self._staging_keys: set[tuple[str, str, str, str, str, str, str]] = set()
 
     @property
     def raw_artifacts(self) -> dict[str, RawDatasetArtifact]:
@@ -57,8 +57,19 @@ class InMemoryFsDatasetStore:
         payload: list[dict[str, Any]],
         parser_version: str,
     ) -> RawDatasetArtifact:
+        # Include ingest envelope metadata in checksum material so a period/context
+        # change cannot collapse into an existing raw artifact by payload rows alone.
+        checksum_material = {
+            "dataset_name": dataset_name,
+            "source_url": source_url,
+            "period_start": period_start,
+            "period_end": period_end,
+            "period_type": period_type,
+            "rows": payload,
+        }
         payload_json = _stable_json(payload)
-        checksum_sha256 = hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
+        checksum_payload = _stable_json(checksum_material)
+        checksum_sha256 = hashlib.sha256(checksum_payload.encode("utf-8")).hexdigest()
 
         with self._lock:
             existing = self._raw_by_checksum.get(checksum_sha256)
@@ -103,6 +114,7 @@ class InMemoryFsDatasetStore:
                     line_item,
                     period_start,
                     period_end,
+                    period_type,
                 )
                 if key in self._staging_keys:
                     continue

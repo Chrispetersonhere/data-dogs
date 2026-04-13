@@ -105,3 +105,40 @@ def test_ingest_rerun_is_deduplicated_and_not_canonicalized() -> None:
     assert first["staged_count"] == 1
     assert second["staged_count"] == 0
     assert store.staging_rows[0]["line_item"] == "CustomCompanySpecificLineItem"
+
+
+def test_same_rows_different_period_type_are_distinct_staging_records() -> None:
+    store = InMemoryFsDatasetStore()
+    rows = [
+        {
+            "issuer_cik": "0001652044",
+            "statement_code": "CF",
+            "line_item": "NetCashProvidedByUsedInOperatingActivities",
+            "amount": 13256000000,
+            "unit": "USD",
+        }
+    ]
+
+    quarter = ingest_fs_dataset(
+        dataset_name="sec-fs-quarterly",
+        source_url="https://www.sec.gov/files/dera/data/financial-statement-data-sets/2024q4.zip",
+        period_start="2024-10-01",
+        period_end="2024-12-31",
+        period_type="quarter",
+        rows=rows,
+        store=store,
+    )
+    ytd = ingest_fs_dataset(
+        dataset_name="sec-fs-quarterly",
+        source_url="https://www.sec.gov/files/dera/data/financial-statement-data-sets/2024q4.zip",
+        period_start="2024-10-01",
+        period_end="2024-12-31",
+        period_type="year_to_date",
+        rows=rows,
+        store=store,
+    )
+
+    assert quarter["staged_count"] == 1
+    assert ytd["staged_count"] == 1
+    assert len(store.staging_rows) == 2
+    assert quarter["raw_checksum_sha256"] != ytd["raw_checksum_sha256"]

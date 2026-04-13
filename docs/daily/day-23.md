@@ -6,6 +6,7 @@
 - Added staging-row writes that preserve period metadata (`period_start`, `period_end`, `period_type`) for downstream consumers.
 - Kept staging intentionally non-canonical: line items are stored as source-native labels with no mapping into normalized facts.
 - Added duplicate-safe behavior so reruns do not multiply raw artifacts or staged rows.
+- Tightened deduplication identity so period context (`period_type`) is part of staging uniqueness and raw checksum material.
 
 ## Files touched
 - `services/parse-xbrl/src/fs_dataset_ingest.py`
