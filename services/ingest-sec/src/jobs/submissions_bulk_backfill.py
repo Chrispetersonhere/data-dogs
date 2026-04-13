@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from typing import Callable
 
 from ..jobs.base import BaseIngestionJob
@@ -49,11 +50,13 @@ class SubmissionsBulkBackfillJob(BaseIngestionJob[str]):
         if self._partition_count == 1:
             return list(self._issuers)
 
-        return [
-            cik
-            for cik in self._issuers
-            if (int(cik) % self._partition_count) == self._partition_index
-        ]
+        return [cik for cik in self._issuers if self._belongs_to_partition(cik)]
+
+
+    def _belongs_to_partition(self, cik: str) -> bool:
+        digest = hashlib.sha256(cik.encode("utf-8")).digest()
+        bucket = int.from_bytes(digest[:8], byteorder="big", signed=False)
+        return (bucket % self._partition_count) == self._partition_index
 
     def process_unit(self, unit: str, index: int) -> None:
         cik = unit

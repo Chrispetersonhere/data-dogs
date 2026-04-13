@@ -111,7 +111,7 @@ def test_submissions_bulk_backfill_ingests_recent_and_archive_with_dedupe() -> N
 
 
 def test_submissions_bulk_backfill_partitions_work_by_issuer() -> None:
-    issuers = ["0000000001", "0000000002", "0000000003", "0000000004"]
+    issuers = ["0000000001", "issuer-alpha", "0000000003", "issuer-beta"]
 
     def fetch_latest(cik: str) -> dict:
         return _sample_recent_payload(cik, f"{cik}-24", f"submissions-{cik}-2023.json")
@@ -136,7 +136,7 @@ def test_submissions_bulk_backfill_partitions_work_by_issuer() -> None:
     result = job.run()
     assert result.state.value == "finished"
 
-    expected_partition = {cik for cik in issuers if int(cik) % 2 == 1}
+    expected_partition = {cik for cik in issuers if job._belongs_to_partition(cik)}
     assert raw_store.checkpoints["submissions-bulk-part-1of2"] == expected_partition
 
     observed_subject_keys = {artifact.subject_key for artifact in raw_store.raw_artifacts.values()}
