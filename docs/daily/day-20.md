@@ -1,4 +1,4 @@
-# Day 20 — Golden Validation Dataset
+# Day 20 - Golden Validation Dataset
 
 ## Scope completed
 - Created a golden validation dataset seed for issuer/security identity regression.
