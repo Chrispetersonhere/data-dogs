@@ -30,7 +30,7 @@ export type ParserFailureSummary = {
 
 export type AdminQaFilters = {
   jobId?: string;
-  parser?: string;
+  parser?: FailedArtifact['parser'];
 };
 
 function mapParser(parserVersion: string): 'xbrl' | 'proxy' | 'sec' {
@@ -66,15 +66,26 @@ function mapJobState(status: string): AdminJobState {
 }
 
 function artifactPathFromSourceUrl(sourceUrl: string, accession: string): string {
-  const withoutProtocol = sourceUrl.replace(/^[a-z]+:\/\//i, '');
-  const firstSlash = withoutProtocol.indexOf('/');
-
-  if (firstSlash === -1) {
-    return accession;
+  try {
+    const parsed = new URL(sourceUrl);
+    const normalizedPath = parsed.pathname.replace(/^\/+/, '');
+    return normalizedPath.length > 0 ? normalizedPath : accession;
+  } catch {
+    const withoutProtocol = sourceUrl.replace(/^[a-z]+:\/\//i, '');
+    const firstSlash = withoutProtocol.indexOf('/');
+    if (firstSlash === -1) {
+      return accession;
+    }
+    const fallbackPath = withoutProtocol.slice(firstSlash + 1);
+    return fallbackPath.length > 0 ? fallbackPath : accession;
   }
+}
 
-  const path = withoutProtocol.slice(firstSlash + 1);
-  return path.length > 0 ? path : accession;
+export function normalizeParserFilter(parser: string | undefined): FailedArtifact['parser'] | undefined {
+  if (parser === 'xbrl' || parser === 'proxy' || parser === 'sec') {
+    return parser;
+  }
+  return undefined;
 }
 
 export async function getAdminJobs(): Promise<AdminJob[]> {
