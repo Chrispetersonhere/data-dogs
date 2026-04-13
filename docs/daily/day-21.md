@@ -18,7 +18,7 @@
 
 ## Acceptance tests
 - `pytest services/id-master/tests -q`
-- `pnpm typecheck` *(environment could not fetch pnpm artifact via proxy, so this check could not complete in-container)*
+- `pnpm typecheck` *(blocked in Windows verification: `pnpm install` hit `EACCES` on `node_modules`, leaving `turbo` unavailable in PATH)*
 
 ## Guardrails respected
 - No new routes.

@@ -31,7 +31,7 @@
 
 ## Quality gates
 - `pytest services/id-master/tests -q`
-- `pnpm typecheck` (attempted; blocked in this environment by package-manager fetch/proxy error)
+- `pnpm typecheck` (attempted; blocked during Windows verification because `pnpm install` failed with `EACCES`, so `turbo` was not available)
 
 ## Next-week focus recommendation
 - Continue cleanup-only hardening with narrow, test-first changes to PIT and relationship edge cases.
