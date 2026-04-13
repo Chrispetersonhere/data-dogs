@@ -30,6 +30,14 @@ def _normalize_identifier_value(value: str) -> str:
     return _normalize_required(value, "identifier_value").upper()
 
 
+def _is_active_during_window(*, valid_from: str, valid_to: str | None, as_of: str) -> bool:
+    if valid_from > as_of:
+        return False
+    if valid_to is None:
+        return True
+    return as_of < valid_to
+
+
 @dataclass(frozen=True)
 class IdentifierMapping:
     subject_type: str
@@ -114,4 +122,47 @@ class IdentifierMap:
             row
             for row in self._mappings
             if row.identifier_type == normalized_identifier_type and row.identifier_value == normalized_identifier_value
+        ]
+
+    def resolve_external_identifier_as_of(
+        self,
+        *,
+        identifier_type: str,
+        identifier_value: str,
+        as_of: str,
+        knowledge_as_of: str | None = None,
+    ) -> list[IdentifierMapping]:
+        """Resolve identifier mappings at a point in time without future leakage.
+
+        `knowledge_as_of` defaults to `as_of` and prevents lookahead by excluding rows
+        observed after that instant.
+        """
+
+        normalized_as_of = _normalize_required(as_of, "as_of")
+        normalized_knowledge_as_of = knowledge_as_of.strip() if knowledge_as_of else normalized_as_of
+        return [
+            row
+            for row in self.get_by_external_identifier(
+                identifier_type=identifier_type,
+                identifier_value=identifier_value,
+            )
+            if row.observed_at <= normalized_knowledge_as_of
+            and _is_active_during_window(valid_from=row.valid_from, valid_to=row.valid_to, as_of=normalized_as_of)
+        ]
+
+    def resolve_internal_id_as_of(
+        self,
+        *,
+        subject_type: str,
+        subject_id: str,
+        as_of: str,
+        knowledge_as_of: str | None = None,
+    ) -> list[IdentifierMapping]:
+        normalized_as_of = _normalize_required(as_of, "as_of")
+        normalized_knowledge_as_of = knowledge_as_of.strip() if knowledge_as_of else normalized_as_of
+        return [
+            row
+            for row in self.get_by_internal_id(subject_type=subject_type, subject_id=subject_id)
+            if row.observed_at <= normalized_knowledge_as_of
+            and _is_active_during_window(valid_from=row.valid_from, valid_to=row.valid_to, as_of=normalized_as_of)
         ]
