@@ -20,7 +20,7 @@ class RawArtifact:
     checksum_sha256: str
     parser_version: str
     job_id: str
-    cik: str
+    subject_key: str
     payload_json: str
 
 
@@ -46,19 +46,19 @@ class InMemoryRawStore:
     def checkpoints(self) -> dict[str, set[str]]:
         return self._checkpoints
 
-    def store_raw_submission(
+    def store_raw_artifact(
         self,
         *,
-        cik: str,
+        subject_key: str,
         source_url: str,
-        submission_json: dict[str, Any],
+        payload: dict[str, Any],
         parser_version: str,
         job_id: str,
     ) -> RawArtifact:
-        payload_json = json.dumps(submission_json, sort_keys=True, separators=(",", ":"))
+        payload_json = json.dumps(payload, sort_keys=True, separators=(",", ":"))
         checksum_sha256 = hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
 
-        filings_recent = submission_json.get("filings", {}).get("recent", {})
+        filings_recent = payload.get("filings", {}).get("recent", {})
         accessions = filings_recent.get("accessionNumber", []) or []
         accession = str(accessions[0]) if accessions else ""
 
@@ -74,7 +74,7 @@ class InMemoryRawStore:
                 checksum_sha256=checksum_sha256,
                 parser_version=parser_version,
                 job_id=job_id,
-                cik=cik,
+                subject_key=subject_key,
                 payload_json=payload_json,
             )
             self._raw_by_checksum[checksum_sha256] = artifact
@@ -92,8 +92,8 @@ class InMemoryRawStore:
                 inserted += 1
         return inserted
 
-    def persist_checkpoint(self, *, job_id: str, cik: str) -> None:
+    def persist_checkpoint(self, *, job_id: str, unit_key: str) -> None:
         with self._lock:
             if job_id not in self._checkpoints:
                 self._checkpoints[job_id] = set()
-            self._checkpoints[job_id].add(cik)
+            self._checkpoints[job_id].add(unit_key)
