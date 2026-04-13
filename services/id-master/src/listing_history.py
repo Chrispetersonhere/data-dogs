@@ -15,6 +15,14 @@ def _normalize_required(value: str, field_name: str) -> str:
     return normalized
 
 
+def _is_active_during_window(*, effective_from: str, effective_to: str | None, as_of: str) -> bool:
+    if effective_from > as_of:
+        return False
+    if effective_to is None:
+        return True
+    return as_of < effective_to
+
+
 @dataclass(frozen=True)
 class ListingHistoryRecord:
     security_id: str
@@ -109,3 +117,30 @@ class ListingHistory:
     def get_history(self, security_id: str) -> list[ListingHistoryRecord]:
         normalized_security_id = _normalize_required(security_id, "security_id")
         return list(self._history.get(normalized_security_id, []))
+
+    def get_listing_as_of(
+        self,
+        *,
+        security_id: str,
+        as_of: str,
+        knowledge_as_of: str | None = None,
+    ) -> ListingHistoryRecord | None:
+        normalized_security_id = _normalize_required(security_id, "security_id")
+        normalized_as_of = _normalize_required(as_of, "as_of")
+        normalized_knowledge_as_of = knowledge_as_of.strip() if knowledge_as_of else normalized_as_of
+
+        eligible = [
+            row
+            for row in self._history.get(normalized_security_id, [])
+            if row.recorded_at <= normalized_knowledge_as_of
+            and _is_active_during_window(
+                effective_from=row.effective_from,
+                effective_to=row.effective_to,
+                as_of=normalized_as_of,
+            )
+        ]
+        if not eligible:
+            return None
+
+        eligible.sort(key=lambda row: row.effective_from)
+        return eligible[-1]
