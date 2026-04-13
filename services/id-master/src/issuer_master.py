@@ -1,25 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
 
-
-def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+from _shared import normalize_required, normalize_upper, utc_now_iso
 
 
 def _normalize_key(value: str) -> str:
-    normalized = value.strip().upper()
-    if not normalized:
-        raise ValueError("issuer_key must be non-empty")
-    return normalized
+    return normalize_upper(value, "issuer_key")
 
 
 def _normalize_name(value: str) -> str:
-    normalized = value.strip()
-    if not normalized:
-        raise ValueError("display_name must be non-empty")
-    return normalized
+    return normalize_required(value, "display_name")
 
 
 @dataclass(frozen=True)
@@ -51,7 +42,7 @@ class IssuerMaster:
     def upsert_issuer(self, *, issuer_key: str, display_name: str, observed_at: str | None = None) -> IssuerRecord:
         stable_key = _normalize_key(issuer_key)
         normalized_name = _normalize_name(display_name)
-        observed_timestamp = observed_at or _utc_now_iso()
+        observed_timestamp = observed_at or utc_now_iso()
 
         current = self._by_key.get(stable_key)
         if current is None:

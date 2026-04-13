@@ -1,26 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
 
-
-def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
-def _normalize_required(value: str, field_name: str) -> str:
-    normalized = value.strip()
-    if not normalized:
-        raise ValueError(f"{field_name} must be non-empty")
-    return normalized
-
-
-def _is_active_during_window(*, effective_from: str, effective_to: str | None, as_of: str) -> bool:
-    if effective_from > as_of:
-        return False
-    if effective_to is None:
-        return True
-    return as_of < effective_to
+from _shared import is_active_during_window, normalize_optional, normalize_required, normalize_upper, utc_now_iso
 
 
 @dataclass(frozen=True)
@@ -49,12 +31,12 @@ class ListingHistory:
         effective_to: str | None = None,
         recorded_at: str | None = None,
     ) -> ListingHistoryRecord:
-        normalized_security_id = _normalize_required(security_id, "security_id")
-        normalized_venue_code = _normalize_required(venue_code, "venue_code").upper()
-        normalized_listing_symbol = _normalize_required(listing_symbol, "listing_symbol").upper()
-        normalized_effective_from = _normalize_required(effective_from, "effective_from")
-        normalized_effective_to = effective_to.strip() if effective_to else None
-        normalized_recorded_at = recorded_at or _utc_now_iso()
+        normalized_security_id = normalize_required(security_id, "security_id")
+        normalized_venue_code = normalize_upper(venue_code, "venue_code")
+        normalized_listing_symbol = normalize_upper(listing_symbol, "listing_symbol")
+        normalized_effective_from = normalize_required(effective_from, "effective_from")
+        normalized_effective_to = normalize_optional(effective_to)
+        normalized_recorded_at = recorded_at or utc_now_iso()
 
         candidate = ListingHistoryRecord(
             security_id=normalized_security_id,
@@ -87,9 +69,9 @@ class ListingHistory:
         transition_at: str,
         recorded_at: str | None = None,
     ) -> ListingHistoryRecord:
-        normalized_security_id = _normalize_required(security_id, "security_id")
-        normalized_transition_at = _normalize_required(transition_at, "transition_at")
-        normalized_recorded_at = recorded_at or _utc_now_iso()
+        normalized_security_id = normalize_required(security_id, "security_id")
+        normalized_transition_at = normalize_required(transition_at, "transition_at")
+        normalized_recorded_at = recorded_at or utc_now_iso()
 
         history = self._history.get(normalized_security_id, [])
         for idx in range(len(history) - 1, -1, -1):
@@ -115,7 +97,7 @@ class ListingHistory:
         )
 
     def get_history(self, security_id: str) -> list[ListingHistoryRecord]:
-        normalized_security_id = _normalize_required(security_id, "security_id")
+        normalized_security_id = normalize_required(security_id, "security_id")
         return list(self._history.get(normalized_security_id, []))
 
     def get_listing_as_of(
@@ -125,19 +107,15 @@ class ListingHistory:
         as_of: str,
         knowledge_as_of: str | None = None,
     ) -> ListingHistoryRecord | None:
-        normalized_security_id = _normalize_required(security_id, "security_id")
-        normalized_as_of = _normalize_required(as_of, "as_of")
-        normalized_knowledge_as_of = knowledge_as_of.strip() if knowledge_as_of else normalized_as_of
+        normalized_security_id = normalize_required(security_id, "security_id")
+        normalized_as_of = normalize_required(as_of, "as_of")
+        normalized_knowledge_as_of = normalize_optional(knowledge_as_of) or normalized_as_of
 
         eligible = [
             row
             for row in self._history.get(normalized_security_id, [])
             if row.recorded_at <= normalized_knowledge_as_of
-            and _is_active_during_window(
-                effective_from=row.effective_from,
-                effective_to=row.effective_to,
-                as_of=normalized_as_of,
-            )
+            and is_active_during_window(start=row.effective_from, end=row.effective_to, as_of=normalized_as_of)
         ]
         if not eligible:
             return None

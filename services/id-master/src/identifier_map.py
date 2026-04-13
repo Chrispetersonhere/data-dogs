@@ -1,41 +1,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
 
-
-def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
-def _normalize_required(value: str, field_name: str) -> str:
-    normalized = value.strip()
-    if not normalized:
-        raise ValueError(f"{field_name} must be non-empty")
-    return normalized
+from _shared import is_active_during_window, normalize_lower, normalize_optional, normalize_required, normalize_upper, utc_now_iso
 
 
 def _normalize_subject_type(value: str) -> str:
-    normalized = _normalize_required(value, "subject_type").lower()
+    normalized = normalize_lower(value, "subject_type")
     if normalized not in {"company", "issuer", "security"}:
         raise ValueError("subject_type must be one of: company, issuer, security")
     return normalized
 
 
 def _normalize_identifier_type(value: str) -> str:
-    return _normalize_required(value, "identifier_type").lower()
+    return normalize_lower(value, "identifier_type")
 
 
 def _normalize_identifier_value(value: str) -> str:
-    return _normalize_required(value, "identifier_value").upper()
-
-
-def _is_active_during_window(*, valid_from: str, valid_to: str | None, as_of: str) -> bool:
-    if valid_from > as_of:
-        return False
-    if valid_to is None:
-        return True
-    return as_of < valid_to
+    return normalize_upper(value, "identifier_value")
 
 
 @dataclass(frozen=True)
@@ -67,12 +49,12 @@ class IdentifierMap:
         observed_at: str | None = None,
     ) -> IdentifierMapping:
         normalized_subject_type = _normalize_subject_type(subject_type)
-        normalized_subject_id = _normalize_required(subject_id, "subject_id")
+        normalized_subject_id = normalize_required(subject_id, "subject_id")
         normalized_identifier_type = _normalize_identifier_type(identifier_type)
         normalized_identifier_value = _normalize_identifier_value(identifier_value)
-        normalized_valid_from = _normalize_required(valid_from, "valid_from")
-        normalized_valid_to = valid_to.strip() if valid_to else None
-        normalized_observed_at = observed_at or _utc_now_iso()
+        normalized_valid_from = normalize_required(valid_from, "valid_from")
+        normalized_valid_to = normalize_optional(valid_to)
+        normalized_observed_at = observed_at or utc_now_iso()
 
         candidate = IdentifierMapping(
             subject_type=normalized_subject_type,
@@ -108,7 +90,7 @@ class IdentifierMap:
 
     def get_by_internal_id(self, *, subject_type: str, subject_id: str) -> list[IdentifierMapping]:
         normalized_subject_type = _normalize_subject_type(subject_type)
-        normalized_subject_id = _normalize_required(subject_id, "subject_id")
+        normalized_subject_id = normalize_required(subject_id, "subject_id")
         return [
             row
             for row in self._mappings
@@ -138,8 +120,8 @@ class IdentifierMap:
         observed after that instant.
         """
 
-        normalized_as_of = _normalize_required(as_of, "as_of")
-        normalized_knowledge_as_of = knowledge_as_of.strip() if knowledge_as_of else normalized_as_of
+        normalized_as_of = normalize_required(as_of, "as_of")
+        normalized_knowledge_as_of = normalize_optional(knowledge_as_of) or normalized_as_of
         return [
             row
             for row in self.get_by_external_identifier(
@@ -147,7 +129,7 @@ class IdentifierMap:
                 identifier_value=identifier_value,
             )
             if row.observed_at <= normalized_knowledge_as_of
-            and _is_active_during_window(valid_from=row.valid_from, valid_to=row.valid_to, as_of=normalized_as_of)
+            and is_active_during_window(start=row.valid_from, end=row.valid_to, as_of=normalized_as_of)
         ]
 
     def resolve_internal_id_as_of(
@@ -158,11 +140,11 @@ class IdentifierMap:
         as_of: str,
         knowledge_as_of: str | None = None,
     ) -> list[IdentifierMapping]:
-        normalized_as_of = _normalize_required(as_of, "as_of")
-        normalized_knowledge_as_of = knowledge_as_of.strip() if knowledge_as_of else normalized_as_of
+        normalized_as_of = normalize_required(as_of, "as_of")
+        normalized_knowledge_as_of = normalize_optional(knowledge_as_of) or normalized_as_of
         return [
             row
             for row in self.get_by_internal_id(subject_type=subject_type, subject_id=subject_id)
             if row.observed_at <= normalized_knowledge_as_of
-            and _is_active_during_window(valid_from=row.valid_from, valid_to=row.valid_to, as_of=normalized_as_of)
+            and is_active_during_window(start=row.valid_from, end=row.valid_to, as_of=normalized_as_of)
         ]
