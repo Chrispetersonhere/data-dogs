@@ -1,18 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
 
-
-def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
-def _normalize_required(value: str, field_name: str) -> str:
-    normalized = value.strip()
-    if not normalized:
-        raise ValueError(f"{field_name} must be non-empty")
-    return normalized
+from _shared import normalize_lower, normalize_optional, normalize_required, normalize_upper, utc_now_iso
 
 
 @dataclass(frozen=True)
@@ -51,10 +41,10 @@ class SecurityMaster:
         security_type: str,
         observed_at: str | None = None,
     ) -> SecurityRecord:
-        normalized_issuer_id = _normalize_required(issuer_id, "issuer_id")
-        normalized_security_key = _normalize_required(security_key, "security_key").upper()
-        normalized_security_type = _normalize_required(security_type, "security_type").lower()
-        observed_timestamp = observed_at or _utc_now_iso()
+        normalized_issuer_id = normalize_required(issuer_id, "issuer_id")
+        normalized_security_key = normalize_upper(security_key, "security_key")
+        normalized_security_type = normalize_lower(security_type, "security_type")
+        observed_timestamp = observed_at or utc_now_iso()
 
         current = self._security_by_key.get(normalized_security_key)
         if current is None:
@@ -100,11 +90,11 @@ class SecurityMaster:
         effective_from: str,
         effective_to: str | None = None,
     ) -> ListingRecord:
-        normalized_security_id = _normalize_required(security_id, "security_id")
-        normalized_venue_code = _normalize_required(venue_code, "venue_code").upper()
-        normalized_listing_symbol = _normalize_required(listing_symbol, "listing_symbol").upper()
-        normalized_effective_from = _normalize_required(effective_from, "effective_from")
-        normalized_effective_to = effective_to.strip() if effective_to else None
+        normalized_security_id = normalize_required(security_id, "security_id")
+        normalized_venue_code = normalize_upper(venue_code, "venue_code")
+        normalized_listing_symbol = normalize_upper(listing_symbol, "listing_symbol")
+        normalized_effective_from = normalize_required(effective_from, "effective_from")
+        normalized_effective_to = normalize_optional(effective_to)
 
         if normalized_security_id not in self._security_by_id:
             raise KeyError(f"Unknown security_id: {normalized_security_id}")
@@ -131,16 +121,16 @@ class SecurityMaster:
         return listing
 
     def get_security_by_id(self, security_id: str) -> SecurityRecord | None:
-        return self._security_by_id.get(_normalize_required(security_id, "security_id"))
+        return self._security_by_id.get(normalize_required(security_id, "security_id"))
 
     def get_security_by_key(self, security_key: str) -> SecurityRecord | None:
-        normalized_security_key = _normalize_required(security_key, "security_key").upper()
+        normalized_security_key = normalize_upper(security_key, "security_key")
         return self._security_by_key.get(normalized_security_key)
 
     def get_listings(self, security_id: str) -> list[ListingRecord]:
-        normalized_security_id = _normalize_required(security_id, "security_id")
+        normalized_security_id = normalize_required(security_id, "security_id")
         return list(self._listing_history.get(normalized_security_id, []))
 
     def get_securities_for_issuer(self, issuer_id: str) -> list[SecurityRecord]:
-        normalized_issuer_id = _normalize_required(issuer_id, "issuer_id")
+        normalized_issuer_id = normalize_required(issuer_id, "issuer_id")
         return [security for security in self._security_by_id.values() if security.issuer_id == normalized_issuer_id]
