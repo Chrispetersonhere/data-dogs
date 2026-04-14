@@ -14,7 +14,10 @@
 - `docs/daily/day-24.md`
 
 ## Acceptance tests
-- `pytest services/parse-xbrl/tests/test_notes_ingest.py -q`
+- Preferred (cross-platform): `python -m pytest services/parse-xbrl/tests/test_notes_ingest.py -q`
+- If `pytest` is not installed in your active environment:
+  - `python -m pip install pytest`
+  - re-run `python -m pytest services/parse-xbrl/tests/test_notes_ingest.py -q`
 
 ## Guardrails respected
 - No public note panel changes.
