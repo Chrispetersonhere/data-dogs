@@ -28,8 +28,18 @@ export type QaFactView = {
   discrepancies: FactDiscrepancy[];
 };
 
+type FactPoint = {
+  val?: number;
+  end?: string;
+  accn?: string;
+};
+
+type FactDetail = {
+  units?: Record<string, FactPoint[]>;
+};
+
 type CompanyFactsPayload = {
-  facts?: Record<string, Record<string, { units?: Record<string, Array<{ val?: number; end?: string; accn?: string }> }>>>;
+  facts?: Record<string, Record<string, FactDetail>>;
 };
 
 function normalizeCik(cik: string): string {
