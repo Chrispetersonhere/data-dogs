@@ -59,6 +59,13 @@ pnpm store prune
 pnpm install --force --node-linker=hoisted --no-frozen-lockfile
 ```
 
+If you see any of these after a failed install:
+- `'turbo' is not recognized as an internal or external command`
+- `'next' is not recognized as an internal or external command`
+- `'tsx' is not recognized as an internal or external command`
+
+that means workspace dependencies were not installed successfully yet. Do **not** debug lint/typecheck/build/test first—complete the reset + reinstall flow above, then rerun commands.
+
 For full fallback (including fresh clone to `C:\dev\data-dogs-clean`), see `docs/operations/local-dev.md`.
 
 
