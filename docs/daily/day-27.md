@@ -18,6 +18,7 @@
 ## Acceptance tests
 - `pnpm --filter web build`
 - `pnpm --filter web test -- qa-facts.spec.ts || pnpm --filter web test`
+  - Note: current web test script uses `tests/*.spec.ts`, so targeted invocation still executes the suite.
 
 ## Guardrails respected
 - Admin-only gate remains in place.
