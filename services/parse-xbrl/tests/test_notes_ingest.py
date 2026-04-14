@@ -37,6 +37,8 @@ def test_ingest_stores_artifacts_and_links_to_filing_and_issuer() -> None:
     )
 
     assert result["stored_count"] == 2
+    assert result["linked_count"] == 2
+    assert result["processed_count"] == 2
     assert result["filing_accession"] == "0000320193-24-000123"
     assert result["issuer_cik"] == "0000320193"
     assert len(store.artifacts_by_checksum) == 2
@@ -73,7 +75,10 @@ def test_ingest_rerun_deduplicates_artifacts_and_links() -> None:
     )
 
     assert first["stored_count"] == 2
-    assert second["stored_count"] == 2
+    assert first["linked_count"] == 2
+    assert second["stored_count"] == 0
+    assert second["linked_count"] == 0
+    assert second["processed_count"] == 2
     assert len(store.artifacts_by_checksum) == 2
     assert len(store.artifact_links) == 2
 

@@ -5,6 +5,7 @@
 - Added explicit linkage capture so every stored note artifact is connected to both a source filing accession and issuer CIK.
 - Preserved auditability by recording parser version, source URI, discovery/link timestamps, and checksum identities.
 - Enforced linkage guardrails in ingest validation: artifact storage is rejected if filing or issuer linkage is missing.
+- Clarified ingest result semantics so `stored_count`/`linked_count` represent newly added records while `processed_count` represents artifacts seen in the request.
 - Kept scope ingest-only (no note UX work).
 
 ## Files touched

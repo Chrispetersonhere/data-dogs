@@ -116,6 +116,11 @@ def ingest_note_artifacts(
     store: InMemoryNotesArtifactStore,
     parser_version: str = "day24-notes-v1",
 ) -> dict[str, Any]:
+    filing_accession = _require_non_empty_text(value=filing_accession, field_name="filing_accession")
+    issuer_cik = _require_non_empty_text(value=issuer_cik, field_name="issuer_cik")
+
+    artifact_count_before = len(store.artifacts_by_checksum)
+    link_count_before = len(store.artifact_links)
     stored_checksums: list[str] = []
     for artifact in artifacts:
         note_type = _require_non_empty_text(value=artifact.get("note_type"), field_name="note_type")
@@ -131,9 +136,14 @@ def ingest_note_artifacts(
         )
         stored_checksums.append(stored.artifact_checksum_sha256)
 
+    artifact_count_after = len(store.artifacts_by_checksum)
+    link_count_after = len(store.artifact_links)
+
     return {
         "filing_accession": filing_accession,
         "issuer_cik": issuer_cik,
-        "stored_count": len(stored_checksums),
+        "stored_count": artifact_count_after - artifact_count_before,
+        "linked_count": link_count_after - link_count_before,
+        "processed_count": len(stored_checksums),
         "artifact_checksums": stored_checksums,
     }
