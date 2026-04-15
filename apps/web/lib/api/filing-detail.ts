@@ -203,7 +203,7 @@ export async function getFilingDetail(accessionRaw: string): Promise<FilingDetai
   return {
     accession,
     issuerCik,
-    issuerName: submissions.name ?? 'Unknown issuer',
+    issuerName: submissions.name ?? 'Issuer name unavailable',
     formType,
     filingDate,
     acceptanceDateTime,
