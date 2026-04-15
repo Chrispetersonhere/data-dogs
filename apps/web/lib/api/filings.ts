@@ -112,7 +112,12 @@ export function normalizeFilingQueryFilters(filters: FilingQueryFilters): Normal
   };
 }
 
-function withinDateRange(*, filingDate: string, dateFrom: string | null, dateTo: string | null): boolean {
+function withinDateRange(args: {
+  filingDate: string;
+  dateFrom: string | null;
+  dateTo: string | null;
+}): boolean {
+  const { filingDate, dateFrom, dateTo } = args;
   if (dateFrom !== null && filingDate < dateFrom) {
     return false;
   }
@@ -133,7 +138,13 @@ export function filterFilingsRows(
     if (filters.formTypes.size > 0 && !filters.formTypes.has(row.formType.toUpperCase())) {
       return false;
     }
-    if (!withinDateRange(filingDate=row.filingDate, dateFrom=filters.dateFrom, dateTo=filters.dateTo)) {
+    if (
+      !withinDateRange({
+        filingDate: row.filingDate,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
+      })
+    ) {
       return false;
     }
     if (filters.accession !== null && row.accession !== filters.accession) {
