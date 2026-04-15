@@ -68,6 +68,7 @@ def build_quarterly_and_ttm(*, normalized_rows: list[dict[str, Any]]) -> Quarter
     quarterly_only = [
         row for row in normalized_rows if str(row.get("period_type", "")).strip().lower() == "quarterly"
     ]
+    quarterly_only = [row for row in normalized_rows if str(row.get("period_type", "")).strip().lower() == "quarterly"]
 
     flow_series = _build_series(rows=quarterly_only, metric_aliases=FLOW_METRICS)
     stock_series = _build_series(rows=quarterly_only, metric_aliases=STOCK_METRICS)
@@ -100,6 +101,7 @@ def _build_series(
         fiscal_year = row.get("fiscal_year")
         fiscal_quarter = row.get("fiscal_quarter")
         amount = as_number(row.get("amount"))
+        amount = _as_number(row.get("amount"))
         if not isinstance(fiscal_year, int) or not isinstance(fiscal_quarter, int) or amount is None:
             continue
         if fiscal_quarter not in (1, 2, 3, 4):
@@ -179,3 +181,17 @@ def _rolling_4q_chain(fiscal_year: int, fiscal_quarter: int) -> list[tuple[int, 
             year -= 1
 
     return chain
+
+
+def _as_number(value: Any) -> float | None:
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return None
+        try:
+            return float(stripped)
+        except ValueError:
+            return None
+    return None
