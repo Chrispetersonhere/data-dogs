@@ -1,5 +1,7 @@
 import type { CSSProperties, JSX } from 'react';
 
+import { FinancialsTableShell, PeriodToggle, stickyTheadStyle } from '../../../../../../packages/ui/src/components/financials';
+
 type FinancialsPageProps = {
   params: Promise<{ companyId: string }>;
 };
@@ -157,13 +159,6 @@ const cardStyle: CSSProperties = {
   borderRadius: '14px',
   background: 'rgba(15, 23, 42, 0.78)',
   padding: '18px',
-};
-
-const premiumTableWrapStyle: CSSProperties = {
-  borderRadius: '12px',
-  border: '1px solid rgba(99, 102, 241, 0.45)',
-  background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%)',
-  overflowX: 'auto',
 };
 
 function secUserAgent(): string {
@@ -354,6 +349,44 @@ function formatMoney(value: number | undefined): string {
   }).format(value);
 }
 
+const PERIOD_OPTIONS = [
+  { id: 'annual', label: 'Annual' },
+  { id: 'quarterly', label: 'Quarterly' },
+];
+
+const responsiveGridStyle: CSSProperties = {
+  maxWidth: '1200px',
+  margin: '0 auto',
+  display: 'grid',
+  gap: '16px',
+  width: '100%',
+  boxSizing: 'border-box',
+};
+
+const thStyle: CSSProperties = {
+  textAlign: 'right',
+  padding: '10px 12px',
+};
+
+const tdStyle: CSSProperties = {
+  textAlign: 'right',
+  padding: '10px 12px',
+  color: '#e2e8f0',
+};
+
+const conceptCellStyle: CSSProperties = {
+  textAlign: 'left',
+  padding: '10px 12px',
+  color: '#94a3b8',
+  fontSize: '12px',
+};
+
+const tableStyle: CSSProperties = {
+  width: '100%',
+  borderCollapse: 'collapse',
+  minWidth: '600px',
+};
+
 export default async function CompanyAnnualFinancialsPage({ params }: FinancialsPageProps): Promise<JSX.Element> {
   const { companyId } = await params;
 
@@ -362,7 +395,7 @@ export default async function CompanyAnnualFinancialsPage({ params }: Financials
 
     return (
       <main style={shellStyle}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gap: '16px' }}>
+        <div style={responsiveGridStyle}>
           <section style={cardStyle}>
             <p style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c4b5fd' }}>Premium table UX</p>
             <h1 style={{ margin: '10px 0 4px', fontSize: '30px' }}>Annual financials</h1>
@@ -374,39 +407,62 @@ export default async function CompanyAnnualFinancialsPage({ params }: Financials
             </p>
           </section>
 
+          <section style={cardStyle}>
+            <h2 style={{ marginTop: 0 }}>Period toggle</h2>
+            <PeriodToggle periods={PERIOD_OPTIONS} activePeriodId="annual" />
+          </section>
+
           {view.statements.map((statement) => (
-            <section key={statement.id} style={cardStyle}>
-              <h2 style={{ marginTop: 0 }}>{statement.title}</h2>
-              <div style={premiumTableWrapStyle}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.35)' }}>
-                      <th style={{ textAlign: 'left', padding: '10px 12px' }}>Metric</th>
-                      {view.years.map((year) => (
-                        <th key={year} style={{ textAlign: 'right', padding: '10px 12px' }}>
-                          FY {year}
-                        </th>
-                      ))}
-                      <th style={{ textAlign: 'left', padding: '10px 12px' }}>Source concept</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {statement.rows.map((row) => (
-                      <tr key={row.label} style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.15)' }}>
-                        <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>{row.label}</th>
-                        {view.years.map((year) => (
-                          <td key={year} style={{ textAlign: 'right', padding: '10px 12px', color: '#e2e8f0' }}>
-                            {formatMoney(row.valuesByYear[year])}
-                          </td>
-                        ))}
-                        <td style={{ textAlign: 'left', padding: '10px 12px', color: '#94a3b8', fontSize: '12px' }}>{row.conceptUsed ?? '—'}</td>
-                      </tr>
+            <FinancialsTableShell key={statement.id} title={statement.title}>
+              <table style={tableStyle} data-export="financials-data">
+                <thead style={stickyTheadStyle}>
+                  <tr style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.35)' }}>
+                    <th style={{ textAlign: 'left', padding: '10px 12px' }}>Metric</th>
+                    {view.years.map((year) => (
+                      <th key={year} style={thStyle}>
+                        FY {year}
+                      </th>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+                    <th style={{ textAlign: 'left', padding: '10px 12px' }}>Source concept</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {statement.rows.map((row) => (
+                    <tr key={row.label} style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.15)' }}>
+                      <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>{row.label}</th>
+                      {view.years.map((year) => (
+                        <td key={year} style={tdStyle}>
+                          {formatMoney(row.valuesByYear[year])}
+                        </td>
+                      ))}
+                      <td style={conceptCellStyle}>{row.conceptUsed ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </FinancialsTableShell>
           ))}
+
+          <section style={cardStyle}>
+            <h2 style={{ marginTop: 0 }}>Sticky headers</h2>
+            <p style={{ margin: 0, color: '#cbd5e1' }}>
+              Table headers remain visible while scrolling through financial data rows.
+            </p>
+          </section>
+
+          <section style={cardStyle}>
+            <h2 style={{ marginTop: 0 }}>Export-friendly layout</h2>
+            <p style={{ margin: 0, color: '#cbd5e1' }}>
+              Clean table structure with semantic markup supports copy-to-spreadsheet and print workflows.
+            </p>
+          </section>
+
+          <section style={{ ...cardStyle, color: '#cbd5e1' }}>
+            <h2 style={{ marginTop: 0, color: '#e2e8f0' }}>Responsive</h2>
+            <p style={{ margin: 0 }}>
+              Tables scroll horizontally on narrow viewports while the page layout adapts to available width.
+            </p>
+          </section>
         </div>
       </main>
     );
