@@ -18,12 +18,12 @@ Implemented baseline project scaffolding and initial product code:
 - Python 3.12+ (for Python service tests)
 
 ### Install dependencies
-```bash
+```powershell
 pnpm install
 ```
 
 ### Start the web app
-```bash
+```powershell
 pnpm --filter web dev
 ```
 
@@ -40,8 +40,8 @@ pnpm typecheck
 pnpm --filter web test
 pnpm --filter web build
 
-python -m pip install -r services/ingest-sec/requirements.txt
-python -m pytest services/ingest-sec/tests -q
+python -m pip install -r services\ingest-sec\requirements.txt
+python -m pytest services\ingest-sec\tests -q
 ```
 
 If install fails with `EACCES` or broken symlink targets in `node_modules`, run:
@@ -74,7 +74,7 @@ A Docker Compose setup is available under `infra/docker/docker-compose.yml` for 
 
 ## Validation Commands
 ### Monorepo checks
-```bash
+```powershell
 pnpm lint
 pnpm typecheck
 pnpm test
@@ -82,9 +82,10 @@ pnpm build
 ```
 
 ### Python ingest-sec tests
-```bash
-python -m pip install -r services/ingest-sec/requirements.txt
-PYTHONPATH=services/ingest-sec python -m pytest services/ingest-sec/tests -q
+```powershell
+python -m pip install -r services\ingest-sec\requirements.txt
+$env:PYTHONPATH = "services\ingest-sec"
+python -m pytest services\ingest-sec\tests -q
 ```
 
 ## Test Each Component Locally
@@ -97,8 +98,8 @@ Quick-reference for running each component's checks from the repository root.
 | `services/ingest-sec` | Python | `$env:PYTHONPATH="services\ingest-sec"; python -m pytest services\ingest-sec\tests -q` | ✅ tests |
 | `services/parse-xbrl` | Python | `$env:PYTHONPATH="services\parse-xbrl"; python -m pytest services\parse-xbrl\tests -q` | ⚠️ stub |
 | `services/id-master` | Python | `$env:PYTHONPATH="services\id-master"; python -m pytest services\id-master\tests -q` | ⚠️ stub |
-| `packages/ui` | TS/React | `pnpm --filter @data-dogs/ui typecheck` | lint/typecheck only |
-| `packages/db` | TS | `pnpm --filter @data-dogs/db typecheck` | lint/typecheck only |
+| `packages/ui` | TS/React | `pnpm --filter @data-dogs/ui lint; pnpm --filter @data-dogs/ui typecheck` | lint/typecheck only |
+| `packages/db` | TS | `pnpm --filter @data-dogs/db lint; pnpm --filter @data-dogs/db typecheck` | lint/typecheck only |
 
 ### apps/web (Next.js)
 
@@ -123,7 +124,8 @@ $env:PYTHONPATH = "services\ingest-sec"
 python -m pytest services\ingest-sec\tests -q
 ```
 
-> **Note:** `SEC_USER_AGENT` must be set for live SEC API calls. Unit tests mock this value.
+> **Note:** `SEC_USER_AGENT` must be set for runtime/live SEC API calls (e.g. `SECClientConfig.from_env()`).
+> Unit tests construct `SECClientConfig` directly and do not require it.
 > See `docs/operations/sec-client.md` for full configuration details.
 
 ### services/parse-xbrl (Python)
@@ -170,7 +172,7 @@ pnpm --filter @data-dogs/db typecheck   # TypeScript
 
 ## Run Full Local Stack
 
-The Docker Compose stack starts all infrastructure and services locally.
+The Docker Compose stack starts local infrastructure (Postgres, ClickHouse, MinIO) and the app containers defined in `infra/docker/docker-compose.yml`.
 
 ```powershell
 # one-command bootstrap (validates docker, installs deps, starts services)
