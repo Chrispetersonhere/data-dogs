@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from src.statement_builder_annual import as_number
+
 FLOW_METRICS: dict[str, tuple[str, ...]] = {
     "revenue": ("revenue", "revenues", "sales"),
     "net_income": ("net_income", "netincome", "profit_loss"),
@@ -63,6 +65,9 @@ def build_quarterly_and_ttm(*, normalized_rows: list[dict[str, Any]]) -> Quarter
     - No mixed-period contamination: annual rows are ignored.
     """
 
+    quarterly_only = [
+        row for row in normalized_rows if str(row.get("period_type", "")).strip().lower() == "quarterly"
+    ]
     quarterly_only = [row for row in normalized_rows if str(row.get("period_type", "")).strip().lower() == "quarterly"]
 
     flow_series = _build_series(rows=quarterly_only, metric_aliases=FLOW_METRICS)
@@ -95,6 +100,7 @@ def _build_series(
 
         fiscal_year = row.get("fiscal_year")
         fiscal_quarter = row.get("fiscal_quarter")
+        amount = as_number(row.get("amount"))
         amount = _as_number(row.get("amount"))
         if not isinstance(fiscal_year, int) or not isinstance(fiscal_quarter, int) or amount is None:
             continue

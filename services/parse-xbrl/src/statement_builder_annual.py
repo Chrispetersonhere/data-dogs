@@ -68,6 +68,7 @@ def build_annual_statements(*, normalized_rows: list[dict[str, Any]], year_count
         for row in normalized_rows
         if row.get("statement_code") in ANNUAL_STATEMENT_METRICS
         and isinstance(row.get("fiscal_year"), int)
+        and as_number(row.get("amount")) is not None
         and _as_number(row.get("amount")) is not None
     ]
 
@@ -111,6 +112,7 @@ def _build_statement_rows(
         if fiscal_year not in fiscal_years:
             continue
 
+        amount = as_number(row.get("amount"))
         amount = _as_number(row.get("amount"))
         if amount is None:
             continue
@@ -139,6 +141,8 @@ def _build_statement_rows(
     return statement_rows
 
 
+def as_number(value: Any) -> float | None:
+    """Shared numeric parser used across statement builders."""
 def _as_number(value: Any) -> float | None:
     if isinstance(value, (int, float)):
         return float(value)
@@ -151,3 +155,8 @@ def _as_number(value: Any) -> float | None:
         except ValueError:
             return None
     return None
+
+
+def _as_number(value: Any) -> float | None:
+    """Backward-compatible alias retained for legacy call sites."""
+    return as_number(value)
