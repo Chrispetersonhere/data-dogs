@@ -381,6 +381,12 @@ const conceptCellStyle: CSSProperties = {
   fontSize: '12px',
 };
 
+const tableStyle: CSSProperties = {
+  width: '100%',
+  borderCollapse: 'collapse',
+  minWidth: '600px',
+};
+
 export default async function CompanyAnnualFinancialsPage({ params }: FinancialsPageProps): Promise<JSX.Element> {
   const { companyId } = await params;
 
@@ -408,7 +414,7 @@ export default async function CompanyAnnualFinancialsPage({ params }: Financials
 
           {view.statements.map((statement) => (
             <FinancialsTableShell key={statement.id} title={statement.title}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }} data-export="financials-data">
+              <table style={tableStyle} data-export="financials-data">
                 <thead style={stickyTheadStyle}>
                   <tr style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.35)' }}>
                     <th style={{ textAlign: 'left', padding: '10px 12px' }}>Metric</th>
