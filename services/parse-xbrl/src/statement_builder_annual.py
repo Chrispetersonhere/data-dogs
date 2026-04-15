@@ -69,6 +69,7 @@ def build_annual_statements(*, normalized_rows: list[dict[str, Any]], year_count
         if row.get("statement_code") in ANNUAL_STATEMENT_METRICS
         and isinstance(row.get("fiscal_year"), int)
         and as_number(row.get("amount")) is not None
+        and _as_number(row.get("amount")) is not None
     ]
 
     fiscal_years = sorted({int(row["fiscal_year"]) for row in annual_rows}, reverse=True)[:year_count]
@@ -112,6 +113,7 @@ def _build_statement_rows(
             continue
 
         amount = as_number(row.get("amount"))
+        amount = _as_number(row.get("amount"))
         if amount is None:
             continue
 
@@ -141,6 +143,7 @@ def _build_statement_rows(
 
 def as_number(value: Any) -> float | None:
     """Shared numeric parser used across statement builders."""
+def _as_number(value: Any) -> float | None:
     if isinstance(value, (int, float)):
         return float(value)
     if isinstance(value, str):
