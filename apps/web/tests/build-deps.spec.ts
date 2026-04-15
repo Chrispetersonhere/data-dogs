@@ -26,4 +26,12 @@ test('web package includes required build dependency for next css pipeline', () 
     packageJson.devDependencies?.esbuild,
     'apps/web/package.json must include esbuild so tsx test runner can resolve its transpiler dependency',
   );
+
+  const npmrcPath = path.join(specDir, '../../.npmrc');
+  const npmrc = readFileSync(npmrcPath, 'utf8');
+  assert.match(
+    npmrc,
+    /onlyBuiltDependencies\[\]=esbuild/,
+    'workspace .npmrc must explicitly allow esbuild build script for tsx runtime',
+  );
 });
