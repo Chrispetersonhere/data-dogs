@@ -94,9 +94,9 @@ Quick-reference for running each component's checks from the repository root.
 | Component | Type | Test Command | Status |
 |-----------|------|-------------|--------|
 | `apps/web` | Next.js | `pnpm --filter web test` | ✅ tests |
-| `services/ingest-sec` | Python | `PYTHONPATH=services/ingest-sec python -m pytest services/ingest-sec/tests -q` | ✅ tests |
-| `services/parse-xbrl` | Python | `PYTHONPATH=services/parse-xbrl python -m pytest services/parse-xbrl/tests -q` | ⚠️ stub |
-| `services/id-master` | Python | `PYTHONPATH=services/id-master python -m pytest services/id-master/tests -q` | ⚠️ stub |
+| `services/ingest-sec` | Python | `$env:PYTHONPATH="services\ingest-sec"; python -m pytest services\ingest-sec\tests -q` | ✅ tests |
+| `services/parse-xbrl` | Python | `$env:PYTHONPATH="services\parse-xbrl"; python -m pytest services\parse-xbrl\tests -q` | ⚠️ stub |
+| `services/id-master` | Python | `$env:PYTHONPATH="services\id-master"; python -m pytest services\id-master\tests -q` | ⚠️ stub |
 | `packages/ui` | TS/React | `pnpm --filter @data-dogs/ui typecheck` | lint/typecheck only |
 | `packages/db` | TS | `pnpm --filter @data-dogs/db typecheck` | lint/typecheck only |
 
@@ -104,7 +104,7 @@ Quick-reference for running each component's checks from the repository root.
 
 **Prerequisites:** Node.js 20+, pnpm 10+
 
-```bash
+```powershell
 pnpm install                   # install all workspace dependencies
 pnpm --filter web dev          # dev server → http://localhost:3000
 pnpm --filter web test         # unit tests (Node test runner via tsx)
@@ -117,9 +117,10 @@ pnpm --filter web build        # production build
 
 **Prerequisites:** Python 3.12+, pip
 
-```bash
-python -m pip install -r services/ingest-sec/requirements.txt
-PYTHONPATH=services/ingest-sec python -m pytest services/ingest-sec/tests -q
+```powershell
+python -m pip install -r services\ingest-sec\requirements.txt
+$env:PYTHONPATH = "services\ingest-sec"
+python -m pytest services\ingest-sec\tests -q
 ```
 
 > **Note:** `SEC_USER_AGENT` must be set for live SEC API calls. Unit tests mock this value.
@@ -129,9 +130,10 @@ PYTHONPATH=services/ingest-sec python -m pytest services/ingest-sec/tests -q
 
 **Prerequisites:** Python 3.12+, pytest
 
-```bash
+```powershell
 python -m pip install pytest   # no requirements.txt yet
-PYTHONPATH=services/parse-xbrl python -m pytest services/parse-xbrl/tests -q
+$env:PYTHONPATH = "services\parse-xbrl"
+python -m pytest services\parse-xbrl\tests -q
 ```
 
 > **Note:** Stub service — tests are self-contained with no external dependencies.
@@ -140,16 +142,17 @@ PYTHONPATH=services/parse-xbrl python -m pytest services/parse-xbrl/tests -q
 
 **Prerequisites:** Python 3.12+, pytest
 
-```bash
+```powershell
 python -m pip install pytest   # no requirements.txt yet
-PYTHONPATH=services/id-master python -m pytest services/id-master/tests -q
+$env:PYTHONPATH = "services\id-master"
+python -m pytest services\id-master\tests -q
 ```
 
 > **Note:** Stub service — tests are self-contained with no external dependencies.
 
 ### packages/ui
 
-```bash
+```powershell
 pnpm --filter @data-dogs/ui lint        # ESLint
 pnpm --filter @data-dogs/ui typecheck   # TypeScript
 ```
@@ -158,7 +161,7 @@ pnpm --filter @data-dogs/ui typecheck   # TypeScript
 
 ### packages/db
 
-```bash
+```powershell
 pnpm --filter @data-dogs/db lint        # ESLint
 pnpm --filter @data-dogs/db typecheck   # TypeScript
 ```
@@ -169,12 +172,12 @@ pnpm --filter @data-dogs/db typecheck   # TypeScript
 
 The Docker Compose stack starts all infrastructure and services locally.
 
-```bash
+```powershell
 # one-command bootstrap (validates docker, installs deps, starts services)
-./infra/scripts/bootstrap.sh
+& .\infra\scripts\bootstrap.sh
 
 # — or manually —
-docker compose -f infra/docker/docker-compose.yml up -d
+docker compose -f infra\docker\docker-compose.yml up -d
 ```
 
 **Exposed endpoints:**
@@ -187,12 +190,12 @@ docker compose -f infra/docker/docker-compose.yml up -d
 | MinIO S3 API | `http://localhost:9001` |
 | MinIO Console | `http://localhost:9002` |
 
-```bash
+```powershell
 # stop services
-docker compose -f infra/docker/docker-compose.yml down
+docker compose -f infra\docker\docker-compose.yml down
 
 # stop and remove volumes
-docker compose -f infra/docker/docker-compose.yml down -v
+docker compose -f infra\docker\docker-compose.yml down -v
 ```
 
 For detailed Docker troubleshooting and Windows-specific instructions, see `docs/operations/local-dev.md`.
