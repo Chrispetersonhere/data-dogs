@@ -9,10 +9,21 @@ test('web package includes required build dependency for next css pipeline', () 
   const packageJsonPath = path.join(specDir, '../package.json');
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as {
     dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
   };
 
   assert.ok(
     packageJson.dependencies?.postcss,
     'apps/web/package.json must include postcss so next build can resolve css minifier pipeline',
+  );
+
+  assert.ok(
+    packageJson.dependencies?.['styled-jsx'],
+    'apps/web/package.json must include styled-jsx so next build can resolve Next require-hook dependencies',
+  );
+
+  assert.ok(
+    packageJson.devDependencies?.esbuild,
+    'apps/web/package.json must include esbuild so tsx test runner can resolve its transpiler dependency',
   );
 });
