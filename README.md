@@ -22,9 +22,34 @@ Implemented baseline project scaffolding and initial product code:
 pnpm install
 ```
 
-### Start the web app
+### Start all dev servers
+```bash
+pnpm dev
+```
+
+This runs `turbo run dev` which starts all workspace dev servers in parallel. The web app will be available at **http://localhost:3000**.
+
+To start only the web app:
 ```bash
 pnpm --filter web dev
+```
+
+### Pages available for inspection
+
+| Route | Description |
+|-------|-------------|
+| `/` | Marketing / design system showcase |
+| `/filings` | Filing explorer — search SEC filings by issuer, form type, date range |
+| `/filings/[accession]` | Filing detail drilldown (e.g. `/filings/0000320193-24-000123`) |
+| `/company/[companyId]` | Company overview (e.g. `/company/320193` for Apple) |
+| `/company/[companyId]/financials` | Annual financial statements (income, balance sheet, cash flow) |
+| `/admin/jobs` | Admin pipeline jobs (requires `ADMIN_ENABLED=true`) |
+| `/admin/artifacts` | Admin provenance ledger (requires `ADMIN_ENABLED=true`) |
+| `/admin/qa` | Admin fact reconciliation QA (requires `ADMIN_ENABLED=true`) |
+
+To access admin pages, start the dev server with:
+```bash
+ADMIN_ENABLED=true pnpm dev
 ```
 
 ### Windows PowerShell quickstart (recommended)
