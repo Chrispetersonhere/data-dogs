@@ -87,6 +87,116 @@ python -m pip install -r services/ingest-sec/requirements.txt
 PYTHONPATH=services/ingest-sec python -m pytest services/ingest-sec/tests -q
 ```
 
+## Test Each Component Locally
+
+Quick-reference for running each component's checks from the repository root.
+
+| Component | Type | Test Command | Status |
+|-----------|------|-------------|--------|
+| `apps/web` | Next.js | `pnpm --filter web test` | ✅ tests |
+| `services/ingest-sec` | Python | `PYTHONPATH=services/ingest-sec python -m pytest services/ingest-sec/tests -q` | ✅ tests |
+| `services/parse-xbrl` | Python | `PYTHONPATH=services/parse-xbrl python -m pytest services/parse-xbrl/tests -q` | ⚠️ stub |
+| `services/id-master` | Python | `PYTHONPATH=services/id-master python -m pytest services/id-master/tests -q` | ⚠️ stub |
+| `packages/ui` | TS/React | `pnpm --filter @data-dogs/ui typecheck` | lint/typecheck only |
+| `packages/db` | TS | `pnpm --filter @data-dogs/db typecheck` | lint/typecheck only |
+
+### apps/web (Next.js)
+
+**Prerequisites:** Node.js 20+, pnpm 10+
+
+```bash
+pnpm install                   # install all workspace dependencies
+pnpm --filter web dev          # dev server → http://localhost:3000
+pnpm --filter web test         # unit tests (Node test runner via tsx)
+pnpm --filter web lint         # ESLint
+pnpm --filter web typecheck    # TypeScript
+pnpm --filter web build        # production build
+```
+
+### services/ingest-sec (Python)
+
+**Prerequisites:** Python 3.12+, pip
+
+```bash
+python -m pip install -r services/ingest-sec/requirements.txt
+PYTHONPATH=services/ingest-sec python -m pytest services/ingest-sec/tests -q
+```
+
+> **Note:** `SEC_USER_AGENT` must be set for live SEC API calls. Unit tests mock this value.
+> See `docs/operations/sec-client.md` for full configuration details.
+
+### services/parse-xbrl (Python)
+
+**Prerequisites:** Python 3.12+, pytest
+
+```bash
+python -m pip install pytest   # no requirements.txt yet
+PYTHONPATH=services/parse-xbrl python -m pytest services/parse-xbrl/tests -q
+```
+
+> **Note:** Stub service — tests are self-contained with no external dependencies.
+
+### services/id-master (Python)
+
+**Prerequisites:** Python 3.12+, pytest
+
+```bash
+python -m pip install pytest   # no requirements.txt yet
+PYTHONPATH=services/id-master python -m pytest services/id-master/tests -q
+```
+
+> **Note:** Stub service — tests are self-contained with no external dependencies.
+
+### packages/ui
+
+```bash
+pnpm --filter @data-dogs/ui lint        # ESLint
+pnpm --filter @data-dogs/ui typecheck   # TypeScript
+```
+
+> No unit tests configured yet.
+
+### packages/db
+
+```bash
+pnpm --filter @data-dogs/db lint        # ESLint
+pnpm --filter @data-dogs/db typecheck   # TypeScript
+```
+
+> No unit tests configured yet.
+
+## Run Full Local Stack
+
+The Docker Compose stack starts all infrastructure and services locally.
+
+```bash
+# one-command bootstrap (validates docker, installs deps, starts services)
+./infra/scripts/bootstrap.sh
+
+# — or manually —
+docker compose -f infra/docker/docker-compose.yml up -d
+```
+
+**Exposed endpoints:**
+
+| Service | URL |
+|---------|-----|
+| Web app | `http://localhost:3000` |
+| PostgreSQL | `localhost:5432` |
+| ClickHouse HTTP | `http://localhost:8123` |
+| MinIO S3 API | `http://localhost:9001` |
+| MinIO Console | `http://localhost:9002` |
+
+```bash
+# stop services
+docker compose -f infra/docker/docker-compose.yml down
+
+# stop and remove volumes
+docker compose -f infra/docker/docker-compose.yml down -v
+```
+
+For detailed Docker troubleshooting and Windows-specific instructions, see `docs/operations/local-dev.md`.
+
 ## Documentation
 - `docs/operations/local-dev.md` — local dev + infrastructure notes.
 - `docs/operations/sec-client.md` — SEC client behavior and troubleshooting.
