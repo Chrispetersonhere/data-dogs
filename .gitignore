@@ -11,3 +11,4 @@ coverage/
 .env.*
 pnpm-lock.yaml
 /data-dogs-check
+data-dogs/
