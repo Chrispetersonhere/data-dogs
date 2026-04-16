@@ -182,7 +182,7 @@ export default function PeersPage() {
       <section style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gap: spacingTokens['4'] }}>
         <header style={cardStyle}>
           <p style={{ margin: 0, color: colorTokens.text.muted, fontSize: typographyTokens.fontSize.sm }}>
-            Peer comparison
+            Company benchmarking
           </p>
           <h1 style={{ margin: `${spacingTokens['2']} 0 ${spacingTokens['3']}`, fontSize: typographyTokens.fontSize['3xl'] }}>
             Peer comparison
