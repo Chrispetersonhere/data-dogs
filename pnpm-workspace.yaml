@@ -1,8 +1,10 @@
 packages:
-  - "apps/*"
-  - "packages/*"
-  - "services/*"
-  - "docs"
+  - apps/*
+  - packages/*
+  - services/*
+  - docs
+
 onlyBuiltDependencies:
+  - esbuild
   - sharp
   - unrs-resolver
