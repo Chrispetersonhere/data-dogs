@@ -30,7 +30,7 @@ and margin metrics (percentage).
 | `packages/ui/src/components/charts/index.ts` | Created | Barrel export for charts package |
 | `packages/ui/src/index.ts` | Updated | Added charts barrel export |
 | `packages/ui/package.json` | Updated | Added `./components/charts` export path |
-| `apps/web/tests/charts.spec.ts` | Created | 20 acceptance tests for data integrity, validation, and structural contracts |
+| `apps/web/tests/charts.spec.ts` | Created | 21 acceptance tests for data integrity, validation, and structural contracts |
 | `docs/daily/day-40.md` | Created | This document |
 
 ## Design Decisions
