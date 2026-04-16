@@ -46,6 +46,8 @@ const containerStyle: CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
   gap: spacingTokens['4'],
+  overflowX: 'auto',
+  maxWidth: '100%',
 };
 
 const panelStyle: CSSProperties = {

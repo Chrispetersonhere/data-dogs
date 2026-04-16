@@ -11,7 +11,7 @@ const shellStyle: CSSProperties = {
   background: 'linear-gradient(145deg, #0b1220 0%, #111827 45%, #1e293b 100%)',
   color: '#e5e7eb',
   fontFamily: 'Inter, system-ui, sans-serif',
-  padding: '32px',
+  padding: '16px',
 };
 
 const cardStyle: CSSProperties = {
@@ -100,13 +100,13 @@ export default async function CompanyOverviewPage({ params }: CompanyPageProps):
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Latest filings summary</h2>
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.35)' }}>
-                    <th style={{ textAlign: 'left', padding: '8px' }}>Filing date</th>
-                    <th style={{ textAlign: 'left', padding: '8px' }}>Form</th>
-                    <th style={{ textAlign: 'left', padding: '8px' }}>Accession</th>
-                    <th style={{ textAlign: 'left', padding: '8px' }}>Primary document</th>
+                    <th style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap' }}>Filing date</th>
+                    <th style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap' }}>Form</th>
+                    <th style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap' }}>Accession</th>
+                    <th style={{ textAlign: 'left', padding: '8px', whiteSpace: 'nowrap' }}>Primary document</th>
                   </tr>
                 </thead>
                 <tbody>

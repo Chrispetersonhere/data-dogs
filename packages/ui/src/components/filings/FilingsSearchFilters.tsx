@@ -10,7 +10,7 @@ type FilingsSearchFiltersProps = {
 
 const gridStyle: CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
   gap: '12px',
 };
 
@@ -22,6 +22,7 @@ const inputStyle: CSSProperties = {
   background: '#ffffff',
   color: '#111827',
   fontSize: '14px',
+  boxSizing: 'border-box',
 };
 
 const labelStyle: CSSProperties = {

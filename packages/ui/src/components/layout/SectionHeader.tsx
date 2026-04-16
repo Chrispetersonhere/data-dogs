@@ -6,9 +6,11 @@ type SectionHeaderProps = {
   title: string;
   subtitle?: string;
   actions?: ReactNode;
+  level?: 1 | 2;
 };
 
-export function SectionHeader({ title, subtitle, actions }: SectionHeaderProps) {
+export function SectionHeader({ title, subtitle, actions, level = 2 }: SectionHeaderProps) {
+  const Heading = level === 1 ? 'h1' : 'h2';
   return (
     <header
       style={{
@@ -21,7 +23,7 @@ export function SectionHeader({ title, subtitle, actions }: SectionHeaderProps) 
       }}
     >
       <div>
-        <h2
+        <Heading
           style={{
             margin: 0,
             fontSize: typographyTokens.fontSize['2xl'],
@@ -31,7 +33,7 @@ export function SectionHeader({ title, subtitle, actions }: SectionHeaderProps) 
           }}
         >
           {title}
-        </h2>
+        </Heading>
         {subtitle ? (
           <p
             style={{
