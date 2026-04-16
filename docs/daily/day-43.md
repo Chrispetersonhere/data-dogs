@@ -54,6 +54,41 @@ pnpm typecheck
 
 All pass — 70 tests (12 new), build successful, zero lint warnings.
 
+### Windows PowerShell verification
+
+> **Important:** All commands must run from the repository root (the folder
+> containing `package.json`, `pnpm-workspace.yaml`, and `turbo.json`).
+> If you already have the repo cloned, do **not** `cd` into a nested
+> `data-dogs` subdirectory — that puts you one level too deep and
+> `pnpm lint` will fail with `ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND`.
+
+```powershell
+# Navigate to your existing clone (adjust path as needed)
+cd "$HOME\Documents\GitHub\data-dogs"
+
+# Pull the latest branch
+git checkout copilot/update-docs-for-fix
+git pull origin copilot/update-docs-for-fix
+
+# Install deps
+pnpm install
+
+# Screener-specific tests (Day 43 acceptance)
+pnpm --filter web test -- screener-api.spec.ts
+
+# Full web test suite
+pnpm --filter web test
+
+# Typecheck
+pnpm --filter web typecheck
+
+# Build
+pnpm --filter web build
+
+# Lint (must be run from repo root)
+pnpm lint
+```
+
 ## Risks / follow-ups
 
 - The query layer is pure-function only; a future day will wire it to a route handler and the screener page UI.
