@@ -54,7 +54,7 @@ pnpm --filter web build
 pnpm --filter web test
 ```
 
-All 20 chart tests should pass alongside the existing 28 tests.
+All 21 chart tests should pass alongside the existing 28 tests (49 total).
 
 ## Risks / Follow-ups
 
