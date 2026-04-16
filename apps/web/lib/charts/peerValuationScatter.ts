@@ -16,9 +16,9 @@
  *   AMZN — CIK 0001018724, Accession 0001018724-24-000008
  *   NVDA — CIK 0001045810, Accession 0001045810-24-000016
  *
- * All multiples computed from reported EPS, EBITDA, enterprise value,
- * and market price as of fiscal-year-end close.  Figures are trailing
- * twelve-month values unless noted.
+ * Forward P/E computed from consensus analyst EPS estimates; EV/EBITDA
+ * and market cap from reported financials and market price as of
+ * fiscal-year-end close.
  */
 
 /** A single company data point in the scatter plot. */
@@ -31,7 +31,7 @@ export type PeerValuationPoint = {
   forwardPE: number;
   /** Enterprise value to EBITDA ratio (y-axis). */
   evToEbitda: number;
-  /** Market capitalisation in USD billions, used for bubble sizing. */
+  /** Market capitalization in USD billions, used for bubble sizing. */
   marketCapBn: number;
   /** Whether this company is the subject (highlighted) or a peer. */
   role: 'subject' | 'peer';
