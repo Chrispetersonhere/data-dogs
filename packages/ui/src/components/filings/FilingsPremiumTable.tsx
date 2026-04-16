@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
 
+import { colorTokens, spacingTokens, typographyTokens } from '../../styles/tokens';
+
 type FilingRecord = {
   issuerCik: string;
   accession: string;
@@ -22,19 +24,19 @@ const tableStyle: CSSProperties = {
 
 const headCellStyle: CSSProperties = {
   textAlign: 'left',
-  fontSize: '12px',
+  fontSize: typographyTokens.fontSize.xs,
   letterSpacing: '0.03em',
   textTransform: 'uppercase',
-  color: '#6b7280',
-  borderBottom: '1px solid #e5e7eb',
-  padding: '10px 12px',
+  color: colorTokens.text.muted,
+  borderBottom: `1px solid ${colorTokens.border.subtle}`,
+  padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
 };
 
 const bodyCellStyle: CSSProperties = {
-  fontSize: '14px',
-  color: '#111827',
-  borderBottom: '1px solid #f1f5f9',
-  padding: '12px',
+  fontSize: typographyTokens.fontSize.sm,
+  color: colorTokens.text.primary,
+  borderBottom: `1px solid ${colorTokens.accent.soft}`,
+  padding: spacingTokens['3'],
   verticalAlign: 'top',
 };
 
@@ -55,7 +57,7 @@ function buildPrimaryDocumentLink(issuerCik: string, accession: string, primaryD
 
 export function FilingsPremiumTable({ issuerCik, filings }: FilingsPremiumTableProps) {
   if (filings.length === 0) {
-    return <p style={{ margin: 0, color: '#6b7280' }}>No filings matched this filter set.</p>;
+    return <p style={{ margin: 0, color: colorTokens.text.muted }}>No filings matched this filter set.</p>;
   }
 
   return (
@@ -79,10 +81,10 @@ export function FilingsPremiumTable({ issuerCik, filings }: FilingsPremiumTableP
               <tr key={filing.accession}>
                 <td style={bodyCellStyle}>{filing.filingDate}</td>
                 <td style={bodyCellStyle}>{filing.formType}</td>
-                <td style={{ ...bodyCellStyle, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{filing.accession}</td>
+                <td style={{ ...bodyCellStyle, fontFamily: typographyTokens.fontFamily.mono }}>{filing.accession}</td>
                 <td style={bodyCellStyle}>{filing.primaryDocDescription || filing.primaryDocument || 'Document link only'}</td>
                 <td style={bodyCellStyle}>
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: spacingTokens['3'], flexWrap: 'wrap' }}>
                     <a href={filingIndex} target="_blank" rel="noreferrer">Filing index</a>
                     <a href={primaryDoc} target="_blank" rel="noreferrer">Primary doc</a>
                   </div>

@@ -2,6 +2,7 @@ import type { CSSProperties, JSX } from 'react';
 
 import Link from 'next/link';
 
+import { colorTokens, spacingTokens, typographyTokens, radiusTokens } from '../../../../../packages/ui/src/styles/tokens';
 import { getFilingDetail } from '../../../lib/api/filing-detail';
 
 type FilingDetailPageProps = {
@@ -10,40 +11,40 @@ type FilingDetailPageProps = {
 
 const shellStyle: CSSProperties = {
   minHeight: '100vh',
-  background: '#f8fafc',
-  color: '#0f172a',
-  fontFamily: 'Inter, system-ui, sans-serif',
-  padding: '20px',
+  background: colorTokens.surface.page,
+  color: colorTokens.text.primary,
+  fontFamily: typographyTokens.fontFamily.sans,
+  padding: spacingTokens['5'],
 };
 
 const cardStyle: CSSProperties = {
-  border: '1px solid #e2e8f0',
-  borderRadius: '14px',
-  background: '#ffffff',
-  padding: '16px',
+  border: `1px solid ${colorTokens.border.subtle}`,
+  borderRadius: radiusTokens.lg,
+  background: colorTokens.surface.card,
+  padding: spacingTokens['4'],
 };
 
 const headCellStyle: CSSProperties = {
   textAlign: 'left',
-  fontSize: '12px',
+  fontSize: typographyTokens.fontSize.xs,
   letterSpacing: '0.03em',
   textTransform: 'uppercase',
-  color: '#6b7280',
-  borderBottom: '1px solid #e5e7eb',
-  padding: '10px 12px',
+  color: colorTokens.text.muted,
+  borderBottom: `1px solid ${colorTokens.border.subtle}`,
+  padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
 };
 
 const bodyCellStyle: CSSProperties = {
-  fontSize: '14px',
-  color: '#111827',
-  borderBottom: '1px solid #f1f5f9',
-  padding: '12px',
+  fontSize: typographyTokens.fontSize.sm,
+  color: colorTokens.text.primary,
+  borderBottom: `1px solid ${colorTokens.accent.soft}`,
+  padding: spacingTokens['3'],
   verticalAlign: 'top',
 };
 
 const dtStyle: CSSProperties = {
-  color: '#64748b',
-  fontSize: '12px',
+  color: colorTokens.text.muted,
+  fontSize: typographyTokens.fontSize.xs,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
 };
@@ -60,12 +61,12 @@ export default async function FilingDetailPage({ params }: FilingDetailPageProps
 
     return (
       <main style={shellStyle}>
-        <div style={{ maxWidth: '1180px', margin: '0 auto', display: 'grid', gap: '14px' }}>
+        <div style={{ maxWidth: '1180px', margin: '0 auto', display: 'grid', gap: spacingTokens['4'] }}>
           {/* Header */}
           <section style={cardStyle}>
-            <p style={{ margin: 0, color: '#64748b', fontSize: '13px' }}>Filing detail • source traceability</p>
-            <h1 style={{ margin: '6px 0 10px', fontSize: '32px' }}>Filing detail</h1>
-            <p style={{ margin: 0, color: '#334155', maxWidth: '68ch' }}>
+            <p style={{ margin: 0, color: colorTokens.text.muted, fontSize: typographyTokens.fontSize.sm }}>Filing detail • source traceability</p>
+            <h1 style={{ margin: `${spacingTokens['2']} 0 ${spacingTokens['3']}`, fontSize: typographyTokens.fontSize['3xl'] }}>Filing detail</h1>
+            <p style={{ margin: 0, color: colorTokens.text.secondary, maxWidth: '68ch' }}>
               Detailed view of filing <strong>{detail.accession}</strong> for{' '}
               <strong>{detail.issuerName}</strong> (CIK {detail.issuerCik}).
             </p>
@@ -74,10 +75,10 @@ export default async function FilingDetailPage({ params }: FilingDetailPageProps
           {/* Filing metadata */}
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Filing metadata</h2>
-            <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', margin: 0 }}>
+            <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: spacingTokens['3'], margin: 0 }}>
               <div>
                 <dt style={dtStyle}>Accession</dt>
-                <dd style={{ margin: 0, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{detail.accession}</dd>
+                <dd style={{ margin: 0, fontFamily: typographyTokens.fontFamily.mono }}>{detail.accession}</dd>
               </div>
               <div>
                 <dt style={dtStyle}>Form type</dt>
@@ -110,7 +111,7 @@ export default async function FilingDetailPage({ params }: FilingDetailPageProps
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Linked documents</h2>
             {detail.documents.length === 0 ? (
-              <p style={{ margin: 0, color: '#64748b' }}>No linked documents available from the filing index.</p>
+              <p style={{ margin: 0, color: colorTokens.text.muted }}>No linked documents available from the filing index.</p>
             ) : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
@@ -126,7 +127,7 @@ export default async function FilingDetailPage({ params }: FilingDetailPageProps
                   <tbody>
                     {detail.documents.map((doc) => (
                       <tr key={doc.filename}>
-                        <td style={{ ...bodyCellStyle, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{doc.filename}</td>
+                        <td style={{ ...bodyCellStyle, fontFamily: typographyTokens.fontFamily.mono }}>{doc.filename}</td>
                         <td style={bodyCellStyle}>{doc.description || '—'}</td>
                         <td style={bodyCellStyle}>{doc.type || '—'}</td>
                         <td style={bodyCellStyle}>{doc.size || '—'}</td>
@@ -144,7 +145,7 @@ export default async function FilingDetailPage({ params }: FilingDetailPageProps
           {/* Provenance summary */}
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Provenance summary</h2>
-            <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px', margin: 0 }}>
+            <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: spacingTokens['3'], margin: 0 }}>
               <div>
                 <dt style={dtStyle}>Source URL</dt>
                 <dd style={{ margin: 0 }}>
@@ -168,11 +169,11 @@ export default async function FilingDetailPage({ params }: FilingDetailPageProps
           {detail.sections.length > 0 && (
             <section style={cardStyle}>
               <h2 style={{ marginTop: 0 }}>Available sections</h2>
-              <ul style={{ margin: 0, paddingLeft: '18px', display: 'grid', gap: '6px' }}>
+              <ul style={{ margin: 0, paddingLeft: '18px', display: 'grid', gap: spacingTokens['2'] }}>
                 {detail.sections.map((section) => (
                   <li key={section.anchor}>
                     <strong>{section.name}</strong>{' '}
-                    <span style={{ color: '#94a3b8', fontSize: '12px' }}>#{section.anchor}</span>
+                    <span style={{ color: colorTokens.accent.muted, fontSize: typographyTokens.fontSize.xs }}>#{section.anchor}</span>
                   </li>
                 ))}
               </ul>
@@ -182,7 +183,7 @@ export default async function FilingDetailPage({ params }: FilingDetailPageProps
           {/* Raw-source drilldown */}
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Raw-source drilldown</h2>
-            <ul style={{ margin: 0, paddingLeft: '18px', color: '#1f2937' }}>
+            <ul style={{ margin: 0, paddingLeft: '18px', color: colorTokens.text.primary }}>
               <li>
                 <a href={detail.provenance.filingIndexUrl} target="_blank" rel="noreferrer">
                   SEC filing index page
@@ -194,7 +195,7 @@ export default async function FilingDetailPage({ params }: FilingDetailPageProps
                 </a>
               </li>
               <li>
-                <Link href="/filings" style={{ color: '#2563eb' }}>
+                <Link href="/filings">
                   ← Back to filing explorer
                 </Link>
               </li>
@@ -208,13 +209,13 @@ export default async function FilingDetailPage({ params }: FilingDetailPageProps
       <main style={shellStyle}>
         <section style={{ ...cardStyle, maxWidth: '840px', margin: '0 auto' }}>
           <h1 style={{ marginTop: 0 }}>Filing detail unavailable</h1>
-          <p style={{ margin: 0, color: '#334155' }}>
+          <p style={{ margin: 0, color: colorTokens.text.secondary }}>
             Could not load filing detail for accession <strong>{decodeURIComponent(accession)}</strong>.
             Please verify the accession number and retry once SEC data is available.
           </p>
-          <p style={{ marginTop: '10px', color: '#94a3b8', fontSize: '12px' }}>{String(error)}</p>
-          <p style={{ marginTop: '10px' }}>
-            <Link href="/filings" style={{ color: '#2563eb' }}>← Back to filing explorer</Link>
+          <p style={{ marginTop: spacingTokens['3'], color: colorTokens.text.muted, fontSize: typographyTokens.fontSize.xs }}>{String(error)}</p>
+          <p style={{ marginTop: spacingTokens['3'] }}>
+            <Link href="/filings">← Back to filing explorer</Link>
           </p>
         </section>
       </main>

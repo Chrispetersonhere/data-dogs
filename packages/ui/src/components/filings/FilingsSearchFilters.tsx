@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
 
+import { colorTokens, spacingTokens, typographyTokens, radiusTokens } from '../../styles/tokens';
+
 type FilingsSearchFiltersProps = {
   issuer: string;
   formType: string;
@@ -11,26 +13,26 @@ type FilingsSearchFiltersProps = {
 const gridStyle: CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-  gap: '12px',
+  gap: spacingTokens['3'],
 };
 
 const inputStyle: CSSProperties = {
   width: '100%',
-  border: '1px solid #d1d5db',
-  borderRadius: '8px',
-  padding: '10px 12px',
-  background: '#ffffff',
-  color: '#111827',
-  fontSize: '14px',
+  border: `1px solid ${colorTokens.border.subtle}`,
+  borderRadius: radiusTokens.md,
+  padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
+  background: colorTokens.surface.card,
+  color: colorTokens.text.primary,
+  fontSize: typographyTokens.fontSize.sm,
   boxSizing: 'border-box',
 };
 
 const labelStyle: CSSProperties = {
   display: 'block',
-  fontSize: '12px',
-  fontWeight: 600,
-  color: '#4b5563',
-  marginBottom: '6px',
+  fontSize: typographyTokens.fontSize.xs,
+  fontWeight: typographyTokens.fontWeight.semibold,
+  color: colorTokens.text.secondary,
+  marginBottom: spacingTokens['2'],
   letterSpacing: '0.02em',
   textTransform: 'uppercase',
 };
@@ -38,29 +40,29 @@ const labelStyle: CSSProperties = {
 const buttonRowStyle: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
-  gap: '8px',
-  marginTop: '12px',
+  gap: spacingTokens['2'],
+  marginTop: spacingTokens['3'],
 };
 
 const buttonStyle: CSSProperties = {
-  border: '1px solid #cbd5e1',
-  borderRadius: '999px',
-  background: '#111827',
-  color: '#f9fafb',
-  padding: '8px 14px',
-  fontSize: '13px',
+  border: `1px solid ${colorTokens.border.subtle}`,
+  borderRadius: radiusTokens.pill,
+  background: colorTokens.surface.inverse,
+  color: colorTokens.text.inverse,
+  padding: `${spacingTokens['2']} ${spacingTokens['4']}`,
+  fontSize: typographyTokens.fontSize.sm,
   cursor: 'pointer',
 };
 
 const quietLinkButtonStyle: CSSProperties = {
   ...buttonStyle,
-  background: '#f8fafc',
-  color: '#0f172a',
+  background: colorTokens.surface.page,
+  color: colorTokens.text.primary,
 };
 
 export function FilingsSearchFilters({ issuer, formType, dateFrom, dateTo, accession }: FilingsSearchFiltersProps) {
   return (
-    <form action="/filings" method="GET" style={{ display: 'grid', gap: '12px' }}>
+    <form action="/filings" method="GET" style={{ display: 'grid', gap: spacingTokens['3'] }}>
       <div style={gridStyle}>
         <label>
           <span style={labelStyle}>Issuer CIK</span>

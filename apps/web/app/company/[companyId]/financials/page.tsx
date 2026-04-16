@@ -1,5 +1,6 @@
 import type { CSSProperties, JSX } from 'react';
 
+import { colorTokens, spacingTokens, typographyTokens, radiusTokens } from '../../../../../../packages/ui/src/styles/tokens';
 import { FinancialsTableShell, PeriodToggle, stickyTheadStyle } from '../../../../../../packages/ui/src/components/financials';
 
 type FinancialsPageProps = {
@@ -148,17 +149,17 @@ const STATEMENT_SPECS: StatementSpec[] = [
 
 const shellStyle: CSSProperties = {
   minHeight: '100vh',
-  background: 'linear-gradient(145deg, #0f172a 0%, #111827 45%, #1f2937 100%)',
-  color: '#e2e8f0',
-  fontFamily: 'Inter, system-ui, sans-serif',
-  padding: '16px',
+  background: `linear-gradient(145deg, ${colorTokens.surface.inverse} 0%, #111827 45%, #1f2937 100%)`,
+  color: colorTokens.text.inverse,
+  fontFamily: typographyTokens.fontFamily.sans,
+  padding: spacingTokens['4'],
 };
 
 const cardStyle: CSSProperties = {
-  border: '1px solid rgba(148, 163, 184, 0.30)',
-  borderRadius: '14px',
+  border: `1px solid ${colorTokens.border.strong}`,
+  borderRadius: radiusTokens.lg,
   background: 'rgba(15, 23, 42, 0.78)',
-  padding: '18px',
+  padding: spacingTokens['5'],
 };
 
 function secUserAgent(): string {
@@ -358,27 +359,27 @@ const responsiveGridStyle: CSSProperties = {
   maxWidth: '1200px',
   margin: '0 auto',
   display: 'grid',
-  gap: '16px',
+  gap: spacingTokens['4'],
   width: '100%',
   boxSizing: 'border-box',
 };
 
 const thStyle: CSSProperties = {
   textAlign: 'right',
-  padding: '10px 12px',
+  padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
 };
 
 const tdStyle: CSSProperties = {
   textAlign: 'right',
-  padding: '10px 12px',
-  color: '#e2e8f0',
+  padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
+  color: colorTokens.text.inverse,
 };
 
 const conceptCellStyle: CSSProperties = {
   textAlign: 'left',
-  padding: '10px 12px',
-  color: '#94a3b8',
-  fontSize: '12px',
+  padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
+  color: colorTokens.accent.muted,
+  fontSize: typographyTokens.fontSize.xs,
 };
 
 const tableStyle: CSSProperties = {
@@ -397,12 +398,12 @@ export default async function CompanyAnnualFinancialsPage({ params }: Financials
       <main style={shellStyle}>
         <div style={responsiveGridStyle}>
           <section style={cardStyle}>
-            <p style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c4b5fd' }}>Premium table UX</p>
-            <h1 style={{ margin: '10px 0 4px', fontSize: '30px' }}>Annual financials</h1>
-            <p style={{ margin: 0, color: '#cbd5e1' }}>
+            <p style={{ margin: 0, fontSize: typographyTokens.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: colorTokens.accent.muted }}>Premium table UX</p>
+            <h1 style={{ margin: `${spacingTokens['3']} 0 ${spacingTokens['1']}`, fontSize: typographyTokens.fontSize['3xl'] }}>Annual financials</h1>
+            <p style={{ margin: 0, color: colorTokens.text.inverse }}>
               {view.companyName} · CIK {view.cik}
             </p>
-            <p style={{ margin: '8px 0 0', color: view.consistency.balanceCheck === 'mismatch' ? '#fca5a5' : '#a5b4fc', fontSize: '13px' }}>
+            <p style={{ margin: `${spacingTokens['2']} 0 0`, color: view.consistency.balanceCheck === 'mismatch' ? colorTokens.semantic.danger : colorTokens.accent.muted, fontSize: typographyTokens.fontSize.sm }}>
               Balance consistency: {view.consistency.message}
             </p>
           </section>
@@ -416,20 +417,20 @@ export default async function CompanyAnnualFinancialsPage({ params }: Financials
             <FinancialsTableShell key={statement.id} title={statement.title}>
               <table style={tableStyle} data-export="financials-data">
                 <thead style={stickyTheadStyle}>
-                  <tr style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.35)' }}>
-                    <th style={{ textAlign: 'left', padding: '10px 12px' }}>Metric</th>
+                  <tr style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
+                    <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Metric</th>
                     {view.years.map((year) => (
                       <th key={year} style={thStyle}>
                         FY {year}
                       </th>
                     ))}
-                    <th style={{ textAlign: 'left', padding: '10px 12px' }}>Source concept</th>
+                    <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Source concept</th>
                   </tr>
                 </thead>
                 <tbody>
                   {statement.rows.map((row) => (
-                    <tr key={row.label} style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.15)' }}>
-                      <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>{row.label}</th>
+                    <tr key={row.label} style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
+                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}`, fontWeight: typographyTokens.fontWeight.semibold }}>{row.label}</th>
                       {view.years.map((year) => (
                         <td key={year} style={tdStyle}>
                           {formatMoney(row.valuesByYear[year])}
@@ -445,20 +446,20 @@ export default async function CompanyAnnualFinancialsPage({ params }: Financials
 
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Sticky headers</h2>
-            <p style={{ margin: 0, color: '#cbd5e1' }}>
+            <p style={{ margin: 0, color: colorTokens.text.inverse }}>
               Table headers remain visible while scrolling through financial data rows.
             </p>
           </section>
 
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Export-friendly layout</h2>
-            <p style={{ margin: 0, color: '#cbd5e1' }}>
+            <p style={{ margin: 0, color: colorTokens.text.inverse }}>
               Clean table structure with semantic markup supports copy-to-spreadsheet and print workflows.
             </p>
           </section>
 
-          <section style={{ ...cardStyle, color: '#cbd5e1' }}>
-            <h2 style={{ marginTop: 0, color: '#e2e8f0' }}>Responsive</h2>
+          <section style={{ ...cardStyle, color: colorTokens.text.inverse }}>
+            <h2 style={{ marginTop: 0, color: colorTokens.text.inverse }}>Responsive</h2>
             <p style={{ margin: 0 }}>
               Tables scroll horizontally on narrow viewports while the page layout adapts to available width.
             </p>
@@ -471,10 +472,10 @@ export default async function CompanyAnnualFinancialsPage({ params }: Financials
       <main style={shellStyle}>
         <section style={{ ...cardStyle, maxWidth: '900px', margin: '0 auto' }}>
           <h1 style={{ marginTop: 0 }}>Annual financials unavailable</h1>
-          <p style={{ margin: 0, color: '#cbd5e1' }}>
+          <p style={{ margin: 0, color: colorTokens.text.inverse }}>
             Real annual statement data could not be loaded for company id <strong>{companyId}</strong>.
           </p>
-          <p style={{ marginTop: '10px', color: '#94a3b8', fontSize: '12px' }}>{String(error)}</p>
+          <p style={{ marginTop: spacingTokens['3'], color: colorTokens.accent.muted, fontSize: typographyTokens.fontSize.xs }}>{String(error)}</p>
         </section>
       </main>
     );
