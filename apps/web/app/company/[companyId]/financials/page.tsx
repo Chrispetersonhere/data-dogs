@@ -151,7 +151,7 @@ const shellStyle: CSSProperties = {
   background: 'linear-gradient(145deg, #0f172a 0%, #111827 45%, #1f2937 100%)',
   color: '#e2e8f0',
   fontFamily: 'Inter, system-ui, sans-serif',
-  padding: '28px',
+  padding: '16px',
 };
 
 const cardStyle: CSSProperties = {

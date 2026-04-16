@@ -37,6 +37,7 @@ export default function MarketingPage() {
           <SectionHeader
             title="Premium Design System Showcase"
             subtitle="Institutional-grade visual primitives for analytics-heavy workflows."
+            level={1}
           />
           <p
             style={{

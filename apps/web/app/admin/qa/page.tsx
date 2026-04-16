@@ -42,7 +42,7 @@ export default async function AdminQaPage({ searchParams }: AdminQaPageProps): P
         <h1 style={{ fontSize: '20px', marginBottom: '8px' }}>Admin Fact Reconciliation QA</h1>
 
         <section>
-          <form action="/admin/qa" method="get" style={{ display: 'flex', gap: '8px', alignItems: 'end' }}>
+          <form action="/admin/qa" method="get" style={{ display: 'flex', gap: '8px', alignItems: 'end', flexWrap: 'wrap' }}>
             <label style={{ display: 'grid', gap: '4px' }}>
               <span style={{ fontSize: '12px', color: '#556070' }}>Issuer CIK</span>
               <input name="cik" defaultValue={cik} placeholder="0000320193" />
@@ -57,13 +57,13 @@ export default async function AdminQaPage({ searchParams }: AdminQaPageProps): P
             Source facts for CIK {view.cik}. This view intentionally preserves source ambiguity.
           </p>
           <div style={{ overflowX: 'auto', border: '1px solid #d7dce2', borderRadius: '8px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', minWidth: '600px' }}>
               <thead style={{ background: '#f7f8fa', textAlign: 'left' }}>
                 <tr>
-                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Source concept</th>
-                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Unit</th>
-                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Period end</th>
-                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Value</th>
+                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2', whiteSpace: 'nowrap' }}>Source concept</th>
+                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2', whiteSpace: 'nowrap' }}>Unit</th>
+                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2', whiteSpace: 'nowrap' }}>Period end</th>
+                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2', whiteSpace: 'nowrap' }}>Value</th>
                 </tr>
               </thead>
               <tbody>
@@ -102,12 +102,12 @@ export default async function AdminQaPage({ searchParams }: AdminQaPageProps): P
         <section>
           <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>Discrepancies (surfaced, not hidden)</h2>
           <div style={{ overflowX: 'auto', border: '1px solid #d7dce2', borderRadius: '8px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', minWidth: '560px' }}>
               <thead style={{ background: '#fff7ed', textAlign: 'left' }}>
                 <tr>
-                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Source concept</th>
-                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Issue</th>
-                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Details</th>
+                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2', whiteSpace: 'nowrap' }}>Source concept</th>
+                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2', whiteSpace: 'nowrap' }}>Issue</th>
+                  <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2', whiteSpace: 'nowrap' }}>Details</th>
                 </tr>
               </thead>
               <tbody>
