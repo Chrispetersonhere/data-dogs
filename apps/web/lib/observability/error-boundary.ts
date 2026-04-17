@@ -1,5 +1,5 @@
 import { type ObservabilityContext } from './context';
-import { buildLogEntry } from './logger';
+import { buildLogEntry, serializeLogEntry } from './logger';
 
 export type ErrorBoundaryPayload = {
   title: string;
@@ -7,11 +7,25 @@ export type ErrorBoundaryPayload = {
   requestId: string;
 };
 
+function getErrorDetails(error: unknown): { message: string; name: string } {
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+      name: error.name,
+    };
+  }
+
+  return {
+    message: 'Unexpected error',
+    name: 'UnknownError',
+  };
+}
+
 export function toErrorBoundaryPayload(
   error: unknown,
   context: ObservabilityContext,
 ): ErrorBoundaryPayload {
-  const message = error instanceof Error ? error.message : 'Unexpected error';
+  const { message } = getErrorDetails(error);
 
   return {
     title: 'Something went wrong',
@@ -21,15 +35,15 @@ export function toErrorBoundaryPayload(
 }
 
 export function buildErrorBoundaryLog(error: unknown, context: ObservabilityContext): string {
-  const message = error instanceof Error ? error.message : 'Unexpected error';
+  const { message, name } = getErrorDetails(error);
 
-  return JSON.stringify(
+  return serializeLogEntry(
     buildLogEntry(context, {
       event: 'ui.error_boundary',
       level: 'error',
       message,
       details: {
-        name: error instanceof Error ? error.name : 'UnknownError',
+        name,
       },
     }),
   );

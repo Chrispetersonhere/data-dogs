@@ -6,7 +6,7 @@ export type ObservabilityContext = {
   jobId?: string;
 };
 
-function normalizeId(value: string | null | undefined): string | undefined {
+function normalizeHeaderId(value: string | null | undefined): string | undefined {
   const trimmed = value?.trim();
   if (!trimmed) {
     return undefined;
@@ -18,11 +18,11 @@ export function resolveRequestId(
   value: string | null | undefined,
   fallbackFactory: () => string = () => crypto.randomUUID(),
 ): string {
-  return normalizeId(value) ?? fallbackFactory();
+  return normalizeHeaderId(value) ?? fallbackFactory();
 }
 
 export function resolveJobId(value: string | null | undefined): string | undefined {
-  return normalizeId(value);
+  return normalizeHeaderId(value);
 }
 
 export function buildObservabilityContext(headers: Headers): ObservabilityContext {
