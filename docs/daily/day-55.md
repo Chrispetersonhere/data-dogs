@@ -22,6 +22,11 @@ Date: 2026-04-17
 
 - `pnpm --filter web build`
 - `pnpm --filter web test -- accessibility.spec.ts`
+- `pnpm lint`
+- `pnpm typecheck`
+- `py -m pytest services/ingest-sec/tests -q`
+- `py -m pytest services/parse-xbrl/tests -q`
+- `py -m pytest services/id-master/tests -q`
 
 ## Risk / rollback
 
@@ -38,10 +43,24 @@ $branch = git branch --show-current
 if (-not $branch) { throw "Could not determine current branch. Run this inside the repo." }
 git checkout $branch
 git pull --ff-only
+
+# Day 55 acceptance checks
 pnpm --filter web build
 pnpm --filter web test -- accessibility.spec.ts
-# fallback if your shell forwards args differently:
-# pnpm --filter web test
+
+# Optional: run only the accessibility file (without glob expansion from package.json script)
+pnpm --filter web exec tsx --test tests/accessibility.spec.ts
+
+# Standard palette
+pnpm lint
+pnpm typecheck
+py -m pytest services/ingest-sec/tests -q
+py -m pytest services/parse-xbrl/tests -q
+py -m pytest services/id-master/tests -q
 ```
 
 If you want to switch to a specific branch, use `git checkout branch-name` (without `<` or `>`), because angle brackets are PowerShell operators.
+
+Notes:
+- `pnpm --filter web test -- accessibility.spec.ts` currently executes all `tests/*.spec.ts` because the package script is `tsx --test tests/*.spec.ts`.
+- `services/parse-proxy/tests` and `services/market-data/tests` are not present in this checkout.
