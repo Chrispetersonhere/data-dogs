@@ -170,6 +170,9 @@ const CONCEPT_TO_NOTES: Record<string, NoteDisclosure[]> = {
  * @returns        Result with matched disclosures or an empty array
  */
 export function getNotesForConcept(concept: string): NoteDisclosureResult {
+  if (!concept) {
+    return { queryConcept: concept, found: false, disclosures: [] };
+  }
   const disclosures = CONCEPT_TO_NOTES[concept] ?? [];
   return {
     queryConcept: concept,

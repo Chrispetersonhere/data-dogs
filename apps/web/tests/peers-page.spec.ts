@@ -299,3 +299,35 @@ test('peers API module exports formatPeerMetric function', () => {
 test('peers API module exports PEER_METRICS array', () => {
   assert.ok(Array.isArray(PEER_METRICS));
 });
+
+// ---------------------------------------------------------------------------
+// Day 49 – edge-case stabilization tests
+// ---------------------------------------------------------------------------
+
+test('formatPeerMetric formats sub-million currency values', () => {
+  assert.equal(formatPeerMetric(500_000, 'currency'), '$500,000');
+  assert.equal(formatPeerMetric(0, 'currency'), '$0');
+});
+
+test('formatPeerMetric formats zero percent and ratio correctly', () => {
+  assert.equal(formatPeerMetric(0, 'percent'), '0.0%');
+  assert.equal(formatPeerMetric(0, 'ratio'), '0.00');
+});
+
+test('buildPeerComparison with empty peer array returns subject only', () => {
+  const result = buildPeerComparison(SUBJECT, []);
+  assert.equal(result.peerCount, 0);
+  assert.equal(result.entries.length, 1);
+  assert.equal(result.entries[0].role, 'subject');
+  assert.equal(result.peers.length, 0);
+});
+
+test('buildPeerComparison preserves peer order after deduplication', () => {
+  const peersWithSubjectDuplicate = [PEER_MSFT, SUBJECT, PEER_GOOGL];
+  const result = buildPeerComparison(SUBJECT, peersWithSubjectDuplicate);
+  assert.equal(result.entries[0].ticker, 'AAPL');
+  assert.equal(result.entries[0].role, 'subject');
+  assert.equal(result.entries[1].ticker, 'MSFT');
+  assert.equal(result.entries[2].ticker, 'GOOGL');
+  assert.equal(result.peerCount, 2);
+});

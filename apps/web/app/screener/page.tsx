@@ -132,6 +132,13 @@ function firstValue(value: string | string[] | undefined): string {
   return Array.isArray(value) ? value[0] ?? '' : value;
 }
 
+/** Parse a query-param string to a finite number, returning `undefined` for empty/invalid values. */
+function safeParseNumber(raw: string): number | undefined {
+  if (!raw) return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 function parseActiveFilters(resolved: Record<string, string | string[] | undefined>): {
   filters: ScreenerFilters;
   active: ScreenerFilterCategory[];
@@ -141,55 +148,55 @@ function parseActiveFilters(resolved: Record<string, string | string[] | undefin
   const active: ScreenerFilterCategory[] = [];
   const labels: { category: string; field: string; label: string }[] = [];
 
-  const minMarketCap = firstValue(resolved.minMarketCap);
-  const minRevenue = firstValue(resolved.minRevenue);
-  if (minMarketCap || minRevenue) {
+  const minMarketCap = safeParseNumber(firstValue(resolved.minMarketCap));
+  const minRevenue = safeParseNumber(firstValue(resolved.minRevenue));
+  if (minMarketCap !== undefined || minRevenue !== undefined) {
     active.push('size');
     filters.size = {};
-    if (minMarketCap) {
-      filters.size.marketCap = { min: Number(minMarketCap) };
-      labels.push({ category: 'size', field: 'marketCap', label: `Market cap ≥ ${formatFilterValue(Number(minMarketCap))}` });
+    if (minMarketCap !== undefined) {
+      filters.size.marketCap = { min: minMarketCap };
+      labels.push({ category: 'size', field: 'marketCap', label: `Market cap ≥ ${formatFilterValue(minMarketCap)}` });
     }
-    if (minRevenue) {
-      filters.size.revenue = { min: Number(minRevenue) };
-      labels.push({ category: 'size', field: 'revenue', label: `Revenue ≥ ${formatFilterValue(Number(minRevenue))}` });
+    if (minRevenue !== undefined) {
+      filters.size.revenue = { min: minRevenue };
+      labels.push({ category: 'size', field: 'revenue', label: `Revenue ≥ ${formatFilterValue(minRevenue)}` });
     }
   }
 
-  const minRevenueGrowth = firstValue(resolved.minRevenueGrowth);
-  if (minRevenueGrowth) {
+  const minRevenueGrowth = safeParseNumber(firstValue(resolved.minRevenueGrowth));
+  if (minRevenueGrowth !== undefined) {
     active.push('growth');
-    filters.growth = { revenueGrowth: { min: Number(minRevenueGrowth) } };
-    labels.push({ category: 'growth', field: 'revenueGrowth', label: `Rev growth ≥ ${(Number(minRevenueGrowth) * 100).toFixed(0)}%` });
+    filters.growth = { revenueGrowth: { min: minRevenueGrowth } };
+    labels.push({ category: 'growth', field: 'revenueGrowth', label: `Rev growth ≥ ${(minRevenueGrowth * 100).toFixed(0)}%` });
   }
 
-  const minGrossMargin = firstValue(resolved.minGrossMargin);
-  const minNetMargin = firstValue(resolved.minNetMargin);
-  if (minGrossMargin || minNetMargin) {
+  const minGrossMargin = safeParseNumber(firstValue(resolved.minGrossMargin));
+  const minNetMargin = safeParseNumber(firstValue(resolved.minNetMargin));
+  if (minGrossMargin !== undefined || minNetMargin !== undefined) {
     active.push('margin');
     filters.margin = {};
-    if (minGrossMargin) {
-      filters.margin.grossMargin = { min: Number(minGrossMargin) };
-      labels.push({ category: 'margin', field: 'grossMargin', label: `Gross margin ≥ ${(Number(minGrossMargin) * 100).toFixed(0)}%` });
+    if (minGrossMargin !== undefined) {
+      filters.margin.grossMargin = { min: minGrossMargin };
+      labels.push({ category: 'margin', field: 'grossMargin', label: `Gross margin ≥ ${(minGrossMargin * 100).toFixed(0)}%` });
     }
-    if (minNetMargin) {
-      filters.margin.netMargin = { min: Number(minNetMargin) };
-      labels.push({ category: 'margin', field: 'netMargin', label: `Net margin ≥ ${(Number(minNetMargin) * 100).toFixed(0)}%` });
+    if (minNetMargin !== undefined) {
+      filters.margin.netMargin = { min: minNetMargin };
+      labels.push({ category: 'margin', field: 'netMargin', label: `Net margin ≥ ${(minNetMargin * 100).toFixed(0)}%` });
     }
   }
 
-  const maxLiabilitiesToEquity = firstValue(resolved.maxLiabilitiesToEquity);
-  if (maxLiabilitiesToEquity) {
+  const maxLiabilitiesToEquity = safeParseNumber(firstValue(resolved.maxLiabilitiesToEquity));
+  if (maxLiabilitiesToEquity !== undefined) {
     active.push('leverage');
-    filters.leverage = { liabilitiesToEquity: { max: Number(maxLiabilitiesToEquity) } };
-    labels.push({ category: 'leverage', field: 'liabilitiesToEquity', label: `L/E ≤ ${Number(maxLiabilitiesToEquity).toFixed(1)}` });
+    filters.leverage = { liabilitiesToEquity: { max: maxLiabilitiesToEquity } };
+    labels.push({ category: 'leverage', field: 'liabilitiesToEquity', label: `L/E ≤ ${maxLiabilitiesToEquity.toFixed(1)}` });
   }
 
-  const minCurrentRatio = firstValue(resolved.minCurrentRatio);
-  if (minCurrentRatio) {
+  const minCurrentRatio = safeParseNumber(firstValue(resolved.minCurrentRatio));
+  if (minCurrentRatio !== undefined) {
     active.push('liquidity');
-    filters.liquidity = { currentRatio: { min: Number(minCurrentRatio) } };
-    labels.push({ category: 'liquidity', field: 'currentRatio', label: `Current ratio ≥ ${Number(minCurrentRatio).toFixed(1)}` });
+    filters.liquidity = { currentRatio: { min: minCurrentRatio } };
+    labels.push({ category: 'liquidity', field: 'currentRatio', label: `Current ratio ≥ ${minCurrentRatio.toFixed(1)}` });
   }
 
   return { filters, active, labels };
