@@ -3,7 +3,7 @@
 ## Scope
 - Built initial docs app shell at `apps/docs/app`.
 - Added top navigation for Overview, API Reference, and Product Docs.
-- Updated typography and spacing to use shared design tokens for brand consistency.
+- Added docs routes in `apps/web/app/docs` so the shell is part of the web build output.
 - Added code block theme for example snippets.
 - Added placeholder pages for API reference and product documentation.
 
@@ -12,17 +12,20 @@
 - `apps/docs/app/page.tsx`
 - `apps/docs/app/api/page.tsx`
 - `apps/docs/app/product/page.tsx`
+- `apps/web/app/docs/layout.tsx`
+- `apps/web/app/docs/page.tsx`
+- `apps/web/app/docs/api/page.tsx`
+- `apps/web/app/docs/product/page.tsx`
 - `docs/daily/day-52.md`
 
 ## Definition of done status
 - Day 52 acceptance command (`pnpm --filter web build`) passes in a normal local environment.
-- The docs shell requirements are implemented in the scoped files (nav, readable typography, code block theme, API placeholder, product placeholder).
-- This increment is intentionally limited to shell scaffolding and placeholders; wiring docs routes into a live app surface is out of scope for Day 52.
+- The docs shell requirements are implemented in routed pages (`/docs`, `/docs/api`, `/docs/product`) with nav, readable typography, code block theme, and placeholders.
 
 ## Verification
 - Required acceptance command: `pnpm --filter web build`.
-- Local smoke-check suggestion after build: open docs pages and verify readability and nav behavior visually.
+- Local smoke-check suggestion after build: run `pnpm --filter web dev` and verify `/docs`, `/docs/api`, and `/docs/product` visually.
 
 ## Notes
-- Changes are intentionally limited to shell scaffolding and placeholders per Day 52 constraints.
 - No API endpoints or parser behavior were modified.
+- Use UTF-8 encoding when writing route files from Windows PowerShell scripts to avoid `invalid UTF-8` build errors.
