@@ -153,7 +153,7 @@ export async function getFilingDetail(accessionRaw: string): Promise<FilingDetai
   const submissionsResponse = await fetch(submissionsUrl, {
     method: 'GET',
     headers,
-    cache: 'no-store',
+    next: { revalidate: 300 },
   });
 
   if (!submissionsResponse.ok) {
@@ -188,7 +188,7 @@ export async function getFilingDetail(accessionRaw: string): Promise<FilingDetai
     const indexResponse = await fetch(filingIndexJsonUrl, {
       method: 'GET',
       headers,
-      cache: 'no-store',
+      next: { revalidate: 300 },
     });
 
     if (indexResponse.ok) {

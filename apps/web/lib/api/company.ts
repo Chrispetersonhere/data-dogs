@@ -90,7 +90,7 @@ export async function getCompanyOverview(companyId: string): Promise<CompanyOver
       'User-Agent': secUserAgent(),
       Accept: 'application/json',
     },
-    cache: 'no-store',
+    next: { revalidate: 300 },
   });
 
   if (!response.ok) {
