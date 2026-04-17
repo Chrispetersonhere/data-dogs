@@ -80,6 +80,64 @@ pnpm --filter web build   # ✓ Compiles, all routes build
 pnpm --filter web test    # ✓ 155/155 tests pass
 ```
 
+### Windows PowerShell — manual spot-checks
+
+> **Important:** The commands below use `git grep` and `git show` which
+> resolve paths relative to the **git repo root**, so they work from any
+> subdirectory inside the clone. Do **not** use `Select-String` with
+> relative paths — PowerShell cannot resolve `[companyId]` brackets and
+> nested directory layouts (`data-dogs\data-dogs`) break path resolution.
+
+```powershell
+# ── Navigate anywhere inside the repo ──
+# (adjust to wherever your clone lives)
+cd C:\Users\lolvi\Documents\GitHub\data-dogs\data-dogs
+
+# 1. Build + Tests (already confirmed: 155/155 pass)
+pnpm --filter web build
+pnpm --filter web test
+
+# 2. No 'no-store' left in API files (expect: no output = PASS)
+Write-Host "`n--- cache: no-store should be GONE ---"
+git grep "no-store" -- "apps/web/lib/api/*.ts" "apps/web/app/company/*/financials/page.tsx"
+if ($LASTEXITCODE -eq 1) { Write-Host "PASS: no-store removed from all API files" }
+else { Write-Host "FAIL: no-store still present" }
+
+# 3. revalidate: 300 present in every API file (expect: 6 matches)
+Write-Host "`n--- revalidate: 300 should be PRESENT ---"
+$r = git grep -c "revalidate: 300" -- "apps/web/lib/api/*.ts" "apps/web/app/company/*/financials/page.tsx"
+$r | ForEach-Object { Write-Host "  $_" }
+$total = ($r | ForEach-Object { ($_ -split ':')[-1] } | Measure-Object -Sum).Sum
+if ($total -ge 6) { Write-Host "PASS: $total revalidate:300 occurrences found (expected >=6)" }
+else { Write-Host "FAIL: only $total occurrences (expected >=6)" }
+
+# 4. dd-pulse animation defined in layout
+Write-Host "`n--- dd-pulse animation in layout ---"
+git grep "dd-pulse" -- "apps/web/app/layout.tsx"
+if ($LASTEXITCODE -eq 0) { Write-Host "PASS" } else { Write-Host "FAIL" }
+
+# 5. dd-skeleton class in all 4 loading files (expect: >=25 matches)
+Write-Host "`n--- dd-skeleton in loading files ---"
+$s = git grep -c "dd-skeleton" -- "apps/web/app/*/loading.tsx" "apps/web/app/*/*/loading.tsx" "apps/web/app/*/*/*/loading.tsx"
+$s | ForEach-Object { Write-Host "  $_" }
+$totalSkel = ($s | ForEach-Object { ($_ -split ':')[-1] } | Measure-Object -Sum).Sum
+if ($totalSkel -ge 20) { Write-Host "PASS: $totalSkel dd-skeleton refs across loading files" }
+else { Write-Host "FAIL: only $totalSkel dd-skeleton refs" }
+
+# 6. day-48 doc exists
+Write-Host "`n--- day-48 doc ---"
+git show HEAD:docs/daily/day-48.md | Select-Object -First 1
+if ($LASTEXITCODE -eq 0) { Write-Host "PASS: day-48.md exists in tree" }
+else { Write-Host "FAIL: day-48.md missing" }
+
+# 7. precomputedStats optimization
+Write-Host "`n--- precomputedStats in peerValuationScatter ---"
+git grep "precomputedStats" -- "apps/web/lib/charts/peerValuationScatter.ts"
+if ($LASTEXITCODE -eq 0) { Write-Host "PASS" } else { Write-Host "FAIL" }
+
+Write-Host "`n=== ALL CHECKS COMPLETE ==="
+```
+
 ## Risks / follow-ups
 
 - **5-minute revalidation window**: During rare rapid re-filing scenarios,
