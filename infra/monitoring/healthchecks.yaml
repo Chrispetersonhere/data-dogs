@@ -1,0 +1,12 @@
+version: 1
+checks:
+  - name: web
+    path: /healthz
+    method: GET
+    expected_status: 200
+    interval_seconds: 30
+    timeout_seconds: 5
+  - name: ingest-sec-worker
+    type: process
+    expected_state: running
+    interval_seconds: 30
