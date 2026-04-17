@@ -3,7 +3,7 @@
 const apiStyles = {
   title: { margin: 0, fontSize: '1.75rem', lineHeight: 1.2, color: colorTokens.text.primary },
   subtitle: { marginTop: spacingTokens['3'], color: colorTokens.text.secondary, lineHeight: typographyTokens.lineHeight.relaxed, maxWidth: '72ch' },
-  placeholder: { marginTop: spacingTokens['4'], border: `1px dashed ${colorTokens.border.default}`, borderRadius: radiusTokens.lg, padding: spacingTokens['4'], color: colorTokens.text.tertiary, background: colorTokens.surface.card }
+  placeholder: { marginTop: spacingTokens['4'], border: `1px dashed ${colorTokens.border.default}`, borderRadius: radiusTokens.lg, padding: spacingTokens['4'], color: colorTokens.text.muted, background: colorTokens.surface.card }
 };
 
 export default function ApiReferencePage() {
@@ -15,4 +15,5 @@ export default function ApiReferencePage() {
     </section>
   );
 }
+
 

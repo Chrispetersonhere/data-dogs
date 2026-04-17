@@ -4,7 +4,7 @@ const pageStyles = {
   hero: { marginBottom: spacingTokens['6'] },
   eyebrow: {
     margin: 0, fontSize: typographyTokens.fontSize.xs, fontWeight: typographyTokens.fontWeight.semibold,
-    letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: colorTokens.text.tertiary
+    letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: colorTokens.text.muted
   },
   title: { margin: `${spacingTokens['2']} 0 0`, fontSize: '2rem', lineHeight: 1.15, color: colorTokens.text.primary },
   subtitle: {
@@ -19,7 +19,7 @@ const pageStyles = {
   codeHeader: {
     margin: 0, padding: `${spacingTokens['2']} ${spacingTokens['3']}`, fontSize: typographyTokens.fontSize.xs,
     fontWeight: typographyTokens.fontWeight.semibold, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
-    color: colorTokens.text.tertiary, borderBottom: `1px solid ${colorTokens.border.default}`, background: '#101A32'
+    color: colorTokens.text.muted, borderBottom: `1px solid ${colorTokens.border.default}`, background: '#101A32'
   },
   codeBlock: {
     margin: 0, padding: `${spacingTokens['4']} ${spacingTokens['4']}`, background: '#0A1328', color: '#D6E6FF',
@@ -54,4 +54,5 @@ export default function DocsHomePage() {
     </section>
   );
 }
+
 
