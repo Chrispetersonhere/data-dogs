@@ -222,3 +222,41 @@ test('filterScreenerRows caps output at 200 rows', () => {
   assert.equal(result.rows.length, 200);
   assert.equal(result.totalMatched, 300);
 });
+
+// ---------------------------------------------------------------------------
+// Day 49 – edge-case stabilization tests
+// ---------------------------------------------------------------------------
+
+test('matchesScreenerFilters passes all rows when all filters are empty objects', () => {
+  const filters = { size: {}, growth: {}, margin: {}, leverage: {}, liquidity: {} };
+  for (const row of SAMPLE_ROWS) {
+    assert.equal(matchesScreenerFilters(row, filters), true, `${row.ticker} should pass empty-object filters`);
+  }
+});
+
+test('filterScreenerRows with all categories active still returns correct subset', () => {
+  const result = filterScreenerRows(SAMPLE_ROWS, {
+    size: { marketCap: { min: 1_500_000_000_000 } },
+    growth: { revenueGrowth: { min: 0.10 } },
+    margin: { grossMargin: { min: 0.50 } },
+    leverage: { liabilitiesToEquity: { max: 1.0 } },
+    liquidity: { currentRatio: { min: 1.5 } },
+  });
+  assert.ok(result.rows.length < SAMPLE_ROWS.length, 'should filter out some rows');
+  for (const row of result.rows) {
+    assert.ok(row.marketCap !== null && row.marketCap >= 1_500_000_000_000);
+    assert.ok(row.revenueGrowth !== null && row.revenueGrowth >= 0.10);
+    assert.ok(row.grossMargin !== null && row.grossMargin >= 0.50);
+    assert.ok(row.liabilitiesToEquity !== null && row.liabilitiesToEquity <= 1.0);
+    assert.ok(row.currentRatio !== null && row.currentRatio >= 1.5);
+  }
+});
+
+test('normalizeScreenerFilters preserves min-only and max-only ranges', () => {
+  const normalized = normalizeScreenerFilters({
+    size: { marketCap: { min: 100 } },
+    leverage: { liabilitiesToEquity: { max: 2.0 } },
+  });
+  assert.deepEqual(normalized.size?.marketCap, { min: 100 });
+  assert.deepEqual(normalized.leverage?.liabilitiesToEquity, { max: 2.0 });
+});

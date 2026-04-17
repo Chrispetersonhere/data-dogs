@@ -263,3 +263,48 @@ test('UI package.json has notes component export path', () => {
     'package.json must export ./components/notes'
   );
 });
+
+// ---------------------------------------------------------------------------
+// Day 49 – edge-case stabilization tests
+// ---------------------------------------------------------------------------
+
+test('getNotesForConcept returns not-found for empty string', () => {
+  const result = getNotesForConcept('');
+  assert.equal(result.found, false);
+  assert.equal(result.disclosures.length, 0);
+  assert.equal(result.queryConcept, '');
+});
+
+test('getNotesForConcepts de-duplicates across overlapping concept sets', () => {
+  const results = getNotesForConcepts([
+    'NetCashProvidedByUsedInFinancingActivities',
+    'NetCashProvidedByUsedInFinancingActivitiesContinuingOperations',
+  ]);
+  const concepts = results.map((d) => d.concept);
+  const unique = new Set(concepts);
+  assert.equal(concepts.length, unique.size, 'should have no duplicate disclosures');
+  assert.ok(concepts.includes('DebtDisclosureTextBlock'));
+});
+
+test('getNotesForConcepts handles mix of known and unknown concepts', () => {
+  const results = getNotesForConcepts(['Revenues', 'NonExistentConcept', 'NetIncomeLoss']);
+  assert.ok(results.length >= 2, 'should return disclosures for the known concepts');
+  const concepts = results.map((d) => d.concept);
+  assert.ok(concepts.includes('RevenueFromContractWithCustomerTextBlock'));
+  assert.ok(concepts.includes('IncomeTaxDisclosureTextBlock'));
+});
+
+test('every NoteDisclosure has non-empty fields', () => {
+  const allConcepts = [
+    'Revenues', 'GrossProfit', 'OperatingIncomeLoss', 'NetIncomeLoss',
+    'CashAndCashEquivalentsAtCarryingValue', 'Assets', 'Liabilities',
+    'StockholdersEquity', 'NetCashProvidedByUsedInOperatingActivities',
+  ];
+  const results = getNotesForConcepts(allConcepts);
+  for (const d of results) {
+    assert.ok(d.concept.length > 0, `concept must be non-empty`);
+    assert.ok(d.title.length > 0, `title must be non-empty for ${d.concept}`);
+    assert.ok(d.summary.length > 0, `summary must be non-empty for ${d.concept}`);
+    assert.ok(d.taxonomySection.length > 0, `taxonomySection must be non-empty for ${d.concept}`);
+  }
+});
