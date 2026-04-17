@@ -2,9 +2,13 @@ import type { CSSProperties, JSX } from 'react';
 
 import { colorTokens, spacingTokens, typographyTokens, radiusTokens } from '../../../../../../packages/ui/src/styles/tokens';
 import { FinancialsTableShell, PeriodToggle, stickyTheadStyle } from '../../../../../../packages/ui/src/components/financials';
+import { NotesPanel } from '../../../../../../packages/ui/src/components/notes';
+import { getNotesForConcept } from '../../../../lib/api/notes';
+import type { NoteItem } from '../../../../../../packages/ui/src/components/notes';
 
 type FinancialsPageProps = {
   params: Promise<{ companyId: string }>;
+  searchParams: Promise<{ note?: string }>;
 };
 
 type FactPoint = {
@@ -388,11 +392,47 @@ const tableStyle: CSSProperties = {
   minWidth: '600px',
 };
 
-export default async function CompanyAnnualFinancialsPage({ params }: FinancialsPageProps): Promise<JSX.Element> {
+const noteIconButtonStyle: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '24px',
+  height: '24px',
+  border: `1px solid ${colorTokens.border.strong}`,
+  borderRadius: radiusTokens.sm,
+  background: 'transparent',
+  cursor: 'pointer',
+  color: colorTokens.accent.muted,
+  fontSize: typographyTokens.fontSize.xs,
+  padding: 0,
+  verticalAlign: 'middle',
+  marginLeft: spacingTokens['2'],
+};
+
+export default async function CompanyAnnualFinancialsPage({ params, searchParams }: FinancialsPageProps): Promise<JSX.Element> {
   const { companyId } = await params;
+  const { note: activeNoteLabel } = await searchParams;
 
   try {
     const view = await getAnnualStatements(companyId);
+
+    /* Resolve note panel data when a row label is selected via ?note= param */
+    let notePanelData: { label: string; conceptUsed: string | null; notes: NoteItem[] } | null = null;
+    if (activeNoteLabel) {
+      const decodedLabel = decodeURIComponent(activeNoteLabel);
+      for (const statement of view.statements) {
+        const matchedRow = statement.rows.find((r) => r.label === decodedLabel);
+        if (matchedRow) {
+          const result = matchedRow.conceptUsed ? getNotesForConcept(matchedRow.conceptUsed) : null;
+          notePanelData = {
+            label: matchedRow.label,
+            conceptUsed: matchedRow.conceptUsed,
+            notes: result?.disclosures ?? [],
+          };
+          break;
+        }
+      }
+    }
 
     return (
       <main style={shellStyle}>
@@ -430,7 +470,20 @@ export default async function CompanyAnnualFinancialsPage({ params }: Financials
                 <tbody>
                   {statement.rows.map((row) => (
                     <tr key={row.label} style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
-                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}`, fontWeight: typographyTokens.fontWeight.semibold }}>{row.label}</th>
+                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}`, fontWeight: typographyTokens.fontWeight.semibold }}>
+                        {row.label}
+                        {row.conceptUsed && (
+                          <a
+                            href={`?note=${encodeURIComponent(row.label)}`}
+                            style={noteIconButtonStyle}
+                            aria-label={`View notes for ${row.label}`}
+                            data-testid={`note-icon-${row.label.replace(/\s+/g, '-').toLowerCase()}`}
+                            title={`View note disclosures for ${row.label}`}
+                          >
+                            &#9432;
+                          </a>
+                        )}
+                      </th>
                       {view.years.map((year) => (
                         <td key={year} style={tdStyle}>
                           {formatMoney(row.valuesByYear[year])}
@@ -465,6 +518,15 @@ export default async function CompanyAnnualFinancialsPage({ params }: Financials
             </p>
           </section>
         </div>
+
+        {notePanelData && (
+          <NotesPanel
+            lineItemLabel={notePanelData.label}
+            conceptUsed={notePanelData.conceptUsed}
+            notes={notePanelData.notes}
+            open={true}
+          />
+        )}
       </main>
     );
   } catch (error) {
