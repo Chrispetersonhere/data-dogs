@@ -82,58 +82,57 @@ pnpm --filter web test    # ✓ 155/155 tests pass
 
 ### Windows PowerShell — manual spot-checks
 
-> **Important:** The commands below use `git grep` and `git show` which
-> resolve paths relative to the **git repo root**, so they work from any
-> subdirectory inside the clone. Do **not** use `Select-String` with
-> relative paths — PowerShell cannot resolve `[companyId]` brackets and
-> nested directory layouts (`data-dogs\data-dogs`) break path resolution.
+> **Important:** In Windows PowerShell, `if/else` must be on the **same
+> line** — never put `else` on its own line. The script below uses
+> `git show HEAD:<path>` piped to `Select-String` so it reads committed
+> content directly and avoids working-tree path issues with brackets
+> like `[companyId]`.
 
 ```powershell
-# ── Navigate anywhere inside the repo ──
-# (adjust to wherever your clone lives)
-cd C:\Users\lolvi\Documents\GitHub\data-dogs\data-dogs
+# ── 0. Make sure you are on the PR branch ──
+cd C:\Users\lolvi\Documents\GitHub\data-dogs
+git fetch origin copilot/update-documentation-for-changes-yet-again
+git checkout copilot/update-documentation-for-changes-yet-again
+git pull origin copilot/update-documentation-for-changes-yet-again
+Write-Host "`n--- Branch & HEAD ---"
+git --no-pager log --oneline -3
 
-# 1. Build + Tests (already confirmed: 155/155 pass)
+# ── 1. Build + Tests ──
 pnpm --filter web build
 pnpm --filter web test
 
-# 2. No 'no-store' left in API files (expect: no output = PASS)
+# ── 2. No 'no-store' left in API files ──
 Write-Host "`n--- cache: no-store should be GONE ---"
-git grep "no-store" -- "apps/web/lib/api/*.ts" "apps/web/app/company/*/financials/page.tsx"
-if ($LASTEXITCODE -eq 1) { Write-Host "PASS: no-store removed from all API files" }
-else { Write-Host "FAIL: no-store still present" }
+$fail2 = $false
+@("apps/web/lib/api/filings.ts","apps/web/lib/api/company.ts","apps/web/lib/api/filing-detail.ts","apps/web/lib/api/qa.ts","apps/web/app/company/[companyId]/financials/page.tsx") | ForEach-Object { $hit = git show HEAD:$_ 2>$null | Select-String "no-store"; if ($hit) { Write-Host "FAIL: $_ still has no-store"; $script:fail2 = $true } }
+if (-not $fail2) { Write-Host "PASS: no-store removed from all API files" }
 
-# 3. revalidate: 300 present in every API file (expect: 6 matches)
+# ── 3. revalidate: 300 present ──
 Write-Host "`n--- revalidate: 300 should be PRESENT ---"
-$r = git grep -c "revalidate: 300" -- "apps/web/lib/api/*.ts" "apps/web/app/company/*/financials/page.tsx"
-$r | ForEach-Object { Write-Host "  $_" }
-$total = ($r | ForEach-Object { ($_ -split ':')[-1] } | Measure-Object -Sum).Sum
-if ($total -ge 6) { Write-Host "PASS: $total revalidate:300 occurrences found (expected >=6)" }
-else { Write-Host "FAIL: only $total occurrences (expected >=6)" }
+$count3 = 0
+@("apps/web/lib/api/filings.ts","apps/web/lib/api/company.ts","apps/web/lib/api/filing-detail.ts","apps/web/lib/api/qa.ts","apps/web/app/company/[companyId]/financials/page.tsx") | ForEach-Object { $hits = git show HEAD:$_ 2>$null | Select-String "revalidate: 300"; $n = @($hits).Count; if ($n -gt 0) { Write-Host "  PASS: $_ ($n match)"; $script:count3 += $n } else { Write-Host "  FAIL: $_ missing revalidate" } }
+if ($count3 -ge 6) { Write-Host "PASS: $count3 total revalidate:300 (expected >=6)" } else { Write-Host "FAIL: only $count3 (expected >=6)" }
 
-# 4. dd-pulse animation defined in layout
+# ── 4. dd-pulse animation in layout ──
 Write-Host "`n--- dd-pulse animation in layout ---"
-git grep "dd-pulse" -- "apps/web/app/layout.tsx"
-if ($LASTEXITCODE -eq 0) { Write-Host "PASS" } else { Write-Host "FAIL" }
+$pulse = git show HEAD:apps/web/app/layout.tsx 2>$null | Select-String "dd-pulse"
+if ($pulse) { Write-Host "PASS: dd-pulse found in layout.tsx" } else { Write-Host "FAIL: dd-pulse NOT in layout.tsx" }
 
-# 5. dd-skeleton class in all 4 loading files (expect: >=25 matches)
+# ── 5. dd-skeleton class in loading files ──
 Write-Host "`n--- dd-skeleton in loading files ---"
-$s = git grep -c "dd-skeleton" -- "apps/web/app/*/loading.tsx" "apps/web/app/*/*/loading.tsx" "apps/web/app/*/*/*/loading.tsx"
-$s | ForEach-Object { Write-Host "  $_" }
-$totalSkel = ($s | ForEach-Object { ($_ -split ':')[-1] } | Measure-Object -Sum).Sum
-if ($totalSkel -ge 20) { Write-Host "PASS: $totalSkel dd-skeleton refs across loading files" }
-else { Write-Host "FAIL: only $totalSkel dd-skeleton refs" }
+$totalSkel = 0
+@("apps/web/app/filings/loading.tsx","apps/web/app/filings/[accession]/loading.tsx","apps/web/app/company/[companyId]/loading.tsx","apps/web/app/company/[companyId]/financials/loading.tsx") | ForEach-Object { $hits = git show HEAD:$_ 2>$null | Select-String "dd-skeleton"; $n = @($hits).Count; Write-Host "  $_  => $n refs"; $script:totalSkel += $n }
+if ($totalSkel -ge 20) { Write-Host "PASS: $totalSkel dd-skeleton refs (expected >=20)" } else { Write-Host "FAIL: only $totalSkel dd-skeleton refs (expected >=20)" }
 
-# 6. day-48 doc exists
+# ── 6. day-48 doc exists ──
 Write-Host "`n--- day-48 doc ---"
-git show HEAD:docs/daily/day-48.md | Select-Object -First 1
-if ($LASTEXITCODE -eq 0) { Write-Host "PASS: day-48.md exists in tree" }
-else { Write-Host "FAIL: day-48.md missing" }
+$doc = git show HEAD:docs/daily/day-48.md 2>$null | Select-Object -First 1
+if ($doc) { Write-Host "PASS: day-48.md exists ($doc)" } else { Write-Host "FAIL: day-48.md missing" }
 
-# 7. precomputedStats optimization
+# ── 7. precomputedStats optimization ──
 Write-Host "`n--- precomputedStats in peerValuationScatter ---"
-git grep "precomputedStats" -- "apps/web/lib/charts/peerValuationScatter.ts"
-if ($LASTEXITCODE -eq 0) { Write-Host "PASS" } else { Write-Host "FAIL" }
+$pcs = git show HEAD:apps/web/lib/charts/peerValuationScatter.ts 2>$null | Select-String "precomputedStats"
+if ($pcs) { Write-Host "PASS: precomputedStats found" } else { Write-Host "FAIL: precomputedStats NOT found" }
 
 Write-Host "`n=== ALL CHECKS COMPLETE ==="
 ```
