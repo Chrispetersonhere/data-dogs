@@ -1,5 +1,11 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+import { getNotesForConcept, getNotesForConcepts } from '../lib/api/notes';
+import type { NoteDisclosure, NoteDisclosureResult } from '../lib/api/notes';
 
 /*
  * Notes panel acceptance tests.
@@ -11,12 +17,19 @@ import test from 'node:test';
  * 4. Panel content is secondary to the primary financial table
  */
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const PANEL_PATH = resolve(__dirname, '../../../packages/ui/src/components/notes/NotesPanel.tsx');
+const PAGE_PATH = resolve(__dirname, '../app/company/[companyId]/financials/page.tsx');
+const NOTES_API_PATH = resolve(__dirname, '../lib/api/notes.ts');
+const UI_INDEX_PATH = resolve(__dirname, '../../../packages/ui/src/index.ts');
+const NOTES_BARREL_PATH = resolve(__dirname, '../../../packages/ui/src/components/notes/index.ts');
+const UI_PKG_PATH = resolve(__dirname, '../../../packages/ui/package.json');
+
 /* ------------------------------------------------------------------ */
 /*  notes.ts API layer tests                                          */
 /* ------------------------------------------------------------------ */
-
-import { getNotesForConcept, getNotesForConcepts } from '../lib/api/notes';
-import type { NoteDisclosure, NoteDisclosureResult } from '../lib/api/notes';
 
 test('getNotesForConcept returns disclosures for Revenues', () => {
   const result: NoteDisclosureResult = getNotesForConcept('Revenues');
@@ -132,32 +145,20 @@ test('NotesPanel markup contains dialog role when open', () => {
    * Since we cannot render JSX directly in node:test, we validate by
    * reading the source file and checking structural properties.
    */
-  const fs = require('node:fs');
-  const panelSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/components/notes/NotesPanel.tsx'),
-    'utf-8'
-  );
+  const panelSource = readFileSync(PANEL_PATH, 'utf-8');
   assert.ok(panelSource.includes('role="dialog"'), 'Panel must use role="dialog"');
   assert.ok(panelSource.includes('data-testid="notes-panel"'), 'Panel must have data-testid');
   assert.ok(panelSource.includes('aria-label='), 'Panel must have aria-label');
 });
 
 test('NotesPanel returns null when open is false', () => {
-  const fs = require('node:fs');
-  const panelSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/components/notes/NotesPanel.tsx'),
-    'utf-8'
-  );
+  const panelSource = readFileSync(PANEL_PATH, 'utf-8');
   assert.ok(panelSource.includes('if (!open)'), 'Panel should check open prop');
   assert.ok(panelSource.includes('return null'), 'Panel should return null when closed');
 });
 
 test('NotesPanel renders empty state when no notes provided', () => {
-  const fs = require('node:fs');
-  const panelSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/components/notes/NotesPanel.tsx'),
-    'utf-8'
-  );
+  const panelSource = readFileSync(PANEL_PATH, 'utf-8');
   assert.ok(panelSource.includes('data-testid="notes-panel-empty"'), 'Panel must show empty state');
   assert.ok(
     panelSource.includes('No linked note disclosures'),
@@ -166,41 +167,25 @@ test('NotesPanel renders empty state when no notes provided', () => {
 });
 
 test('NotesPanel renders note cards with data-testid', () => {
-  const fs = require('node:fs');
-  const panelSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/components/notes/NotesPanel.tsx'),
-    'utf-8'
-  );
+  const panelSource = readFileSync(PANEL_PATH, 'utf-8');
   assert.ok(panelSource.includes('data-testid="notes-panel-card"'), 'Each note card must have data-testid');
 });
 
 test('NotesPanel uses design tokens (not hardcoded colors)', () => {
-  const fs = require('node:fs');
-  const panelSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/components/notes/NotesPanel.tsx'),
-    'utf-8'
-  );
+  const panelSource = readFileSync(PANEL_PATH, 'utf-8');
   assert.ok(panelSource.includes("from '../../styles/tokens'"), 'Must import design tokens');
   assert.ok(!panelSource.includes('#6b7280'), 'Must not hardcode gray hex');
   assert.ok(!panelSource.includes('#111827'), 'Must not hardcode dark hex');
 });
 
 test('NotesPanel is secondary — panel width is constrained', () => {
-  const fs = require('node:fs');
-  const panelSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/components/notes/NotesPanel.tsx'),
-    'utf-8'
-  );
+  const panelSource = readFileSync(PANEL_PATH, 'utf-8');
   assert.ok(panelSource.includes("width: '380px'"), 'Panel width should be constrained');
   assert.ok(panelSource.includes("maxWidth: '90vw'"), 'Panel should respect viewport');
 });
 
 test('NotesPanel shows taxonomy section in note cards', () => {
-  const fs = require('node:fs');
-  const panelSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/components/notes/NotesPanel.tsx'),
-    'utf-8'
-  );
+  const panelSource = readFileSync(PANEL_PATH, 'utf-8');
   assert.ok(panelSource.includes('ASC {note.taxonomySection}'), 'Should display taxonomy section');
 });
 
@@ -209,50 +194,30 @@ test('NotesPanel shows taxonomy section in note cards', () => {
 /* ------------------------------------------------------------------ */
 
 test('financials page includes note icon links', () => {
-  const fs = require('node:fs');
-  const pageSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../app/company/[companyId]/financials/page.tsx'),
-    'utf-8'
-  );
+  const pageSource = readFileSync(PAGE_PATH, 'utf-8');
   assert.ok(pageSource.includes('note-icon-'), 'Page must render note icon data-testid attributes');
   assert.ok(pageSource.includes('View notes for'), 'Note icon must have descriptive aria-label');
   assert.ok(pageSource.includes('?note='), 'Note link must use ?note= search param');
 });
 
 test('financials page conditionally renders NotesPanel', () => {
-  const fs = require('node:fs');
-  const pageSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../app/company/[companyId]/financials/page.tsx'),
-    'utf-8'
-  );
+  const pageSource = readFileSync(PAGE_PATH, 'utf-8');
   assert.ok(pageSource.includes('<NotesPanel'), 'Page must render NotesPanel component');
   assert.ok(pageSource.includes('notePanelData'), 'Page must check notePanelData before rendering');
 });
 
 test('financials page imports notes API', () => {
-  const fs = require('node:fs');
-  const pageSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../app/company/[companyId]/financials/page.tsx'),
-    'utf-8'
-  );
+  const pageSource = readFileSync(PAGE_PATH, 'utf-8');
   assert.ok(pageSource.includes("from '../../../../lib/api/notes'"), 'Page must import notes API');
 });
 
 test('financials page only shows note icons for rows with a concept', () => {
-  const fs = require('node:fs');
-  const pageSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../app/company/[companyId]/financials/page.tsx'),
-    'utf-8'
-  );
+  const pageSource = readFileSync(PAGE_PATH, 'utf-8');
   assert.ok(pageSource.includes('row.conceptUsed &&'), 'Note icon should only appear when concept exists');
 });
 
 test('financials page preserves primary table structure', () => {
-  const fs = require('node:fs');
-  const pageSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../app/company/[companyId]/financials/page.tsx'),
-    'utf-8'
-  );
+  const pageSource = readFileSync(PAGE_PATH, 'utf-8');
   /* Ensure the core table structure is intact */
   assert.ok(pageSource.includes('data-export="financials-data"'), 'Table data-export attribute must remain');
   assert.ok(pageSource.includes('FinancialsTableShell'), 'FinancialsTableShell must still be used (provides data-export="financials-table")');
@@ -261,11 +226,7 @@ test('financials page preserves primary table structure', () => {
 });
 
 test('notes panel does not contain forbidden text', () => {
-  const fs = require('node:fs');
-  const panelSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/components/notes/NotesPanel.tsx'),
-    'utf-8'
-  );
+  const panelSource = readFileSync(PANEL_PATH, 'utf-8');
   const forbidden = ['TODO', 'Placeholder', 'Coming soon', 'screener'];
   for (const text of forbidden) {
     assert.ok(!panelSource.toLowerCase().includes(text.toLowerCase()), `Notes panel must not contain: ${text}`);
@@ -273,11 +234,7 @@ test('notes panel does not contain forbidden text', () => {
 });
 
 test('notes API does not contain forbidden text', () => {
-  const fs = require('node:fs');
-  const apiSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../lib/api/notes.ts'),
-    'utf-8'
-  );
+  const apiSource = readFileSync(NOTES_API_PATH, 'utf-8');
   const forbidden = ['TODO', 'Placeholder', 'Coming soon', 'screener'];
   for (const text of forbidden) {
     assert.ok(!apiSource.toLowerCase().includes(text.toLowerCase()), `Notes API must not contain: ${text}`);
@@ -289,32 +246,18 @@ test('notes API does not contain forbidden text', () => {
 /* ------------------------------------------------------------------ */
 
 test('notes component is exported from UI package index', () => {
-  const fs = require('node:fs');
-  const indexSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/index.ts'),
-    'utf-8'
-  );
+  const indexSource = readFileSync(UI_INDEX_PATH, 'utf-8');
   assert.ok(indexSource.includes("'./components/notes'"), 'UI index must re-export notes');
 });
 
 test('notes barrel export includes NotesPanel and NoteItem', () => {
-  const fs = require('node:fs');
-  const barrelSource = fs.readFileSync(
-    require('node:path').resolve(__dirname, '../../../packages/ui/src/components/notes/index.ts'),
-    'utf-8'
-  );
+  const barrelSource = readFileSync(NOTES_BARREL_PATH, 'utf-8');
   assert.ok(barrelSource.includes('NotesPanel'), 'Barrel must export NotesPanel');
   assert.ok(barrelSource.includes('NoteItem'), 'Barrel must export NoteItem type');
 });
 
 test('UI package.json has notes component export path', () => {
-  const fs = require('node:fs');
-  const pkgJson = JSON.parse(
-    fs.readFileSync(
-      require('node:path').resolve(__dirname, '../../../packages/ui/package.json'),
-      'utf-8'
-    )
-  );
+  const pkgJson = JSON.parse(readFileSync(UI_PKG_PATH, 'utf-8'));
   assert.ok(
     pkgJson.exports['./components/notes'] !== undefined,
     'package.json must export ./components/notes'
