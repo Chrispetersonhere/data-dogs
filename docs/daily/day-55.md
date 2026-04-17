@@ -34,10 +34,14 @@ Use this exact block in Windows PowerShell from repo root:
 
 ```powershell
 git fetch origin
-git checkout <your-branch>
+$branch = git branch --show-current
+if (-not $branch) { throw "Could not determine current branch. Run this inside the repo." }
+git checkout $branch
 git pull --ff-only
 pnpm --filter web build
 pnpm --filter web test -- accessibility.spec.ts
 # fallback if your shell forwards args differently:
 # pnpm --filter web test
 ```
+
+If you want to switch to a specific branch, use `git checkout branch-name` (without `<` or `>`), because angle brackets are PowerShell operators.
