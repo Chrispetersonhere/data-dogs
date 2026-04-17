@@ -1,23 +1,25 @@
+import { colorTokens, radiusTokens, spacingTokens, typographyTokens } from '@data-dogs/ui';
+
 const apiStyles = {
   title: {
     margin: 0,
     fontSize: '1.75rem',
     lineHeight: 1.2,
-    color: '#F8FAFC'
+    color: colorTokens.text.primary
   },
   subtitle: {
-    marginTop: '0.8rem',
-    color: '#C5D3EA',
-    lineHeight: 1.75,
+    marginTop: spacingTokens['3'],
+    color: colorTokens.text.secondary,
+    lineHeight: typographyTokens.lineHeight.relaxed,
     maxWidth: '72ch'
   },
   placeholder: {
-    marginTop: '1.1rem',
-    border: '1px dashed #3B4F78',
-    borderRadius: '0.85rem',
-    padding: '1rem',
-    color: '#AFC2E5',
-    background: '#101A30'
+    marginTop: spacingTokens['4'],
+    border: `1px dashed ${colorTokens.border.default}`,
+    borderRadius: radiusTokens.lg,
+    padding: spacingTokens['4'],
+    color: colorTokens.text.tertiary,
+    background: colorTokens.surface.card
   }
 };
 

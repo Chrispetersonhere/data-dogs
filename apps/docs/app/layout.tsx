@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { colorTokens, radiusTokens, spacingTokens, typographyTokens } from '@data-dogs/ui';
+
 export const metadata = {
   title: 'Data Dogs Docs',
   description: 'Product and API documentation for Data Dogs.'
@@ -12,9 +14,9 @@ type DocsLayoutProps = {
 const shellStyles = {
   page: {
     margin: 0,
-    background: '#0A1020',
-    color: '#E8ECF5',
-    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+    background: colorTokens.surface.page,
+    color: colorTokens.text.primary,
+    fontFamily: typographyTokens.fontFamily.sans,
     minHeight: '100vh'
   },
   topBorder: {
@@ -27,26 +29,26 @@ const shellStyles = {
     zIndex: 40,
     backdropFilter: 'blur(10px)',
     background: 'rgba(10, 16, 32, 0.86)',
-    borderBottom: '1px solid #1E2B46'
+    borderBottom: `1px solid ${colorTokens.border.default}`
   },
   headerInner: {
     maxWidth: '1100px',
     margin: '0 auto',
-    padding: '0.9rem 1.25rem',
+    padding: `${spacingTokens['4']} ${spacingTokens['5']}`,
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: '1rem'
+    gap: spacingTokens['4']
   },
   brand: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.6rem',
-    color: '#F8FAFC',
+    gap: spacingTokens['2'],
+    color: colorTokens.text.primary,
     textDecoration: 'none',
-    fontSize: '0.96rem',
-    fontWeight: 650,
-    letterSpacing: '0.02em'
+    fontSize: typographyTokens.fontSize.md,
+    fontWeight: typographyTokens.fontWeight.semibold,
+    letterSpacing: '0.01em'
   },
   dot: {
     width: '8px',
@@ -57,22 +59,22 @@ const shellStyles = {
   },
   nav: {
     display: 'flex',
-    gap: '0.9rem',
+    gap: spacingTokens['2'],
     flexWrap: 'wrap' as const,
     alignItems: 'center'
   },
   navLink: {
-    color: '#C8D4EA',
+    color: colorTokens.text.secondary,
     textDecoration: 'none',
-    fontSize: '0.88rem',
-    padding: '0.35rem 0.6rem',
-    borderRadius: '0.5rem',
+    fontSize: typographyTokens.fontSize.sm,
+    padding: `${spacingTokens['1']} ${spacingTokens['3']}`,
+    borderRadius: radiusTokens.md,
     border: '1px solid transparent'
   },
   main: {
     maxWidth: '1100px',
     margin: '0 auto',
-    padding: '2rem 1.25rem 4rem'
+    padding: `${spacingTokens['8']} ${spacingTokens['5']} ${spacingTokens['12']}`
   }
 };
 

@@ -1,77 +1,79 @@
+import { colorTokens, radiusTokens, spacingTokens, typographyTokens } from '@data-dogs/ui';
+
 const pageStyles = {
   hero: {
-    marginBottom: '1.5rem'
+    marginBottom: spacingTokens['6']
   },
   eyebrow: {
     margin: 0,
-    fontSize: '0.72rem',
-    fontWeight: 700,
+    fontSize: typographyTokens.fontSize.xs,
+    fontWeight: typographyTokens.fontWeight.semibold,
     letterSpacing: '0.08em',
     textTransform: 'uppercase' as const,
-    color: '#8FA6CF'
+    color: colorTokens.text.tertiary
   },
   title: {
-    margin: '0.55rem 0 0',
+    margin: `${spacingTokens['2']} 0 0`,
     fontSize: '2rem',
     lineHeight: 1.15,
-    color: '#F8FAFC'
+    color: colorTokens.text.primary
   },
   subtitle: {
-    margin: '0.85rem 0 0',
+    margin: `${spacingTokens['3']} 0 0`,
     maxWidth: '72ch',
-    fontSize: '1rem',
-    lineHeight: 1.75,
-    color: '#C7D2E6'
+    fontSize: typographyTokens.fontSize.md,
+    lineHeight: typographyTokens.lineHeight.relaxed,
+    color: colorTokens.text.secondary
   },
   grid: {
-    marginTop: '1.5rem',
+    marginTop: spacingTokens['6'],
     display: 'grid',
-    gap: '1rem',
+    gap: spacingTokens['4'],
     gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))'
   },
   card: {
-    border: '1px solid #263451',
-    borderRadius: '0.9rem',
-    padding: '1rem 1rem 1.1rem',
-    background: 'linear-gradient(180deg, #111A31, #0E172B)'
+    border: `1px solid ${colorTokens.border.default}`,
+    borderRadius: radiusTokens.lg,
+    padding: `${spacingTokens['4']} ${spacingTokens['4']} ${spacingTokens['5']}`,
+    background: colorTokens.surface.card
   },
   cardTitle: {
     margin: 0,
-    fontSize: '1rem',
-    color: '#EAF0FD'
+    fontSize: typographyTokens.fontSize.md,
+    color: colorTokens.text.primary
   },
   cardBody: {
-    margin: '0.6rem 0 0',
-    color: '#B9C8E3',
-    lineHeight: 1.65,
-    fontSize: '0.94rem'
+    margin: `${spacingTokens['2']} 0 0`,
+    color: colorTokens.text.secondary,
+    lineHeight: typographyTokens.lineHeight.relaxed,
+    fontSize: typographyTokens.fontSize.sm
   },
   codeWrap: {
-    marginTop: '1.25rem',
-    border: '1px solid #2A3B5E',
-    borderRadius: '0.85rem',
+    marginTop: spacingTokens['5'],
+    border: `1px solid ${colorTokens.border.default}`,
+    borderRadius: radiusTokens.lg,
     overflow: 'hidden'
   },
   codeHeader: {
     margin: 0,
-    padding: '0.5rem 0.8rem',
-    fontSize: '0.76rem',
-    fontWeight: 650,
+    padding: `${spacingTokens['2']} ${spacingTokens['3']}`,
+    fontSize: typographyTokens.fontSize.xs,
+    fontWeight: typographyTokens.fontWeight.semibold,
     letterSpacing: '0.06em',
     textTransform: 'uppercase' as const,
-    color: '#A3B5D6',
-    borderBottom: '1px solid #2A3B5E',
+    color: colorTokens.text.tertiary,
+    borderBottom: `1px solid ${colorTokens.border.default}`,
     background: '#101A32'
   },
   codeBlock: {
     margin: 0,
-    padding: '1rem 1.1rem',
+    padding: `${spacingTokens['4']} ${spacingTokens['4']}`,
     background: '#0A1328',
     color: '#D6E6FF',
     overflowX: 'auto' as const,
-    fontSize: '0.86rem',
+    fontSize: typographyTokens.fontSize.sm,
     lineHeight: 1.7,
-    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
+    fontFamily: typographyTokens.fontFamily.mono
   }
 };
 
