@@ -63,7 +63,10 @@ const sampleProvenance = {
 export default function MarketingPage() {
   return (
     <PageContainer>
-      <main className={styles.pageMain}>
+      <a className={styles.skipLink} href="#main-content">
+        Skip to main content
+      </a>
+      <main id="main-content" className={styles.pageMain}>
 
         {/* Section 1: Trust Signal (Hero) */}
         <section className={styles.heroSection}>
@@ -199,6 +202,8 @@ export default function MarketingPage() {
             subtitle="No sign-up walls for public filing data."
           />
           <div
+            role="group"
+            aria-label="Primary actions"
             style={{
               display: 'flex',
               gap: spacingTokens['4'],
