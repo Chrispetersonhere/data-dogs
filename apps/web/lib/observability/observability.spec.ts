@@ -9,6 +9,7 @@ import {
   HEALTHCHECK_PATH,
   resolveRequestId,
   serializeLogEntry,
+  toErrorBoundaryPayload,
 } from './index';
 
 test('health check path and payload are stable', () => {
@@ -60,3 +61,18 @@ test('error boundary log includes ids', () => {
   assert.equal(payload.jobId, 'job-99');
   assert.equal(payload.event, 'ui.error_boundary');
 });
+
+test('error boundary payload/log handle unknown errors consistently', () => {
+  const context = { requestId: 'req-unknown' };
+  const payload = toErrorBoundaryPayload('boom', context);
+
+  assert.equal(payload.message, 'Unexpected error');
+  assert.equal(payload.requestId, 'req-unknown');
+
+  const log = buildErrorBoundaryLog('boom', context);
+  const logPayload = JSON.parse(log) as Record<string, unknown>;
+
+  assert.equal(logPayload.message, 'Unexpected error');
+  assert.deepEqual(logPayload.details, { name: 'UnknownError' });
+});
+
