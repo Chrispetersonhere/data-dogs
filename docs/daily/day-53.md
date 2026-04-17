@@ -15,8 +15,8 @@ Date: 2026-04-17
 
 ## Acceptance criteria mapping
 
-- **Health check path exists**: `HEALTHCHECK_PATH` constant is set to `/healthz` and monitored in `infra/monitoring/healthchecks.yaml`.
-- **Logs include ids**: structured logging helpers include request id and optional job id fields; `ingest-sec` binds ids via context.
+- **Health check path exists**: `/healthz` is implemented via `apps/web/app/healthz/route.ts`, backed by `HEALTHCHECK_PATH` and monitored in `infra/monitoring/healthchecks.yaml`.
+- **Logs include ids**: structured logging helpers include request id and optional job id fields; web acceptance test `apps/web/tests/observability-health.spec.ts` verifies this; `ingest-sec` binds ids via context.
 
 ## Verification
 

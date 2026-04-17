@@ -46,7 +46,7 @@ Context ids are injected into every structured log line.
 
 ## Health checks
 
-- Canonical web health-check path: `/healthz`.
+- Canonical web health-check path: `/healthz` (implemented at `apps/web/app/healthz/route.ts`).
 - Monitoring baseline file: `infra/monitoring/healthchecks.yaml`.
 
 ## Error boundaries
@@ -55,6 +55,8 @@ Web error-boundary helpers:
 
 - `toErrorBoundaryPayload(...)`
 - `buildErrorBoundaryLog(...)`
+
+Acceptance tests for health + id-bearing logs are in `apps/web/tests/observability-health.spec.ts`.
 
 These provide a user-safe payload and machine-parsable error event with request/job ids.
 
