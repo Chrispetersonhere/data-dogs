@@ -9,6 +9,7 @@
     "./components/layout": "./src/components/layout/index.ts",
     "./components/financials": "./src/components/financials/index.ts",
     "./components/charts": "./src/components/charts/index.ts",
+    "./components/marketing": "./src/components/marketing/index.ts",
     "./components/ui": "./src/components/ui/index.ts",
     "./components/notes": "./src/components/notes/index.ts",
     "./components/screener": "./src/components/screener/index.ts"
