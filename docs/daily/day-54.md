@@ -27,3 +27,17 @@ Date: 2026-04-17
 
 - Low risk; changes are internal helper cleanup with added tests.
 - Rollback by reverting this day’s commit if any regression appears in observability payloads/logging.
+
+## Windows PowerShell verification notes
+
+- Branch/commit names are environment-specific. Use `git branch --show-current` and `git log --oneline -n 5` instead of hard-coding `work` or a local-only commit hash.
+- If `pytest` is not on PATH, run Python tests with `py -m pytest services/parse-xbrl/tests -q` (or `python -m pytest ...`) after installing test deps for the service.
+- Suggested Windows verification sequence:
+  1. `git fetch origin`
+  2. `git checkout codex/hardening-month-2-codebase`
+  3. `git pull --ff-only`
+  4. `pnpm lint`
+  5. `pnpm typecheck`
+  6. `pnpm --filter web build`
+  7. `py -m pytest services/parse-xbrl/tests -q`
+
