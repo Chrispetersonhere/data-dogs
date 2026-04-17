@@ -111,6 +111,7 @@ export function NotesPanel({ lineItemLabel, conceptUsed, notes, open }: NotesPan
   return (
     <aside
       role="dialog"
+      aria-modal="true"
       aria-label={`Notes for ${lineItemLabel}`}
       data-testid="notes-panel"
       style={overlayStyle}

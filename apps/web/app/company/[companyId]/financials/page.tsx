@@ -409,6 +409,8 @@ const noteIconButtonStyle: CSSProperties = {
   marginLeft: spacingTokens['2'],
 };
 
+const INFO_ICON = '\u2139';
+
 export default async function CompanyAnnualFinancialsPage({ params, searchParams }: FinancialsPageProps): Promise<JSX.Element> {
   const { companyId } = await params;
   const { note: activeNoteLabel } = await searchParams;
@@ -480,7 +482,7 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
                             data-testid={`note-icon-${row.label.replace(/\s+/g, '-').toLowerCase()}`}
                             title={`View note disclosures for ${row.label}`}
                           >
-                            &#9432;
+                            {INFO_ICON}
                           </a>
                         )}
                       </th>

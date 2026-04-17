@@ -33,34 +33,67 @@ export type NoteDisclosureResult = {
  * Static mapping from financial line-item concepts to related note text-block
  * concepts. Derived from the US-GAAP 2024 taxonomy presentation linkbase.
  */
+
+const REVENUE_RECOGNITION_NOTE: NoteDisclosure = {
+  concept: 'RevenueFromContractWithCustomerTextBlock',
+  title: 'Revenue recognition',
+  summary:
+    'Describes the entity\u2019s accounting policy for revenue from contracts with customers, including timing of recognition, significant judgments, and contract balances.',
+  taxonomySection: '606-10',
+};
+
+const DEBT_DISCLOSURE_NOTE: NoteDisclosure = {
+  concept: 'DebtDisclosureTextBlock',
+  title: 'Debt obligations',
+  summary:
+    'Covers short-term and long-term debt instruments, maturities, covenants, and fair-value disclosures.',
+  taxonomySection: '470-10',
+};
+
+const CASH_FLOW_SUPPLEMENTAL_NOTE: NoteDisclosure = {
+  concept: 'CashFlowSupplementalDisclosuresTextBlock',
+  title: 'Cash-flow supplemental disclosures',
+  summary:
+    'Presents supplemental cash-flow information including taxes paid, interest paid, and non-cash investing and financing activities.',
+  taxonomySection: '230-10',
+};
+
+const INCOME_TAX_NOTE: NoteDisclosure = {
+  concept: 'IncomeTaxDisclosureTextBlock',
+  title: 'Income taxes',
+  summary:
+    'Discloses current and deferred income tax provisions, effective tax rate reconciliation, and significant tax positions.',
+  taxonomySection: '740-10',
+};
+
+const CASH_EQUIVALENTS_POLICY_NOTE: NoteDisclosure = {
+  concept: 'CashAndCashEquivalentsPolicyTextBlock',
+  title: 'Cash & equivalents policy',
+  summary:
+    'Describes what the entity considers cash equivalents and any restrictions on cash balances.',
+  taxonomySection: '305-10',
+};
+
+const STOCKHOLDERS_EQUITY_NOTE: NoteDisclosure = {
+  concept: 'StockholdersEquityNoteDisclosureTextBlock',
+  title: "Shareholders\u2019 equity",
+  summary:
+    'Details common stock, preferred stock, treasury stock activity, and any equity-classified instruments.',
+  taxonomySection: '505-10',
+};
+
+const INVESTMENT_DISCLOSURES_NOTE: NoteDisclosure = {
+  concept: 'InvestmentsInDebtAndMarketableEquitySecuritiesAndCertainTradingAssetsDisclosureTextBlock',
+  title: 'Investment disclosures',
+  summary:
+    'Covers classification, fair value, and impairment of debt and equity securities held by the entity.',
+  taxonomySection: '320-10',
+};
+
 const CONCEPT_TO_NOTES: Record<string, NoteDisclosure[]> = {
-  Revenues: [
-    {
-      concept: 'RevenueFromContractWithCustomerTextBlock',
-      title: 'Revenue recognition',
-      summary:
-        'Describes the entity\u2019s accounting policy for revenue from contracts with customers, including timing of recognition, significant judgments, and contract balances.',
-      taxonomySection: '606-10',
-    },
-  ],
-  RevenueFromContractWithCustomerExcludingAssessedTax: [
-    {
-      concept: 'RevenueFromContractWithCustomerTextBlock',
-      title: 'Revenue recognition',
-      summary:
-        'Describes the entity\u2019s accounting policy for revenue from contracts with customers, including timing of recognition, significant judgments, and contract balances.',
-      taxonomySection: '606-10',
-    },
-  ],
-  SalesRevenueNet: [
-    {
-      concept: 'RevenueFromContractWithCustomerTextBlock',
-      title: 'Revenue recognition',
-      summary:
-        'Describes the entity\u2019s accounting policy for revenue from contracts with customers, including timing of recognition, significant judgments, and contract balances.',
-      taxonomySection: '606-10',
-    },
-  ],
+  Revenues: [REVENUE_RECOGNITION_NOTE],
+  RevenueFromContractWithCustomerExcludingAssessedTax: [REVENUE_RECOGNITION_NOTE],
+  SalesRevenueNet: [REVENUE_RECOGNITION_NOTE],
   GrossProfit: [
     {
       concept: 'CostOfGoodsAndServicesSoldPolicyTextBlock',
@@ -80,13 +113,7 @@ const CONCEPT_TO_NOTES: Record<string, NoteDisclosure[]> = {
     },
   ],
   NetIncomeLoss: [
-    {
-      concept: 'IncomeTaxDisclosureTextBlock',
-      title: 'Income taxes',
-      summary:
-        'Discloses current and deferred income tax provisions, effective tax rate reconciliation, and significant tax positions.',
-      taxonomySection: '740-10',
-    },
+    INCOME_TAX_NOTE,
     {
       concept: 'EarningsPerShareTextBlock',
       title: 'Earnings per share',
@@ -95,33 +122,9 @@ const CONCEPT_TO_NOTES: Record<string, NoteDisclosure[]> = {
       taxonomySection: '260-10',
     },
   ],
-  ProfitLoss: [
-    {
-      concept: 'IncomeTaxDisclosureTextBlock',
-      title: 'Income taxes',
-      summary:
-        'Discloses current and deferred income tax provisions, effective tax rate reconciliation, and significant tax positions.',
-      taxonomySection: '740-10',
-    },
-  ],
-  CashAndCashEquivalentsAtCarryingValue: [
-    {
-      concept: 'CashAndCashEquivalentsPolicyTextBlock',
-      title: 'Cash & equivalents policy',
-      summary:
-        'Describes what the entity considers cash equivalents and any restrictions on cash balances.',
-      taxonomySection: '305-10',
-    },
-  ],
-  CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents: [
-    {
-      concept: 'CashAndCashEquivalentsPolicyTextBlock',
-      title: 'Cash & equivalents policy',
-      summary:
-        'Describes what the entity considers cash equivalents and any restrictions on cash balances.',
-      taxonomySection: '305-10',
-    },
-  ],
+  ProfitLoss: [INCOME_TAX_NOTE],
+  CashAndCashEquivalentsAtCarryingValue: [CASH_EQUIVALENTS_POLICY_NOTE],
+  CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents: [CASH_EQUIVALENTS_POLICY_NOTE],
   Assets: [
     {
       concept: 'SignificantAccountingPoliciesTextBlock',
@@ -132,13 +135,7 @@ const CONCEPT_TO_NOTES: Record<string, NoteDisclosure[]> = {
     },
   ],
   Liabilities: [
-    {
-      concept: 'DebtDisclosureTextBlock',
-      title: 'Debt obligations',
-      summary:
-        'Covers short-term and long-term debt instruments, maturities, covenants, and fair-value disclosures.',
-      taxonomySection: '470-10',
-    },
+    DEBT_DISCLOSURE_NOTE,
     {
       concept: 'CommitmentsAndContingenciesDisclosureTextBlock',
       title: 'Commitments & contingencies',
@@ -147,78 +144,14 @@ const CONCEPT_TO_NOTES: Record<string, NoteDisclosure[]> = {
       taxonomySection: '450-20',
     },
   ],
-  StockholdersEquity: [
-    {
-      concept: 'StockholdersEquityNoteDisclosureTextBlock',
-      title: "Shareholders\u2019 equity",
-      summary:
-        'Details common stock, preferred stock, treasury stock activity, and any equity-classified instruments.',
-      taxonomySection: '505-10',
-    },
-  ],
-  StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest: [
-    {
-      concept: 'StockholdersEquityNoteDisclosureTextBlock',
-      title: "Shareholders\u2019 equity",
-      summary:
-        'Details common stock, preferred stock, treasury stock activity, and any equity-classified instruments.',
-      taxonomySection: '505-10',
-    },
-  ],
-  NetCashProvidedByUsedInOperatingActivities: [
-    {
-      concept: 'CashFlowSupplementalDisclosuresTextBlock',
-      title: 'Cash-flow supplemental disclosures',
-      summary:
-        'Presents supplemental cash-flow information including taxes paid, interest paid, and non-cash investing and financing activities.',
-      taxonomySection: '230-10',
-    },
-  ],
-  NetCashProvidedByUsedInOperatingActivitiesContinuingOperations: [
-    {
-      concept: 'CashFlowSupplementalDisclosuresTextBlock',
-      title: 'Cash-flow supplemental disclosures',
-      summary:
-        'Presents supplemental cash-flow information including taxes paid, interest paid, and non-cash investing and financing activities.',
-      taxonomySection: '230-10',
-    },
-  ],
-  NetCashProvidedByUsedInInvestingActivities: [
-    {
-      concept: 'InvestmentsInDebtAndMarketableEquitySecuritiesAndCertainTradingAssetsDisclosureTextBlock',
-      title: 'Investment disclosures',
-      summary:
-        'Covers classification, fair value, and impairment of debt and equity securities held by the entity.',
-      taxonomySection: '320-10',
-    },
-  ],
-  NetCashProvidedByUsedInInvestingActivitiesContinuingOperations: [
-    {
-      concept: 'InvestmentsInDebtAndMarketableEquitySecuritiesAndCertainTradingAssetsDisclosureTextBlock',
-      title: 'Investment disclosures',
-      summary:
-        'Covers classification, fair value, and impairment of debt and equity securities held by the entity.',
-      taxonomySection: '320-10',
-    },
-  ],
-  NetCashProvidedByUsedInFinancingActivities: [
-    {
-      concept: 'DebtDisclosureTextBlock',
-      title: 'Debt obligations',
-      summary:
-        'Covers short-term and long-term debt instruments, maturities, covenants, and fair-value disclosures.',
-      taxonomySection: '470-10',
-    },
-  ],
-  NetCashProvidedByUsedInFinancingActivitiesContinuingOperations: [
-    {
-      concept: 'DebtDisclosureTextBlock',
-      title: 'Debt obligations',
-      summary:
-        'Covers short-term and long-term debt instruments, maturities, covenants, and fair-value disclosures.',
-      taxonomySection: '470-10',
-    },
-  ],
+  StockholdersEquity: [STOCKHOLDERS_EQUITY_NOTE],
+  StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest: [STOCKHOLDERS_EQUITY_NOTE],
+  NetCashProvidedByUsedInOperatingActivities: [CASH_FLOW_SUPPLEMENTAL_NOTE],
+  NetCashProvidedByUsedInOperatingActivitiesContinuingOperations: [CASH_FLOW_SUPPLEMENTAL_NOTE],
+  NetCashProvidedByUsedInInvestingActivities: [INVESTMENT_DISCLOSURES_NOTE],
+  NetCashProvidedByUsedInInvestingActivitiesContinuingOperations: [INVESTMENT_DISCLOSURES_NOTE],
+  NetCashProvidedByUsedInFinancingActivities: [DEBT_DISCLOSURE_NOTE],
+  NetCashProvidedByUsedInFinancingActivitiesContinuingOperations: [DEBT_DISCLOSURE_NOTE],
   PaymentsToAcquirePropertyPlantAndEquipment: [
     {
       concept: 'PropertyPlantAndEquipmentDisclosureTextBlock',
