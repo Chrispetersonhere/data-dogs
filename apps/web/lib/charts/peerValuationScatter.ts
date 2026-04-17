@@ -124,8 +124,8 @@ export type ValuationDistance = {
   distance: number;
 };
 
-export function computeValuationDistances(data: PeerValuationScatterData): ValuationDistance[] {
-  const stats = computePeerStats(data);
+export function computeValuationDistances(data: PeerValuationScatterData, precomputedStats?: PeerStats): ValuationDistance[] {
+  const stats = precomputedStats ?? computePeerStats(data);
   return data.points.map((p) => {
     const dx = p.forwardPE - stats.medianForwardPE;
     const dy = p.evToEbitda - stats.medianEvToEbitda;

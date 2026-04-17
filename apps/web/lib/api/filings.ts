@@ -164,7 +164,7 @@ export async function queryFilings(filters: FilingQueryFilters): Promise<FilingQ
       'User-Agent': secUserAgent(),
       Accept: 'application/json',
     },
-    cache: 'no-store',
+    next: { revalidate: 300 },
   });
 
   if (!response.ok) {

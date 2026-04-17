@@ -28,21 +28,21 @@ export default function FilingsLoading() {
     <main style={shellStyle}>
       <section style={{ maxWidth: '1180px', margin: '0 auto', display: 'grid', gap: spacingTokens['4'] }}>
         <header style={cardStyle}>
-          <div style={{ ...pulseBar, width: '200px', marginBottom: spacingTokens['3'] }} />
-          <div style={{ ...pulseBar, width: '320px', height: spacingTokens['8'] }} />
+          <div className="dd-skeleton" style={{ ...pulseBar, width: '200px', marginBottom: spacingTokens['3'] }} />
+          <div className="dd-skeleton" style={{ ...pulseBar, width: '320px', height: spacingTokens['8'] }} />
         </header>
         <section style={cardStyle}>
-          <div style={{ ...pulseBar, width: '140px', marginBottom: spacingTokens['4'] }} />
+          <div className="dd-skeleton" style={{ ...pulseBar, width: '140px', marginBottom: spacingTokens['4'] }} />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: spacingTokens['3'] }}>
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} style={{ ...pulseBar, height: spacingTokens['10'] }} />
+              <div key={i} className="dd-skeleton" style={{ ...pulseBar, height: spacingTokens['10'] }} />
             ))}
           </div>
         </section>
         <section style={cardStyle}>
-          <div style={{ ...pulseBar, width: '180px', marginBottom: spacingTokens['4'] }} />
+          <div className="dd-skeleton" style={{ ...pulseBar, width: '180px', marginBottom: spacingTokens['4'] }} />
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ ...pulseBar, marginBottom: spacingTokens['2'] }} />
+            <div key={i} className="dd-skeleton" style={{ ...pulseBar, marginBottom: spacingTokens['2'] }} />
           ))}
         </section>
       </section>

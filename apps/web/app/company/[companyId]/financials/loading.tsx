@@ -28,21 +28,21 @@ export default function FinancialsLoading() {
     <main style={shellStyle}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gap: spacingTokens['4'], width: '100%', boxSizing: 'border-box' }}>
         <section style={cardStyle}>
-          <div style={{ ...pulseBar, width: '140px', marginBottom: spacingTokens['3'] }} />
-          <div style={{ ...pulseBar, width: '320px', height: spacingTokens['8'] }} />
+          <div className="dd-skeleton" style={{ ...pulseBar, width: '140px', marginBottom: spacingTokens['3'] }} />
+          <div className="dd-skeleton" style={{ ...pulseBar, width: '320px', height: spacingTokens['8'] }} />
         </section>
         <section style={cardStyle}>
-          <div style={{ ...pulseBar, width: '160px', marginBottom: spacingTokens['4'] }} />
+          <div className="dd-skeleton" style={{ ...pulseBar, width: '160px', marginBottom: spacingTokens['4'] }} />
           <div style={{ display: 'flex', gap: spacingTokens['2'] }}>
-            <div style={{ ...pulseBar, width: '80px', height: spacingTokens['8'] }} />
-            <div style={{ ...pulseBar, width: '80px', height: spacingTokens['8'] }} />
+            <div className="dd-skeleton" style={{ ...pulseBar, width: '80px', height: spacingTokens['8'] }} />
+            <div className="dd-skeleton" style={{ ...pulseBar, width: '80px', height: spacingTokens['8'] }} />
           </div>
         </section>
         {Array.from({ length: 3 }).map((_, i) => (
           <section key={i} style={cardStyle}>
-            <div style={{ ...pulseBar, width: '180px', marginBottom: spacingTokens['4'] }} />
+            <div className="dd-skeleton" style={{ ...pulseBar, width: '180px', marginBottom: spacingTokens['4'] }} />
             {Array.from({ length: 4 }).map((_, j) => (
-              <div key={j} style={{ ...pulseBar, marginBottom: spacingTokens['2'] }} />
+              <div key={j} className="dd-skeleton" style={{ ...pulseBar, marginBottom: spacingTokens['2'] }} />
             ))}
           </section>
         ))}
