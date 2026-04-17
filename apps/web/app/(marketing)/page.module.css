@@ -1,24 +1,87 @@
+.pageMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.heroSection {
+  padding-top: 1rem;
+}
+
+.sectionDivider {
+  border: none;
+  border-top: 1px solid #D0D5DD;
+  margin: 0;
+}
+
+/* Real-data provenance example */
+.provenanceExample {
+  margin-top: 1.5rem;
+  border: 1px solid #D0D5DD;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: #FAFAF9;
+}
+
+.provenanceExampleLabel {
+  margin: 0;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #7C8BA8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #D0D5DD;
+}
+
+.provenanceExamplePre {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: #10213E;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* CTA subtle hover */
+.ctaPrimary:hover {
+  opacity: 0.88;
+}
+
+.ctaSecondary:hover {
+  border-color: #475467 !important;
+}
+
 .statsGrid {
   display: grid;
   grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
 .twoColGrid {
   display: grid;
   grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
 .provenanceGrid {
   display: grid;
   grid-template-columns: 1fr;
+  gap: 0.75rem;
 }
 
 .apiGrid {
   display: grid;
   grid-template-columns: 1fr;
+  gap: 0.75rem;
 }
 
 @media (min-width: 768px) {
+  .pageMain {
+    gap: 3rem;
+  }
+
   .statsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

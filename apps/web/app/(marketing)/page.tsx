@@ -1,10 +1,14 @@
 import {
+  ApiEndpointCard,
+  FeatureCard,
+  HeroHeadline,
   PageContainer,
+  PipelineStep,
+  ProvenanceField,
   SectionHeader,
   StatCard,
   colorTokens,
   radiusTokens,
-  shadowTokens,
   spacingTokens,
   typographyTokens
 } from '@data-dogs/ui';
@@ -47,27 +51,27 @@ const pipelineSteps = [
   }
 ] as const;
 
-const cardStyle = {
-  backgroundColor: colorTokens.surface.card,
-  border: `1px solid ${colorTokens.border.subtle}`,
-  borderRadius: radiusTokens.lg,
-  boxShadow: shadowTokens.sm,
-  padding: spacingTokens['5']
+const sampleProvenance = {
+  source_url: 'https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/0000320193-23-000106-index.htm',
+  accession: '0000320193-23-000106',
+  fetch_ts: '2024-11-02T08:14:32Z',
+  sha256: 'a1b2c3d4e5f6…7890',
+  parser: 'xbrl-parse v2.4.1',
+  job_id: 'ingest-7f3a9c'
 } as const;
 
 export default function MarketingPage() {
   return (
     <PageContainer>
-      <main style={{ display: 'flex', flexDirection: 'column', gap: spacingTokens['10'] }}>
+      <main className={styles.pageMain}>
 
         {/* Section 1: Trust Signal (Hero) */}
-        <section>
-          <SectionHeader
+        <section className={styles.heroSection}>
+          <HeroHeadline
             title="SEC filings → verified financial facts"
             subtitle="Every fact traced to source URL, accession number, fetch timestamp, checksum, parser version, and job ID."
-            level={1}
           />
-          <div className={styles.statsGrid} style={{ gap: spacingTokens['4'] }}>
+          <div className={styles.statsGrid}>
             <StatCard
               label="Filing types ingested"
               value="10-K, 10-Q, 8-K, DEF 14A"
@@ -86,49 +90,44 @@ export default function MarketingPage() {
           </div>
         </section>
 
+        <hr className={styles.sectionDivider} />
+
         {/* Section 2: Filings to Facts */}
         <section>
           <SectionHeader
             title="From raw filing to structured fact"
             subtitle="Deterministic extraction, not LLM guesswork."
           />
-          <div className={styles.statsGrid} style={{ gap: spacingTokens['4'] }}>
+          <div className={styles.statsGrid}>
             {pipelineSteps.map((s) => (
-              <article key={s.step} style={cardStyle}>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: typographyTokens.fontSize.sm,
-                    color: colorTokens.accent.muted,
-                    fontWeight: typographyTokens.fontWeight.semibold
-                  }}
-                >
-                  Step {s.step}
-                </p>
-                <p
-                  style={{
-                    margin: `${spacingTokens['2']} 0`,
-                    fontSize: typographyTokens.fontSize.xl,
-                    fontWeight: typographyTokens.fontWeight.semibold,
-                    color: colorTokens.text.primary
-                  }}
-                >
-                  {s.title}
-                </p>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: typographyTokens.fontSize.sm,
-                    color: colorTokens.text.secondary,
-                    lineHeight: typographyTokens.lineHeight.relaxed
-                  }}
-                >
-                  {s.description}
-                </p>
-              </article>
+              <PipelineStep
+                key={s.step}
+                step={s.step}
+                title={s.title}
+                description={s.description}
+              />
             ))}
           </div>
+
+          {/* Real-data provenance example */}
+          <div className={styles.provenanceExample}>
+            <p className={styles.provenanceExampleLabel}>
+              Sample provenance record — Apple Inc. 10-K (FY 2023)
+            </p>
+            <pre className={styles.provenanceExamplePre}>
+{`{
+  "source_url": "${sampleProvenance.source_url}",
+  "accession":  "${sampleProvenance.accession}",
+  "fetched_at": "${sampleProvenance.fetch_ts}",
+  "sha256":     "${sampleProvenance.sha256}",
+  "parser":     "${sampleProvenance.parser}",
+  "job_id":     "${sampleProvenance.job_id}"
+}`}
+            </pre>
+          </div>
         </section>
+
+        <hr className={styles.sectionDivider} />
 
         {/* Section 3: Compensation & Insider Modules */}
         <section>
@@ -136,55 +135,19 @@ export default function MarketingPage() {
             title="Executive compensation and insider activity"
             subtitle="Pay and trading data traced directly to SEC filings."
           />
-          <div className={styles.twoColGrid} style={{ gap: spacingTokens['4'] }}>
-            <article style={cardStyle}>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: typographyTokens.fontSize.lg,
-                  fontWeight: typographyTokens.fontWeight.semibold,
-                  color: colorTokens.text.primary
-                }}
-              >
-                Compensation
-              </p>
-              <p
-                style={{
-                  margin: `${spacingTokens['2']} 0 0`,
-                  fontSize: typographyTokens.fontSize.sm,
-                  color: colorTokens.text.secondary,
-                  lineHeight: typographyTokens.lineHeight.relaxed
-                }}
-              >
-                Named executive officer pay extracted from DEF 14A proxy filings.
-                Each compensation fact is source-linked to the specific proxy disclosure section.
-              </p>
-            </article>
-            <article style={cardStyle}>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: typographyTokens.fontSize.lg,
-                  fontWeight: typographyTokens.fontWeight.semibold,
-                  color: colorTokens.text.primary
-                }}
-              >
-                Insiders
-              </p>
-              <p
-                style={{
-                  margin: `${spacingTokens['2']} 0 0`,
-                  fontSize: typographyTokens.fontSize.sm,
-                  color: colorTokens.text.secondary,
-                  lineHeight: typographyTokens.lineHeight.relaxed
-                }}
-              >
-                Forms 3, 4, and 5 transaction summaries with filing-level provenance.
-                Every insider transaction links back to its SEC source filing.
-              </p>
-            </article>
+          <div className={styles.twoColGrid}>
+            <FeatureCard
+              title="Compensation"
+              description="Named executive officer pay extracted from DEF 14A proxy filings. Each compensation fact is source-linked to the specific proxy disclosure section."
+            />
+            <FeatureCard
+              title="Insiders"
+              description="Forms 3, 4, and 5 transaction summaries with filing-level provenance. Every insider transaction links back to its SEC source filing."
+            />
           </div>
         </section>
+
+        <hr className={styles.sectionDivider} />
 
         {/* Section 4: Provenance Story */}
         <section>
@@ -192,32 +155,18 @@ export default function MarketingPage() {
             title="Every number has a receipt"
             subtitle="Full audit trail, restatement-aware, reproducible."
           />
-          <div className={styles.provenanceGrid} style={{ gap: spacingTokens['3'] }}>
+          <div className={styles.provenanceGrid}>
             {provenanceFields.map((field) => (
-              <article key={field.label} style={cardStyle}>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: typographyTokens.fontSize.sm,
-                    fontWeight: typographyTokens.fontWeight.semibold,
-                    color: colorTokens.text.primary
-                  }}
-                >
-                  {field.label}
-                </p>
-                <p
-                  style={{
-                    margin: `${spacingTokens['1']} 0 0`,
-                    fontSize: typographyTokens.fontSize.sm,
-                    color: colorTokens.text.secondary
-                  }}
-                >
-                  {field.detail}
-                </p>
-              </article>
+              <ProvenanceField
+                key={field.label}
+                label={field.label}
+                detail={field.detail}
+              />
             ))}
           </div>
         </section>
+
+        <hr className={styles.sectionDivider} />
 
         {/* Section 5: API Story */}
         <section>
@@ -225,33 +174,18 @@ export default function MarketingPage() {
             title="Programmatic access to filing-derived data"
             subtitle="Every API response includes provenance metadata."
           />
-          <div className={styles.apiGrid} style={{ gap: spacingTokens['3'] }}>
+          <div className={styles.apiGrid}>
             {apiEndpoints.map((ep) => (
-              <article key={ep.path} style={cardStyle}>
-                <p
-                  style={{
-                    margin: 0,
-                    fontFamily: typographyTokens.fontFamily.mono,
-                    fontSize: typographyTokens.fontSize.sm,
-                    fontWeight: typographyTokens.fontWeight.medium,
-                    color: colorTokens.text.primary
-                  }}
-                >
-                  {ep.path}
-                </p>
-                <p
-                  style={{
-                    margin: `${spacingTokens['1']} 0 0`,
-                    fontSize: typographyTokens.fontSize.sm,
-                    color: colorTokens.text.secondary
-                  }}
-                >
-                  {ep.description}
-                </p>
-              </article>
+              <ApiEndpointCard
+                key={ep.path}
+                path={ep.path}
+                description={ep.description}
+              />
             ))}
           </div>
         </section>
+
+        <hr className={styles.sectionDivider} />
 
         {/* Section 6: Call to Action */}
         <section
@@ -274,6 +208,7 @@ export default function MarketingPage() {
           >
             <a
               href="/overview"
+              className={styles.ctaPrimary}
               style={{
                 display: 'inline-block',
                 padding: `${spacingTokens['3']} ${spacingTokens['6']}`,
@@ -282,13 +217,15 @@ export default function MarketingPage() {
                 borderRadius: radiusTokens.md,
                 fontSize: typographyTokens.fontSize.md,
                 fontWeight: typographyTokens.fontWeight.semibold,
-                textDecoration: 'none'
+                textDecoration: 'none',
+                transition: 'opacity 0.15s ease'
               }}
             >
               Explore the terminal
             </a>
             <a
               href="/docs/api"
+              className={styles.ctaSecondary}
               style={{
                 display: 'inline-block',
                 padding: `${spacingTokens['3']} ${spacingTokens['6']}`,
@@ -298,7 +235,8 @@ export default function MarketingPage() {
                 borderRadius: radiusTokens.md,
                 fontSize: typographyTokens.fontSize.md,
                 fontWeight: typographyTokens.fontWeight.semibold,
-                textDecoration: 'none'
+                textDecoration: 'none',
+                transition: 'border-color 0.15s ease'
               }}
             >
               Read the API docs
