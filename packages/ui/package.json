@@ -10,6 +10,7 @@
     "./components/financials": "./src/components/financials/index.ts",
     "./components/charts": "./src/components/charts/index.ts",
     "./components/ui": "./src/components/ui/index.ts",
+    "./components/notes": "./src/components/notes/index.ts",
     "./components/screener": "./src/components/screener/index.ts"
   },
   "scripts": {
