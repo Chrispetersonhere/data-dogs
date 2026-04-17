@@ -28,7 +28,7 @@ export function PipelineStep({ step, title, description }: PipelineStepProps) {
         style={{
           margin: 0,
           fontSize: typographyTokens.fontSize.xs,
-          color: colorTokens.accent.muted,
+          color: colorTokens.text.secondary,
           fontWeight: typographyTokens.fontWeight.semibold,
           textTransform: 'uppercase' as const,
           letterSpacing: '0.05em'
