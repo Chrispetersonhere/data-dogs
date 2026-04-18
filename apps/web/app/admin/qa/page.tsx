@@ -45,6 +45,7 @@ export default async function AdminQaPage({ searchParams }: AdminQaPageProps): P
 
   try {
     const view = await getCompQaView(cik);
+    const discrepancyRowIds = new Set(view.discrepancies.map((item) => item.rowId));
 
     return (
       <main style={layoutStyles.main}>
@@ -83,26 +84,42 @@ export default async function AdminQaPage({ searchParams }: AdminQaPageProps): P
                       <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Bonus</th>
                       <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Equity</th>
                       <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Total</th>
+                      <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Source URL</th>
                       <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Trace</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {view.rawProxyRows.map((row) => (
-                      <tr key={row.rowId}>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.executiveName}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.role}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.salaryUsd}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.bonusUsd}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.equityUsd}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.totalUsd}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4', fontSize: '12px' }}>
-                          {row.accession}<br />
-                          {row.fetchTimestamp}<br />
-                          {row.parserVersion}<br />
-                          {row.jobId}
-                        </td>
-                      </tr>
-                    ))}
+                    {view.rawProxyRows.map((row) => {
+                      const isDiscrepant = discrepancyRowIds.has(row.rowId);
+                      return (
+                        <tr
+                          key={row.rowId}
+                          data-discrepancy-row={isDiscrepant ? 'true' : 'false'}
+                          style={isDiscrepant ? { background: '#fff3f2' } : undefined}
+                        >
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.executiveName}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.role}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.salaryUsd}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.bonusUsd}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.equityUsd}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.totalUsd}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4', maxWidth: '180px', wordBreak: 'break-all' }}>
+                            {row.sourceUrl}
+                          </td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4', fontSize: '12px' }}>
+                            Accession: {row.accession}
+                            <br />
+                            Fetch timestamp: {row.fetchTimestamp}
+                            <br />
+                            Checksum: {row.checksum}
+                            <br />
+                            Parser version: {row.parserVersion}
+                            <br />
+                            Job id: {row.jobId}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -120,21 +137,28 @@ export default async function AdminQaPage({ searchParams }: AdminQaPageProps): P
                       <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Bonus</th>
                       <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Equity</th>
                       <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Total</th>
-                      <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>Trace source row</th>
+                      <th style={{ padding: '10px', borderBottom: '1px solid #d7dce2' }}>traceSourceRowId</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {view.parsedRows.map((row) => (
-                      <tr key={row.rowId}>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.executiveName}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.fiscalYear}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.salaryUsd}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.bonusUsd}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.equityUsd}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.totalUsd}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.traceSourceRowId}</td>
-                      </tr>
-                    ))}
+                    {view.parsedRows.map((row) => {
+                      const isDiscrepant = discrepancyRowIds.has(row.rowId);
+                      return (
+                        <tr
+                          key={row.rowId}
+                          data-discrepancy-row={isDiscrepant ? 'true' : 'false'}
+                          style={isDiscrepant ? { background: '#fff3f2' } : undefined}
+                        >
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.executiveName}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.fiscalYear}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.salaryUsd}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.bonusUsd}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.equityUsd}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.totalUsd}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #eef1f4' }}>{row.traceSourceRowId}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -144,7 +168,7 @@ export default async function AdminQaPage({ searchParams }: AdminQaPageProps): P
 
         <section>
           <h2 style={layoutStyles.subheading}>Discrepancy highlights</h2>
-          <p style={layoutStyles.muted}>Rows with mismatches are emphasized for review and must remain visible.</p>
+          <p style={layoutStyles.muted}>Rows with mismatches are emphasized in both tables and listed below for fast triage.</p>
           <div style={layoutStyles.panel}>
             <table style={{ ...layoutStyles.table, minWidth: '560px' }}>
               <thead style={{ background: '#fff7ed', textAlign: 'left' }}>
@@ -177,7 +201,7 @@ export default async function AdminQaPage({ searchParams }: AdminQaPageProps): P
         <section>
           <h2 style={layoutStyles.subheading}>Provenance and traceability</h2>
           <p style={layoutStyles.muted}>
-            CIK {view.issuerCik}. Raw table preserves source URL, accession, fetch timestamp, checksum, parser version, and job id.
+            CIK {view.issuerCik}. Raw table visibly preserves source URL, accession, fetch timestamp, checksum, parser version, and job id.
             Parsed rows include traceSourceRowId back to raw rows.
           </p>
         </section>

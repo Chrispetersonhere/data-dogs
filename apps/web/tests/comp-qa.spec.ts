@@ -10,6 +10,9 @@ const REQUIRED_TEXT = [
   'Load compensation QA',
   'Issuer CIK',
   'traceSourceRowId',
+  'Source URL',
+  'Checksum:',
+  'data-discrepancy-row="true"',
 ] as const;
 
 export function assertCompQaMarkup(markup: string): void {
@@ -31,8 +34,11 @@ test('assertCompQaMarkup accepts compensation QA markup with discrepancy highlig
     <button>Load compensation QA</button>
     <h2>Raw vs parsed comparison (side-by-side)</h2>
     <h3>Raw proxy table</h3>
+    <th>Source URL</th>
     <h3>Parsed structured output</h3>
     <span>traceSourceRowId</span>
+    <span>Checksum:</span>
+    <tr data-discrepancy-row="true"></tr>
     <h2>Discrepancy highlights</h2>
     <table><tr><td>total_mismatch</td></tr></table>
   `;
@@ -40,17 +46,20 @@ test('assertCompQaMarkup accepts compensation QA markup with discrepancy highlig
   assert.doesNotThrow(() => assertCompQaMarkup(markup));
 });
 
-test('assertCompQaMarkup rejects markup that hides discrepancy highlights', () => {
+test('assertCompQaMarkup rejects markup that hides discrepancy highlights in side-by-side tables', () => {
   const markup = `
     <h1>Admin Compensation QA</h1>
     <label>Issuer CIK</label>
     <button>Load compensation QA</button>
     <h2>Raw vs parsed comparison (side-by-side)</h2>
     <h3>Raw proxy table</h3>
+    <th>Source URL</th>
     <h3>Parsed structured output</h3>
     <span>traceSourceRowId</span>
+    <span>Checksum:</span>
     <h2>Discrepancy highlights</h2>
+    <table><tr><td>total_mismatch</td></tr></table>
   `;
 
-  assert.throws(() => assertCompQaMarkup(markup), /Missing discrepancy signal/);
+  assert.throws(() => assertCompQaMarkup(markup), /data-discrepancy-row="true"/);
 });

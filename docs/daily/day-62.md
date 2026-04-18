@@ -16,8 +16,41 @@
 ## Notes
 - This is internal-only and still gated by `ADMIN_ENABLED === 'true'`.
 - Public compensation pages and homepage are unchanged.
-- Rollback rule honored: discrepancy signals are explicit and visually highlighted rather than suppressed.
+- Rollback rule honored: discrepancy signals are explicit and visually highlighted in both side-by-side tables and in the discrepancy list.
+- Raw table now visibly includes all provenance fields required for QA auditability.
 
-## Verification
-- `pnpm --filter web build`
-- `pnpm --filter web test -- comp-qa.spec.ts || pnpm --filter web test`
+## Definition of done checks for Day 62
+1. `/admin/qa` is internal-only and loads under `ADMIN_ENABLED=true`.
+2. Raw proxy and parsed structured output are rendered side-by-side.
+3. Discrepant rows are visibly highlighted in both tables and listed in discrepancy highlights.
+4. Raw rows visibly include source URL, accession, fetch timestamp, checksum, parser version, and job id.
+5. Acceptance checks pass:
+   - `pnpm --filter web build`
+   - `pnpm --filter web test -- comp-qa.spec.ts || pnpm --filter web test`
+
+## Windows PowerShell verification
+```powershell
+# from repo root (use your current branch; do not assume a branch named 'work')
+git pull
+
+# inspect the latest Day 62 commit on current branch
+git log --oneline --max-count=20
+
+# run required Day 62 acceptance checks
+pnpm --filter web build
+pnpm --filter web test -- comp-qa.spec.ts
+if ($LASTEXITCODE -ne 0) { pnpm --filter web test }
+
+# optional broader repo checks
+pnpm lint
+pnpm typecheck
+pnpm --filter web test
+pnpm --filter web build
+
+# python services checks (only if pytest is available in your shell)
+pytest services/ingest-sec/tests -q
+pytest services/parse-xbrl/tests -q
+pytest services/parse-proxy/tests -q
+pytest services/id-master/tests -q
+pytest services/market-data/tests -q
+```
