@@ -15,12 +15,17 @@ Implemented a dedicated governance parser in parse-proxy to extract required gov
     - `raw_line`
     - `raw_text`
   - Uses conservative pattern matching and avoids inference when data is not feasible to extract.
+  - Handles common proxy layout variants:
+    - compensation committee heading followed by member list on next line
+    - say-on-pay outcome inference from `for`/`against` percentages when explicit pass/fail wording is absent
 
 - Added `services/parse-proxy/tests/test_parse_governance.py`.
   - Verifies required fact extraction for a representative proxy text block.
   - Verifies source linking exists on all extracted fact types.
   - Verifies separate CEO/chair detection.
   - Verifies optional facts remain `None`/empty when not feasible.
+  - Verifies committee-member extraction from a heading + following-line member list format.
+  - Verifies say-on-pay outcome inference from explicit percentage splits.
 
 ## Out of scope (intentionally unchanged)
 - UI/web application changes.

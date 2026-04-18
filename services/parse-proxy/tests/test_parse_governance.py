@@ -89,3 +89,45 @@ We maintain governance oversight through board committees.
     assert parsed.ceo_chair_structure is None
     assert parsed.compensation_committee_members == ()
     assert parsed.say_on_pay_result is None
+
+
+def test_parse_governance_extracts_committee_members_from_following_line() -> None:
+    text = """Compensation Committee
+Members: Dana White, Evan Green and Fiona Black
+"""
+
+    parsed = parse_governance_facts(
+        text=text,
+        start_line=200,
+        source_url="https://example.test/committee",
+        accession="acc-committee-following-line",
+    )
+
+    assert {member.member_name for member in parsed.compensation_committee_members} == {
+        "Dana White",
+        "Evan Green",
+        "Fiona Black",
+    }
+    for member in parsed.compensation_committee_members:
+        assert member.source.source_url == "https://example.test/committee"
+        assert member.source.raw_line == 201
+        assert member.source.raw_text == "Members: Dana White, Evan Green and Fiona Black"
+
+
+def test_parse_governance_infers_say_on_pay_outcome_from_for_against_percentages() -> None:
+    text = """Advisory Vote to Approve Executive Compensation (Say-on-Pay): 47% for, 53% against.
+"""
+
+    parsed = parse_governance_facts(
+        text=text,
+        start_line=320,
+        source_url="https://example.test/say-on-pay",
+        accession="acc-sop-percentages",
+    )
+
+    say_on_pay = parsed.say_on_pay_result
+    assert say_on_pay is not None
+    assert say_on_pay.support_percent == 47.0
+    assert say_on_pay.outcome == "failed"
+    assert say_on_pay.source.source_url == "https://example.test/say-on-pay"
+    assert say_on_pay.source.raw_line == 320

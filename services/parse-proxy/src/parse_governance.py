@@ -105,7 +105,13 @@ def _extract_ceo_chair_structure(*, lines: list[str], start_line: int, source_ur
             chair_name = _first_name(raw)
             chair_ref = GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw)
 
-        if "roles of chief executive officer and" in lowered and "chair" in lowered and "separate" in lowered:
+        separate_markers = (
+            "roles of chief executive officer and chair are separate",
+            "roles of chief executive officer and chairman are separate",
+            "chief executive officer and chair roles are separate",
+            "chief executive officer and chairman roles are separate",
+        )
+        if any(marker in lowered for marker in separate_markers):
             line_ref = GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw)
             return CeoChairStructureFact(
                 structure="separate",
@@ -128,18 +134,31 @@ def _extract_ceo_chair_structure(*, lines: list[str], start_line: int, source_ur
 
 def _extract_comp_committee_members(*, lines: list[str], start_line: int, source_url: str) -> tuple[CompensationCommitteeMemberFact, ...]:
     members: dict[str, CompensationCommitteeMemberFact] = {}
+    committee_context_active = False
 
     for idx, raw in enumerate(lines):
         lowered = raw.lower()
-        if "compensation committee" not in lowered:
+        has_committee_phrase = "compensation committee" in lowered
+        has_member_phrase = any(
+            keyword in lowered
+            for keyword in ("members", "consists of", "comprised of", "include", "includes", "composed of")
+        )
+
+        # Many proxy statements use a section line followed by a member list line.
+        if has_committee_phrase:
+            committee_context_active = True
+
+        if not has_member_phrase and not (committee_context_active and _looks_like_name_list(raw)):
             continue
 
-        if not any(keyword in lowered for keyword in ("members", "consists of", "comprised of", "include")):
-            continue
+        if has_member_phrase or committee_context_active:
+            line_ref = GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw)
+            for name in _extract_names(raw):
+                members.setdefault(name, CompensationCommitteeMemberFact(member_name=name, source=line_ref))
 
-        line_ref = GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw)
-        for name in _extract_names(raw):
-            members.setdefault(name, CompensationCommitteeMemberFact(member_name=name, source=line_ref))
+        # Stop context once we move past a likely member list line.
+        if has_member_phrase or _looks_like_name_list(raw):
+            committee_context_active = False
 
     return tuple(members.values())
 
@@ -150,15 +169,8 @@ def _extract_say_on_pay(*, lines: list[str], start_line: int, source_url: str) -
         if "say-on-pay" not in lowered and "say on pay" not in lowered:
             continue
 
-        percent_match = re.search(r"(\d{1,3}(?:\.\d+)?)\s*%", raw)
-        support_percent = float(percent_match.group(1)) if percent_match else None
-
-        if any(term in lowered for term in ("approved", "passed", "received majority", "supported")):
-            outcome = "approved"
-        elif any(term in lowered for term in ("failed", "did not pass", "not approved")):
-            outcome = "failed"
-        else:
-            outcome = "unknown"
+        support_percent = _extract_support_percent(raw)
+        outcome = _infer_say_on_pay_outcome(line=raw, support_percent=support_percent)
 
         return SayOnPayResultFact(
             outcome=outcome,
@@ -192,3 +204,36 @@ def _first_name(text: str) -> str | None:
     if not names:
         return None
     return names[0]
+
+
+def _looks_like_name_list(text: str) -> bool:
+    names = _extract_names(text)
+    return len(names) >= 2
+
+
+def _extract_support_percent(text: str) -> float | None:
+    for_pattern = re.search(r"(\d{1,3}(?:\.\d+)?)\s*%\s*(?:for|in favor)", text, flags=re.IGNORECASE)
+    if for_pattern:
+        return float(for_pattern.group(1))
+
+    generic = re.search(r"(\d{1,3}(?:\.\d+)?)\s*%", text)
+    if generic:
+        return float(generic.group(1))
+    return None
+
+
+def _infer_say_on_pay_outcome(*, line: str, support_percent: float | None) -> str:
+    lowered = line.lower()
+    if any(term in lowered for term in ("approved", "passed", "received majority", "supported")):
+        return "approved"
+    if any(term in lowered for term in ("failed", "did not pass", "not approved", "rejected")):
+        return "failed"
+
+    against_match = re.search(r"(\d{1,3}(?:\.\d+)?)\s*%\s*against", line, flags=re.IGNORECASE)
+    if support_percent is not None and against_match:
+        against_percent = float(against_match.group(1))
+        return "approved" if support_percent > against_percent else "failed"
+
+    if support_percent is not None:
+        return "approved" if support_percent >= 50.0 else "failed"
+    return "unknown"
