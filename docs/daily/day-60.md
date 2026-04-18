@@ -38,6 +38,23 @@ cd C:\Users\lolvi\Documents\GitHub\data-dogs
 
 # required acceptance test for day 60
 py -m pytest services/parse-proxy/tests/test_parse_grants.py -q
+
+# optional broader suite used in this repo
+py -m pytest services/parse-proxy/tests -q
+pnpm lint
+pnpm typecheck
+pnpm --filter web test
+pnpm --filter web build
+py -m pytest services/ingest-sec/tests -q
+py -m pytest services/parse-xbrl/tests -q
+py -m pytest services/id-master/tests -q
+
+# market-data tests may not exist on this branch; skip safely if absent
+if (Test-Path "services/market-data/tests") {
+  py -m pytest services/market-data/tests -q
+} else {
+  Write-Host "SKIP: services/market-data/tests not present on this branch"
+}
 ```
 
 ## Auditability and provenance
