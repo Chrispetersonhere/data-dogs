@@ -68,8 +68,9 @@ def parse_summary_comp_table(*, table_text: str, start_line: int, source_url: st
     - It never guesses/fills missing cells.
     - It preserves raw row text + raw row line for traceability.
     """
-    lines = [line for line in table_text.splitlines() if line.strip()]
-    if not lines:
+    raw_lines = table_text.splitlines()
+    non_empty_lines = [(idx, line) for idx, line in enumerate(raw_lines) if line.strip()]
+    if not non_empty_lines:
         return ParsedSct(
             source_url=source_url,
             accession=accession,
@@ -78,13 +79,12 @@ def parse_summary_comp_table(*, table_text: str, start_line: int, source_url: st
             rows=(),
         )
 
-    header_idx = _find_header_index(lines)
-    header_line = lines[header_idx]
+    header_idx = _find_header_index([line for _, line in non_empty_lines])
+    header_raw_idx, header_line = non_empty_lines[header_idx]
     canonical_by_column = _canonical_columns(header_line)
 
     parsed_rows: list[SctRow] = []
-    for idx in range(header_idx + 1, len(lines)):
-        line = lines[idx]
+    for raw_idx, line in non_empty_lines[header_idx + 1 :]:
         columns = _split_columns(line)
         if len(columns) <= 1:
             continue
@@ -92,7 +92,7 @@ def parse_summary_comp_table(*, table_text: str, start_line: int, source_url: st
         parsed_rows.append(
             SctRow(
                 raw_row_text=line,
-                raw_row_line=start_line + idx,
+                raw_row_line=start_line + raw_idx,
                 salary=_value_for(columns, canonical_by_column, "salary"),
                 bonus=_value_for(columns, canonical_by_column, "bonus"),
                 stock_awards=_value_for(columns, canonical_by_column, "stock_awards"),
@@ -108,7 +108,7 @@ def parse_summary_comp_table(*, table_text: str, start_line: int, source_url: st
         source_url=source_url,
         accession=accession,
         parser_version=PARSER_VERSION,
-        header_line=start_line + header_idx,
+        header_line=start_line + header_raw_idx,
         rows=tuple(parsed_rows),
     )
 
@@ -137,7 +137,12 @@ def _canonical_columns(header_line: str) -> dict[int, str]:
 
 def _split_columns(line: str) -> list[str]:
     if "|" in line:
-        return [c.strip() for c in line.split("|") if c.strip()]
+        normalized = line.strip()
+        if normalized.startswith("|"):
+            normalized = normalized[1:]
+        if normalized.endswith("|"):
+            normalized = normalized[:-1]
+        return [c.strip() for c in normalized.split("|")]
     return [c.strip() for c in re.split(r"\s{2,}", line.strip()) if c.strip()]
 
 

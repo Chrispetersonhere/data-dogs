@@ -11,6 +11,7 @@ _NAME_PATTERN = r"[A-Z][A-Za-z'\.-]+(?:\s+[A-Z][A-Za-z'\.-]+){1,4}"
 @dataclass(frozen=True)
 class GovernanceLineRef:
     source_url: str
+    source_accession: str
     raw_line: int
     raw_text: str
 
@@ -54,11 +55,27 @@ def parse_governance_facts(*, text: str, start_line: int, source_url: str, acces
     - It preserves source URL + raw line + raw text for every extracted fact.
     - It avoids guessing when evidence is weak or conflicting.
     """
-    lines = [line for line in text.splitlines() if line.strip()]
+    raw_lines = text.splitlines()
+    non_empty_lines = [(idx, line) for idx, line in enumerate(raw_lines) if line.strip()]
 
-    ceo_chair_structure = _extract_ceo_chair_structure(lines=lines, start_line=start_line, source_url=source_url)
-    compensation_members = _extract_comp_committee_members(lines=lines, start_line=start_line, source_url=source_url)
-    say_on_pay_result = _extract_say_on_pay(lines=lines, start_line=start_line, source_url=source_url)
+    ceo_chair_structure = _extract_ceo_chair_structure(
+        lines=non_empty_lines,
+        start_line=start_line,
+        source_url=source_url,
+        accession=accession,
+    )
+    compensation_members = _extract_comp_committee_members(
+        lines=non_empty_lines,
+        start_line=start_line,
+        source_url=source_url,
+        accession=accession,
+    )
+    say_on_pay_result = _extract_say_on_pay(
+        lines=non_empty_lines,
+        start_line=start_line,
+        source_url=source_url,
+        accession=accession,
+    )
 
     return ParsedGovernance(
         source_url=source_url,
@@ -70,13 +87,15 @@ def parse_governance_facts(*, text: str, start_line: int, source_url: str, acces
     )
 
 
-def _extract_ceo_chair_structure(*, lines: list[str], start_line: int, source_url: str) -> CeoChairStructureFact | None:
+def _extract_ceo_chair_structure(
+    *, lines: list[tuple[int, str]], start_line: int, source_url: str, accession: str
+) -> CeoChairStructureFact | None:
     ceo_name: str | None = None
     chair_name: str | None = None
     ceo_ref: GovernanceLineRef | None = None
     chair_ref: GovernanceLineRef | None = None
 
-    for idx, raw in enumerate(lines):
+    for raw_idx, raw in lines:
         lowered = raw.lower()
 
         combined_markers = (
@@ -89,7 +108,12 @@ def _extract_ceo_chair_structure(*, lines: list[str], start_line: int, source_ur
         )
         if any(marker in lowered for marker in combined_markers):
             name = _first_name(raw)
-            line_ref = GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw)
+            line_ref = GovernanceLineRef(
+                source_url=source_url,
+                source_accession=accession,
+                raw_line=start_line + raw_idx,
+                raw_text=raw,
+            )
             return CeoChairStructureFact(
                 structure="combined",
                 ceo_name=name,
@@ -99,11 +123,21 @@ def _extract_ceo_chair_structure(*, lines: list[str], start_line: int, source_ur
 
         if "chief executive officer" in lowered:
             ceo_name = _first_name(raw)
-            ceo_ref = GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw)
+            ceo_ref = GovernanceLineRef(
+                source_url=source_url,
+                source_accession=accession,
+                raw_line=start_line + raw_idx,
+                raw_text=raw,
+            )
 
         if "chair of the board" in lowered or "chairman of the board" in lowered or "board chair" in lowered:
             chair_name = _first_name(raw)
-            chair_ref = GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw)
+            chair_ref = GovernanceLineRef(
+                source_url=source_url,
+                source_accession=accession,
+                raw_line=start_line + raw_idx,
+                raw_text=raw,
+            )
 
         separate_markers = (
             "roles of chief executive officer and chair are separate",
@@ -112,7 +146,12 @@ def _extract_ceo_chair_structure(*, lines: list[str], start_line: int, source_ur
             "chief executive officer and chairman roles are separate",
         )
         if any(marker in lowered for marker in separate_markers):
-            line_ref = GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw)
+            line_ref = GovernanceLineRef(
+                source_url=source_url,
+                source_accession=accession,
+                raw_line=start_line + raw_idx,
+                raw_text=raw,
+            )
             return CeoChairStructureFact(
                 structure="separate",
                 ceo_name=ceo_name,
@@ -132,11 +171,13 @@ def _extract_ceo_chair_structure(*, lines: list[str], start_line: int, source_ur
     return None
 
 
-def _extract_comp_committee_members(*, lines: list[str], start_line: int, source_url: str) -> tuple[CompensationCommitteeMemberFact, ...]:
+def _extract_comp_committee_members(
+    *, lines: list[tuple[int, str]], start_line: int, source_url: str, accession: str
+) -> tuple[CompensationCommitteeMemberFact, ...]:
     members: dict[str, CompensationCommitteeMemberFact] = {}
     committee_context_active = False
 
-    for idx, raw in enumerate(lines):
+    for raw_idx, raw in lines:
         lowered = raw.lower()
         has_committee_phrase = "compensation committee" in lowered
         has_member_phrase = any(
@@ -152,7 +193,12 @@ def _extract_comp_committee_members(*, lines: list[str], start_line: int, source
             continue
 
         if has_member_phrase or committee_context_active:
-            line_ref = GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw)
+            line_ref = GovernanceLineRef(
+                source_url=source_url,
+                source_accession=accession,
+                raw_line=start_line + raw_idx,
+                raw_text=raw,
+            )
             for name in _extract_names(raw):
                 members.setdefault(name, CompensationCommitteeMemberFact(member_name=name, source=line_ref))
 
@@ -163,8 +209,10 @@ def _extract_comp_committee_members(*, lines: list[str], start_line: int, source
     return tuple(members.values())
 
 
-def _extract_say_on_pay(*, lines: list[str], start_line: int, source_url: str) -> SayOnPayResultFact | None:
-    for idx, raw in enumerate(lines):
+def _extract_say_on_pay(
+    *, lines: list[tuple[int, str]], start_line: int, source_url: str, accession: str
+) -> SayOnPayResultFact | None:
+    for raw_idx, raw in lines:
         lowered = raw.lower()
         if "say-on-pay" not in lowered and "say on pay" not in lowered:
             continue
@@ -175,7 +223,12 @@ def _extract_say_on_pay(*, lines: list[str], start_line: int, source_url: str) -
         return SayOnPayResultFact(
             outcome=outcome,
             support_percent=support_percent,
-            source=GovernanceLineRef(source_url=source_url, raw_line=start_line + idx, raw_text=raw),
+            source=GovernanceLineRef(
+                source_url=source_url,
+                source_accession=accession,
+                raw_line=start_line + raw_idx,
+                raw_text=raw,
+            ),
         )
 
     return None

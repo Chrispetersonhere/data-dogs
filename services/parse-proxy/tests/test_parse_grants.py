@@ -80,3 +80,27 @@ Chief Accounting Officer  2025  --
     assert row.period == "2025"
     assert row.award is None
     assert row.award_candidates == ()
+
+
+def test_parse_grants_preserves_blank_pipe_columns_and_source_line_numbers() -> None:
+    table_text = """Grants of Plan-Based Awards
+
+Name|Fiscal Year|Grant Date Fair Value|Stock Award
+
+Chief Accounting Officer|2025||400000
+"""
+
+    parsed = parse_grants_table(
+        table_text=table_text,
+        start_line=30,
+        source_url="https://example.test/grants-pipes",
+        accession="acc-grants-pipes",
+    )
+
+    assert parsed.header_line == 32
+    row = parsed.rows[0]
+    assert row.raw_row_line == 34
+    assert row.executive == "Chief Accounting Officer"
+    assert row.period == "2025"
+    assert row.award == 400_000
+    assert row.award_candidates == (400_000,)

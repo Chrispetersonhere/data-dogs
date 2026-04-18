@@ -80,3 +80,23 @@ CEO   100  --  200  --  --  0  --  --
     assert row.non_equity is None
     assert row.other_comp is None
     assert row.total is None
+
+
+def test_parse_summary_comp_table_preserves_source_line_numbers_with_blank_lines() -> None:
+    table_text = """Summary Compensation Table
+
+Name|Salary|Bonus|Stock Awards|Option Awards|Non-Equity Incentive Plan Compensation|Change in Pension Value|All Other Compensation|Total
+
+CEO|100|10|200||25|0|5|340
+"""
+    parsed = parse_summary_comp_table(
+        table_text=table_text,
+        start_line=50,
+        source_url="https://example.test/proxy-blank-lines",
+        accession="acc-blank-lines",
+    )
+
+    assert parsed.header_line == 52
+    row = parsed.rows[0]
+    assert row.raw_row_line == 54
+    assert row.option_awards is None
