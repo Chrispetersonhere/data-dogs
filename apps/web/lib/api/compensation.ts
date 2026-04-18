@@ -76,18 +76,6 @@ function toSourceUrl(cik: string, accession: string, primaryDocument: string): s
   return `https://www.sec.gov/Archives/edgar/data/${Number.parseInt(cik, 10)}/${accessionForPath(accession)}/${safeDoc}`;
 }
 
-function decodeHtmlText(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&#160;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 function normalizeExecutiveName(raw: string): string {
   return raw
     .replace(/\s+/g, ' ')
