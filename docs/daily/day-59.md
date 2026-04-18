@@ -27,8 +27,25 @@ Implemented a dedicated parser for Summary Compensation Table (SCT) rows in the 
 - Grants parsing.
 - Governance parsing.
 
-## Verification
+## Verification (Linux/macOS)
 - `pytest services/parse-proxy/tests/test_parse_sct.py -q`
+
+## Verification (Windows PowerShell)
+- Use `python -m pytest`/`py -m pytest` so the test runner resolves from your active interpreter.
+
+```powershell
+# from repository root
+cd C:\Users\lolvi\Documents\GitHub\data-dogs
+
+# ensure pytest is available in this Python environment
+py -m pip install -U pip pytest
+
+# required acceptance test for day 59
+py -m pytest services/parse-proxy/tests/test_parse_sct.py -q
+
+# optional safety check for parse-proxy test suite
+py -m pytest services/parse-proxy/tests -q
+```
 
 ## Auditability and provenance
 - Parser output keeps source metadata fields (`source_url`, `accession`) and parser version (`parse-proxy.parse_sct.v1`).
