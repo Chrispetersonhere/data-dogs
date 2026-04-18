@@ -37,6 +37,7 @@ class GrantRow:
     period: str | None
     period_candidates: tuple[str, ...]
     award: int | None
+    award_candidates: tuple[int, ...]
 
 
 @dataclass(frozen=True)
@@ -90,6 +91,7 @@ def parse_grants_table(*, table_text: str, start_line: int, source_url: str, acc
                 period=period_candidates[0] if len(period_candidates) == 1 else None,
                 period_candidates=period_candidates,
                 award=award_candidates[0] if len(award_candidates) == 1 else None,
+                award_candidates=award_candidates,
             )
         )
 

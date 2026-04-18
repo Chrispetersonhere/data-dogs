@@ -36,6 +36,7 @@ Chief Financial Officer  2025  1,250,000
     assert ceo.period == "2025"
     assert ceo.period_candidates == ("2025",)
     assert ceo.award == 2_500_000
+    assert ceo.award_candidates == (2_500_000,)
 
 
 def test_parse_grants_keeps_ambiguity_explicit() -> None:
@@ -59,6 +60,7 @@ Jane Doe  Jane A. Doe  2025  2024-2025  300000  500000
     assert row.period_candidates == ("2025", "2024-2025")
 
     assert row.award is None
+    assert row.award_candidates == (300_000, 500_000)
 
 
 def test_parse_grants_does_not_guess_missing_awards() -> None:
@@ -77,3 +79,4 @@ Chief Accounting Officer  2025  --
     assert row.executive == "Chief Accounting Officer"
     assert row.period == "2025"
     assert row.award is None
+    assert row.award_candidates == ()

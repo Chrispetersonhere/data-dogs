@@ -9,12 +9,12 @@ Implemented a dedicated grants parser in parse-proxy to capture award amounts wh
   - Parses grants table rows conservatively into:
     - `executive` / `executive_candidates`
     - `period` / `period_candidates`
-    - `award`
+    - `award` / `award_candidates`
   - Preserves row provenance via `raw_row_text` and `raw_row_line`.
   - Keeps ambiguity explicit:
     - If multiple executive columns are present, `executive` is `None` and all values stay in `executive_candidates`.
     - If multiple period columns are present, `period` is `None` and all values stay in `period_candidates`.
-    - If multiple award-like columns are present with values, `award` is `None` instead of guessing.
+    - If multiple award-like columns are present with values, `award` is `None` and all parsed values are retained in `award_candidates`.
   - Does not infer or backfill missing award data.
 
 - Added `services/parse-proxy/tests/test_parse_grants.py`.
