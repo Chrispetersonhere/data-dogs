@@ -28,6 +28,7 @@ Date: 2026-04-18
 - Replaced invalid `colorTokens.accent.primary` link color usage with `colorTokens.accent.soft` in compensation page links to satisfy `web` TypeScript token typing.
 - Reworked compensation row extraction to prioritize HTML table-row parsing for Summary Compensation Table-style structures so executive names resolve to person names (e.g., `Tim Cook`) rather than section-label noise.
 - Updated compensation page test import path to avoid `.ts` extension suffix so CI TypeScript checks pass without enabling `allowImportingTsExtensions`.
+- Tightened row extraction to exclude compensation component labels (e.g., `Base Salary`, `Variable Cash`, `SY PSUs` / `MY PSUs`) and to ignore filing-year rows so reported fiscal years stay in the prior fiscal period window.
 
 ## Rollback rule check
 - The page remains usable even when row extraction is sparse: source links and filing context are still rendered from real SEC data.

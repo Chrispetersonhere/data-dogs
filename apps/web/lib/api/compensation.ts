@@ -183,6 +183,18 @@ const NOISE_EXECUTIVE_LABELS = new Set([
   'scorecard focus',
   'contents summary governance directors',
   'average summary compensation table',
+  'base salary',
+  'variable cash',
+  'cash bonus',
+  'salary',
+  'bonus',
+  'stock awards',
+  'option awards',
+  'non-equity incentive plan compensation',
+  'all other compensation',
+  'total',
+  'my psus',
+  'sy psus',
 ]);
 
 function looksLikeExecutiveName(value: string): boolean {
@@ -196,9 +208,19 @@ function looksLikeExecutiveName(value: string): boolean {
   return /^[A-Z][A-Za-z'-.]+(?:\s+[A-Z][A-Za-z'-.]+){1,3}$/.test(normalized);
 }
 
-function parseYearFromCells(cells: string[], filingYear: number): number | null {
+function parseYearFromCells(cells: string[], filingYear: number, yearIndex: number | null): number | null {
+  if (yearIndex !== null && yearIndex < cells.length) {
+    const yearMatch = cells[yearIndex].match(/\b(20\d{2}|19\d{2})\b/);
+    if (yearMatch) {
+      const year = Number.parseInt(yearMatch[1], 10);
+      if (year >= filingYear - 15 && year <= filingYear - 1) {
+        return year;
+      }
+    }
+  }
+
   const years = extractYearTokens(cells.join(' '));
-  const valid = years.filter((year) => year <= filingYear && year >= filingYear - 15);
+  const valid = years.filter((year) => year <= filingYear - 1 && year >= filingYear - 15);
   return valid.length > 0 ? valid[0] : null;
 }
 
@@ -228,13 +250,16 @@ function parseCompensationRowsFromTables(args: {
   const filingYear = Number.parseInt(args.filing.filingDate.slice(0, 4), 10);
   const out: CompensationRow[] = [];
   let currentTotalColumn: number | null = null;
+  let currentYearColumn: number | null = null;
 
   for (const cells of rows) {
     const lowered = cells.map((cell) => cell.toLowerCase());
-    const headerLike = lowered.some((cell) => cell.includes('name') && cell.includes('principal'))
-      && lowered.some((cell) => cell.includes('total'));
+    const headerLike = lowered.some((cell) => cell.includes('year'))
+      && lowered.some((cell) => cell.includes('total'))
+      && lowered.some((cell) => cell.includes('name') || cell.includes('principal position'));
     if (headerLike) {
       currentTotalColumn = lowered.findIndex((cell) => cell.includes('total'));
+      currentYearColumn = lowered.findIndex((cell) => cell.includes('year'));
       continue;
     }
 
@@ -243,7 +268,7 @@ function parseCompensationRowsFromTables(args: {
       continue;
     }
 
-    const fiscalYear = parseYearFromCells(cells, filingYear);
+    const fiscalYear = parseYearFromCells(cells, filingYear, currentYearColumn);
     if (fiscalYear === null) {
       continue;
     }
