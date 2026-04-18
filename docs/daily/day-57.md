@@ -42,7 +42,7 @@ Date: 2026-04-18
 ## Definition of done status
 - Schema + domain + docs scope: complete.
 - JS/TS validation palette (`pnpm`): complete.
-- Python service tests in Windows PowerShell: blocked until `pytest` is available in the Python environment.
+- Python service tests in Windows PowerShell: complete via `py -m pytest` (ingest-sec, parse-xbrl, id-master); optional suites skipped when paths are absent.
 
 ## Verification commands run (agent environment)
 - `git status --short`
@@ -53,6 +53,11 @@ Date: 2026-04-18
 - `pytest services/ingest-sec/tests -q`
 - `pytest services/parse-xbrl/tests -q`
 - `pytest services/id-master/tests -q`
+- `py -m pytest services/ingest-sec/tests -q`
+- `py -m pytest services/parse-xbrl/tests -q`
+- `py -m pytest services/id-master/tests -q`
+- `if (Test-Path services/parse-proxy/tests) { py -m pytest services/parse-proxy/tests -q } else { Write-Host "SKIP services/parse-proxy/tests (path not present)" }`
+- `if (Test-Path services/market-data/tests) { py -m pytest services/market-data/tests -q } else { Write-Host "SKIP services/market-data/tests (path not present)" }`
 
 ## Windows PowerShell verification block
 Use this from repo root to validate this Day 57 PR in Windows PowerShell.
