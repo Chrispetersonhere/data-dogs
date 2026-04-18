@@ -27,7 +27,16 @@ Date: 2026-04-18
 
 ## Acceptance checks
 - ✅ `pytest services/parse-proxy/tests -q`
-- ⚠️ `pnpm --filter web build` (environment network/proxy prevented Corepack from downloading pnpm archive)
+- ✅ `pnpm --filter web build`
+
+## Additional verification (Windows PowerShell run)
+- ✅ `pnpm lint`
+- ✅ `pnpm typecheck`
+- ✅ `pnpm --filter web test`
+- ✅ `py -m pytest services/ingest-sec/tests -q`
+- ✅ `py -m pytest services/parse-xbrl/tests -q`
+- ✅ `py -m pytest services/id-master/tests -q`
+- ✅ `services/market-data/tests` skipped because the path is not present on this branch.
 
 ## Rollback rule check
 - No scope expansion beyond stabilization was introduced; no new modules/features were added.

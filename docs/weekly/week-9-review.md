@@ -20,7 +20,8 @@ Stabilize the compensation data path from proxy ingestion through parser outputs
 ## Quality and verification status
 - Parse-proxy suite passed after stabilization:
   - `pytest services/parse-proxy/tests -q`
-- Web build acceptance command could not be executed in this environment due external package download restriction during Corepack/pnpm bootstrap.
+- Web build acceptance command passed:
+  - `pnpm --filter web build`
 
 ## Limitations and risk notes
 - Parsing remains heuristic text-based and not full HTML table-model aware.
