@@ -100,21 +100,25 @@ test('extractCompensationRowsForTest excludes compensation-component labels and 
       <tr>
         <th>Name and Principal Position</th>
         <th>Year</th>
+        <th>Salary ($)</th>
         <th>Total ($)</th>
       </tr>
       <tr>
         <td>Base Salary</td>
         <td>2024</td>
         <td>$1,000,000</td>
+        <td>$1,000,000</td>
       </tr>
       <tr>
         <td>Jen-Hsun Huang</td>
         <td>2026</td>
+        <td>$3,000,000</td>
         <td>$49,866,251</td>
       </tr>
       <tr>
         <td>Jen-Hsun Huang</td>
         <td>2025</td>
+        <td>$3,000,000</td>
         <td>$49,866,251</td>
       </tr>
     </table>
