@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { extractCompensationRowsForTest } from '../lib/api/compensation.ts';
+import { extractCompensationRowsForTest } from '../lib/api/compensation';
 
 const REQUIRED_TEXT = [
   'Premium layout',
