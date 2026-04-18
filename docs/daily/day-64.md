@@ -23,6 +23,10 @@ Date: 2026-04-18
   - Explicit fallback rendering when no parseable rows are found while still preserving source visibility.
 - Added `apps/web/tests/compensation-page.spec.ts` to assert required markup sections and reject incomplete markup.
 
+
+## Post-review fix
+- Replaced invalid `colorTokens.accent.primary` link color usage with `colorTokens.accent.soft` in compensation page links to satisfy `web` TypeScript token typing.
+
 ## Rollback rule check
 - The page remains usable even when row extraction is sparse: source links and filing context are still rendered from real SEC data.
 - If production testing shows page usability failure on real data, rollback should revert this Day 64 patch.

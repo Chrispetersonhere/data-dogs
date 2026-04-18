@@ -85,7 +85,7 @@ export default async function CompanyCompensationPage({ params }: CompensationPa
                         <td style={{ padding: spacingTokens['2'] }}>{formatUsd(row.totalCompensationUsd)}</td>
                         <td style={{ padding: spacingTokens['2'] }}>{row.filingDate}</td>
                         <td style={{ padding: spacingTokens['2'] }}>
-                          <a href={row.sourceUrl} target="_blank" rel="noreferrer" style={{ color: colorTokens.accent.primary }}>
+                          <a href={row.sourceUrl} target="_blank" rel="noreferrer" style={{ color: colorTokens.accent.soft }}>
                             {row.accession}
                           </a>
                         </td>
@@ -119,7 +119,7 @@ export default async function CompanyCompensationPage({ params }: CompensationPa
                         <td style={{ padding: spacingTokens['2'] }}>{row.fiscalYear}</td>
                         <td style={{ padding: spacingTokens['2'] }}>{formatUsd(row.totalCompensationUsd)}</td>
                         <td style={{ padding: spacingTokens['2'] }}>
-                          <a href={row.latestSourceUrl} target="_blank" rel="noreferrer" style={{ color: colorTokens.accent.primary }}>
+                          <a href={row.latestSourceUrl} target="_blank" rel="noreferrer" style={{ color: colorTokens.accent.soft }}>
                             source link
                           </a>
                         </td>
@@ -140,7 +140,7 @@ export default async function CompanyCompensationPage({ params }: CompensationPa
                 {compensation.sources.map((source) => (
                   <li key={source.accession}>
                     {source.filingDate} · {source.form} ·{' '}
-                    <a href={source.sourceUrl} target="_blank" rel="noreferrer" style={{ color: colorTokens.accent.primary }}>
+                    <a href={source.sourceUrl} target="_blank" rel="noreferrer" style={{ color: colorTokens.accent.soft }}>
                       {source.accession}
                     </a>
                   </li>
