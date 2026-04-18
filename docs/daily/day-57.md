@@ -39,7 +39,12 @@ Date: 2026-04-18
 ## Rollback rule check
 - Schema retains separate role-history and compensation-facts structures; rollback not required.
 
-## Verification commands run
+## Definition of done status
+- Schema + domain + docs scope: complete.
+- JS/TS validation palette (`pnpm`): complete.
+- Python service tests in Windows PowerShell: blocked until `pytest` is available in the Python environment.
+
+## Verification commands run (agent environment)
 - `git status --short`
 - `pnpm lint`
 - `pnpm typecheck`
@@ -47,12 +52,11 @@ Date: 2026-04-18
 - `pnpm --filter web build`
 - `pytest services/ingest-sec/tests -q`
 - `pytest services/parse-xbrl/tests -q`
-- `pytest services/parse-proxy/tests -q`
 - `pytest services/id-master/tests -q`
-- `pytest services/market-data/tests -q`
 
 ## Windows PowerShell verification block
-Use this from repo root to validate this Day 57 PR:
+Use this from repo root to validate this Day 57 PR in Windows PowerShell.
+This version avoids direct `pytest` calls and handles optional/missing service test folders.
 
 ```powershell
 git fetch origin
@@ -62,6 +66,7 @@ git checkout $branch
 git pull --ff-only
 
 # Confirm scope is restricted to Day 57 files
+# (should be clean after pulling if you are only validating)
 git status --short
 
 # Review changed files
@@ -69,14 +74,25 @@ Get-Content packages\db\schema\011_compensation.sql
 Get-Content packages\schemas\src\domain\compensation.ts
 Get-Content docs\daily\day-57.md
 
-# Standard verification palette
+# JS/TS validation palette
 pnpm lint
 pnpm typecheck
 pnpm --filter web test
 pnpm --filter web build
-pytest services/ingest-sec/tests -q
-pytest services/parse-xbrl/tests -q
-pytest services/parse-proxy/tests -q
-pytest services/id-master/tests -q
-pytest services/market-data/tests -q
+
+# Python test prerequisites (Windows)
+py --version
+py -m pip --version
+
+# If pytest is missing, install it in your active environment:
+# py -m pip install pytest
+
+# Python service tests (run with module form for PowerShell compatibility)
+py -m pytest services/ingest-sec/tests -q
+py -m pytest services/parse-xbrl/tests -q
+py -m pytest services/id-master/tests -q
+
+# Optional suites: run only if present in your checkout
+if (Test-Path services/parse-proxy/tests) { py -m pytest services/parse-proxy/tests -q } else { Write-Host "SKIP services/parse-proxy/tests (path not present)" }
+if (Test-Path services/market-data/tests) { py -m pytest services/market-data/tests -q } else { Write-Host "SKIP services/market-data/tests (path not present)" }
 ```
