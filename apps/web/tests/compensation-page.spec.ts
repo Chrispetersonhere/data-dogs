@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { extractCompensationRowsForTest } from '../lib/api/compensation.ts';
 
 const REQUIRED_TEXT = [
   'Premium layout',
@@ -49,4 +50,46 @@ test('assertCompensationPageMarkup rejects markup missing executive table sectio
   `;
 
   assert.throws(() => assertCompensationPageMarkup(markup), /Executive table/);
+});
+
+test('extractCompensationRowsForTest prefers real executive names from summary compensation table rows', () => {
+  const sampleHtml = `
+    <table>
+      <tr>
+        <th>Name and Principal Position</th>
+        <th>Year</th>
+        <th>Salary ($)</th>
+        <th>Total ($)</th>
+      </tr>
+      <tr>
+        <td>Tim Cook</td>
+        <td>2025</td>
+        <td>$3,000,000</td>
+        <td>$74,609,802</td>
+      </tr>
+      <tr>
+        <td>Luca Maestri</td>
+        <td>2025</td>
+        <td>$1,000,000</td>
+        <td>$27,180,897</td>
+      </tr>
+      <tr>
+        <td>Summary Compensation Table</td>
+        <td>2025</td>
+        <td>$0</td>
+        <td>$999,999,999</td>
+      </tr>
+    </table>
+  `;
+
+  const rows = extractCompensationRowsForTest({
+    rawHtml: sampleHtml,
+    filingDate: '2026-01-08',
+  });
+
+  assert.equal(rows.length, 2);
+  assert.deepEqual(
+    rows.map((row) => row.executiveName),
+    ['Tim Cook', 'Luca Maestri'],
+  );
 });

@@ -93,7 +93,19 @@ function normalizeExecutiveName(raw: string): string {
     .replace(/\s+/g, ' ')
     .replace(/\*+/g, '')
     .replace(/\([^)]*\)/g, '')
+    .replace(/\s*,\s*/g, ', ')
     .trim();
+}
+
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&#160;/g, ' ')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
 }
 
 function extractYearTokens(text: string): number[] {
@@ -139,6 +151,133 @@ function titleFromLine(line: string): string {
   return 'Named Executive Officer';
 }
 
+function stripHtml(cell: string): string {
+  return decodeHtmlEntities(cell.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+}
+
+function extractTableRows(html: string): string[][] {
+  const rowMatches = html.match(/<tr[\s\S]*?<\/tr>/gi) ?? [];
+  const rows: string[][] = [];
+
+  for (const rowHtml of rowMatches) {
+    const cells = rowHtml.match(/<t[dh][^>]*>[\s\S]*?<\/t[dh]>/gi) ?? [];
+    const parsed = cells.map((cell) => stripHtml(cell));
+    if (parsed.length > 0) {
+      rows.push(parsed);
+    }
+  }
+
+  return rows;
+}
+
+const NOISE_EXECUTIVE_LABELS = new Set([
+  'summary compensation table',
+  'proxy statement',
+  'relative tsr',
+  'audit fees',
+  'other neo',
+  'name stock options',
+  'name estimated total value',
+  'name grant date number',
+  'cash incentive plan',
+  'scorecard focus',
+  'contents summary governance directors',
+  'average summary compensation table',
+]);
+
+function looksLikeExecutiveName(value: string): boolean {
+  const normalized = normalizeExecutiveName(value);
+  if (normalized.length < 5 || normalized.length > 60) {
+    return false;
+  }
+  if (NOISE_EXECUTIVE_LABELS.has(normalized.toLowerCase())) {
+    return false;
+  }
+  return /^[A-Z][A-Za-z'-.]+(?:\s+[A-Z][A-Za-z'-.]+){1,3}$/.test(normalized);
+}
+
+function parseYearFromCells(cells: string[], filingYear: number): number | null {
+  const years = extractYearTokens(cells.join(' '));
+  const valid = years.filter((year) => year <= filingYear && year >= filingYear - 15);
+  return valid.length > 0 ? valid[0] : null;
+}
+
+function parseMoneyFromCells(cells: string[], totalIndex: number | null): number | null {
+  if (totalIndex !== null && totalIndex < cells.length) {
+    const exact = parseDollarValue(cells[totalIndex]);
+    if (exact !== null && exact > 10_000) {
+      return exact;
+    }
+  }
+
+  const parsed = cells
+    .flatMap((cell) => cell.match(/\$?\(?\d{1,3}(?:,\d{3})*(?:\.\d{2})?\)?/g) ?? [])
+    .map((value) => parseDollarValue(value))
+    .filter((value): value is number => value !== null)
+    .filter((value) => value > 10_000)
+    .sort((a, b) => b - a);
+
+  return parsed.length > 0 ? parsed[0] : null;
+}
+
+function parseCompensationRowsFromTables(args: {
+  rawHtml: string;
+  filing: FilingCandidate;
+}): CompensationRow[] {
+  const rows = extractTableRows(args.rawHtml);
+  const filingYear = Number.parseInt(args.filing.filingDate.slice(0, 4), 10);
+  const out: CompensationRow[] = [];
+  let currentTotalColumn: number | null = null;
+
+  for (const cells of rows) {
+    const lowered = cells.map((cell) => cell.toLowerCase());
+    const headerLike = lowered.some((cell) => cell.includes('name') && cell.includes('principal'))
+      && lowered.some((cell) => cell.includes('total'));
+    if (headerLike) {
+      currentTotalColumn = lowered.findIndex((cell) => cell.includes('total'));
+      continue;
+    }
+
+    const nameCandidate = normalizeExecutiveName(cells[0] ?? '');
+    if (!looksLikeExecutiveName(nameCandidate)) {
+      continue;
+    }
+
+    const fiscalYear = parseYearFromCells(cells, filingYear);
+    if (fiscalYear === null) {
+      continue;
+    }
+
+    const totalCompensationUsd = parseMoneyFromCells(cells, currentTotalColumn);
+    if (totalCompensationUsd === null) {
+      continue;
+    }
+
+    out.push({
+      executiveName: nameCandidate,
+      title: titleFromLine(cells.join(' ')),
+      fiscalYear,
+      totalCompensationUsd,
+      sourceUrl: args.filing.sourceUrl,
+      accession: args.filing.accession,
+      filingDate: args.filing.filingDate,
+    });
+  }
+
+  return uniqueRows(out);
+}
+
+export function extractCompensationRowsForTest(args: { rawHtml: string; filingDate: string }): CompensationRow[] {
+  const filing: FilingCandidate = {
+    accession: 'TEST',
+    filingDate: args.filingDate,
+    form: 'DEF 14A',
+    primaryDocument: 'test.htm',
+    sourceUrl: 'https://example.test',
+  };
+  return parseCompensationRowsFromTables({ rawHtml: args.rawHtml, filing });
+}
+
 function uniqueRows(rows: CompensationRow[]): CompensationRow[] {
   const seen = new Set<string>();
   const out: CompensationRow[] = [];
@@ -157,6 +296,11 @@ function parseCompensationRows(args: {
   rawHtml: string;
   filing: FilingCandidate;
 }): CompensationRow[] {
+  const tableRows = parseCompensationRowsFromTables(args);
+  if (tableRows.length > 0) {
+    return tableRows;
+  }
+
   const plain = decodeHtmlText(args.rawHtml);
   const lines = plain
     .split(/(?<=\.)\s+|\s{2,}/g)
