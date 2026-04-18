@@ -32,6 +32,7 @@ Date: 2026-04-18
 - Restricted extraction to Summary Compensation Table-like headers and removed permissive text-line fallback to avoid non-person rows such as `Human Rights` or executive-title labels appearing as executives.
 - Removed unused `decodeHtmlText` helper from `apps/web/lib/api/compensation.ts` to satisfy `web` lint (`no-unused-vars` / dead-code hygiene).
 - Updated compensation parser regression fixture to include a salary-like header column so the test reflects the stricter Summary Compensation Table header gating logic.
+- Added person-name extraction trimming so name cells like `Luca Maestri Former Senior...` normalize to `Luca Maestri`, while role-only cells such as `EVP, General Counsel` are excluded.
 
 ## Rollback rule check
 - The page remains usable even when row extraction is sparse: source links and filing context are still rendered from real SEC data.

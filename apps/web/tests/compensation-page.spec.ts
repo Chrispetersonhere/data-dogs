@@ -172,3 +172,36 @@ test('extractCompensationRowsForTest excludes non-person labels like Human Right
   assert.equal(rows.length, 1);
   assert.equal(rows[0].executiveName, 'Tim Cook');
 });
+
+test('extractCompensationRowsForTest trims trailing title words from name cells', () => {
+  const sampleHtml = `
+    <table>
+      <tr>
+        <th>Name and Principal Position</th>
+        <th>Year</th>
+        <th>Salary ($)</th>
+        <th>Total ($)</th>
+      </tr>
+      <tr>
+        <td>Luca Maestri Former Senior Vice President</td>
+        <td>2025</td>
+        <td>$1,000,000</td>
+        <td>$15,482,928</td>
+      </tr>
+      <tr>
+        <td>EVP, General Counsel</td>
+        <td>2025</td>
+        <td>$1,000,000</td>
+        <td>$11,048,538</td>
+      </tr>
+    </table>
+  `;
+
+  const rows = extractCompensationRowsForTest({
+    rawHtml: sampleHtml,
+    filingDate: '2026-01-10',
+  });
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].executiveName, 'Luca Maestri');
+});

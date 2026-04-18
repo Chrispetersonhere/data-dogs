@@ -187,6 +187,11 @@ const NOISE_EXECUTIVE_LABELS = new Set([
 ]);
 
 const TITLE_WORDS = new Set([
+  'chief',
+  'senior',
+  'former',
+  'general',
+  'counsel',
   'executive',
   'vice',
   'president',
@@ -205,7 +210,34 @@ const TITLE_WORDS = new Set([
   'rights',
   'corporate',
   'governance',
+  'evp',
 ]);
+
+function extractLikelyPersonName(raw: string): string | null {
+  const normalized = normalizeExecutiveName(raw).replace(/,/g, ' ');
+  const tokens = normalized.split(/\s+/).filter((token) => token.length > 0);
+  const collected: string[] = [];
+
+  for (const token of tokens) {
+    const cleaned = token.replace(/[.,]/g, '');
+    const lowered = cleaned.toLowerCase();
+    if (TITLE_WORDS.has(lowered)) {
+      break;
+    }
+    if (!/^[A-Z][A-Za-z'-.]*$/.test(cleaned)) {
+      break;
+    }
+    collected.push(cleaned);
+    if (collected.length >= 4) {
+      break;
+    }
+  }
+
+  if (collected.length < 2) {
+    return null;
+  }
+  return collected.join(' ');
+}
 
 function looksLikeExecutiveName(value: string): boolean {
   const normalized = normalizeExecutiveName(value);
@@ -293,8 +325,10 @@ function parseCompensationRowsFromTables(args: {
     }
 
     const rawNameCell = normalizeExecutiveName(cells[0] ?? '');
-    const nameMatch = rawNameCell.match(/[A-Z][A-Za-z'-.]+(?:\s+[A-Z]\.)?(?:\s+[A-Z][A-Za-z'-.]+){1,3}/);
-    const nameCandidate = normalizeExecutiveName(nameMatch?.[0] ?? rawNameCell);
+    const nameCandidate = extractLikelyPersonName(rawNameCell);
+    if (nameCandidate === null) {
+      continue;
+    }
     if (!looksLikeExecutiveName(nameCandidate)) {
       continue;
     }
