@@ -24,33 +24,39 @@
 2. Raw proxy and parsed structured output are rendered side-by-side.
 3. Discrepant rows are visibly highlighted in both tables and listed in discrepancy highlights.
 4. Raw rows visibly include source URL, accession, fetch timestamp, checksum, parser version, and job id.
-5. Acceptance checks pass:
+5. Required acceptance checks pass:
    - `pnpm --filter web build`
    - `pnpm --filter web test -- comp-qa.spec.ts || pnpm --filter web test`
 
-## Windows PowerShell verification
+## Windows PowerShell verification (copy/paste)
 ```powershell
-# from repo root (use your current branch; do not assume a branch named 'work')
-git pull
+# from repo root
+$ErrorActionPreference = 'Stop'
 
-# inspect the latest Day 62 commit on current branch
+git pull
 git log --oneline --max-count=20
 
-# run required Day 62 acceptance checks
+# required Day 62 acceptance checks
 pnpm --filter web build
 pnpm --filter web test -- comp-qa.spec.ts
 if ($LASTEXITCODE -ne 0) { pnpm --filter web test }
 
-# optional broader repo checks
+# recommended broader checks
 pnpm lint
 pnpm typecheck
 pnpm --filter web test
 pnpm --filter web build
 
-# python services checks (only if pytest is available in your shell)
-pytest services/ingest-sec/tests -q
-pytest services/parse-xbrl/tests -q
-pytest services/parse-proxy/tests -q
-pytest services/id-master/tests -q
-pytest services/market-data/tests -q
+# optional service checks: run only when pytest is installed
+$pytestCmd = Get-Command pytest -ErrorAction SilentlyContinue
+if ($pytestCmd) {
+  pytest services/ingest-sec/tests -q
+  pytest services/parse-xbrl/tests -q
+  pytest services/parse-proxy/tests -q
+  pytest services/id-master/tests -q
+  pytest services/market-data/tests -q
+} else {
+  Write-Host "Skipping Python service tests: pytest is not installed in this shell." -ForegroundColor Yellow
+  Write-Host "If needed, install with: py -m pip install pytest" -ForegroundColor Yellow
+}
 ```
