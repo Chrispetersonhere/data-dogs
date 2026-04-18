@@ -195,6 +195,28 @@ const NOISE_EXECUTIVE_LABELS = new Set([
   'total',
   'my psus',
   'sy psus',
+  'human rights',
+]);
+
+const TITLE_WORDS = new Set([
+  'executive',
+  'vice',
+  'president',
+  'officer',
+  'operations',
+  'operation',
+  'worldwide',
+  'field',
+  'director',
+  'committee',
+  'chair',
+  'chairman',
+  'principal',
+  'position',
+  'human',
+  'rights',
+  'corporate',
+  'governance',
 ]);
 
 function looksLikeExecutiveName(value: string): boolean {
@@ -205,7 +227,19 @@ function looksLikeExecutiveName(value: string): boolean {
   if (NOISE_EXECUTIVE_LABELS.has(normalized.toLowerCase())) {
     return false;
   }
-  return /^[A-Z][A-Za-z'-.]+(?:\s+[A-Z][A-Za-z'-.]+){1,3}$/.test(normalized);
+  if (!/^[A-Z][A-Za-z'-.]+(?:\s+[A-Z]\.)?(?:\s+[A-Z][A-Za-z'-.]+){1,3}$/.test(normalized)) {
+    return false;
+  }
+
+  const tokens = normalized
+    .split(/\s+/)
+    .map((token) => token.replace(/[.,]/g, '').toLowerCase())
+    .filter((token) => token.length > 0);
+  if (tokens.some((token) => TITLE_WORDS.has(token))) {
+    return false;
+  }
+
+  return true;
 }
 
 function parseYearFromCells(cells: string[], filingYear: number, yearIndex: number | null): number | null {
@@ -213,14 +247,14 @@ function parseYearFromCells(cells: string[], filingYear: number, yearIndex: numb
     const yearMatch = cells[yearIndex].match(/\b(20\d{2}|19\d{2})\b/);
     if (yearMatch) {
       const year = Number.parseInt(yearMatch[1], 10);
-      if (year >= filingYear - 15 && year <= filingYear - 1) {
+      if (year >= filingYear - 6 && year <= filingYear - 1) {
         return year;
       }
     }
   }
 
   const years = extractYearTokens(cells.join(' '));
-  const valid = years.filter((year) => year <= filingYear - 1 && year >= filingYear - 15);
+  const valid = years.filter((year) => year <= filingYear - 1 && year >= filingYear - 6);
   return valid.length > 0 ? valid[0] : null;
 }
 
@@ -251,19 +285,28 @@ function parseCompensationRowsFromTables(args: {
   const out: CompensationRow[] = [];
   let currentTotalColumn: number | null = null;
   let currentYearColumn: number | null = null;
+  let currentSctTable = false;
 
   for (const cells of rows) {
     const lowered = cells.map((cell) => cell.toLowerCase());
     const headerLike = lowered.some((cell) => cell.includes('year'))
       && lowered.some((cell) => cell.includes('total'))
       && lowered.some((cell) => cell.includes('name') || cell.includes('principal position'));
+    const looksLikeSctHeader = headerLike
+      && lowered.some((cell) => cell.includes('salary') || cell.includes('stock awards') || cell.includes('option awards') || cell.includes('bonus') || cell.includes('non-equity'));
     if (headerLike) {
       currentTotalColumn = lowered.findIndex((cell) => cell.includes('total'));
       currentYearColumn = lowered.findIndex((cell) => cell.includes('year'));
+      currentSctTable = looksLikeSctHeader;
+      continue;
+    }
+    if (!currentSctTable) {
       continue;
     }
 
-    const nameCandidate = normalizeExecutiveName(cells[0] ?? '');
+    const rawNameCell = normalizeExecutiveName(cells[0] ?? '');
+    const nameMatch = rawNameCell.match(/[A-Z][A-Za-z'-.]+(?:\s+[A-Z]\.)?(?:\s+[A-Z][A-Za-z'-.]+){1,3}/);
+    const nameCandidate = normalizeExecutiveName(nameMatch?.[0] ?? rawNameCell);
     if (!looksLikeExecutiveName(nameCandidate)) {
       continue;
     }
@@ -322,64 +365,7 @@ function parseCompensationRows(args: {
   filing: FilingCandidate;
 }): CompensationRow[] {
   const tableRows = parseCompensationRowsFromTables(args);
-  if (tableRows.length > 0) {
-    return tableRows;
-  }
-
-  const plain = decodeHtmlText(args.rawHtml);
-  const lines = plain
-    .split(/(?<=\.)\s+|\s{2,}/g)
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0)
-    .slice(0, 8000);
-
-  const rows: CompensationRow[] = [];
-
-  for (const line of lines) {
-    const lower = line.toLowerCase();
-    if (!lower.includes('total') && !lower.includes('compensation')) {
-      continue;
-    }
-
-    const amountMatches = line.match(/\$?\(?\d{1,3}(?:,\d{3})*(?:\.\d{2})?\)?/g) ?? [];
-    const years = extractYearTokens(line);
-    if (amountMatches.length === 0 || years.length === 0) {
-      continue;
-    }
-
-    const nameMatch = line.match(/([A-Z][A-Za-z'\-.]+(?:\s+[A-Z][A-Za-z'\-.]+){1,3})/);
-    if (!nameMatch) {
-      continue;
-    }
-
-    const executiveName = normalizeExecutiveName(nameMatch[1] ?? '');
-    if (executiveName.length < 3) {
-      continue;
-    }
-
-    const year = years[0];
-    const parsedAmounts = amountMatches
-      .map((value) => parseDollarValue(value))
-      .filter((value): value is number => value !== null)
-      .filter((value) => value > 10_000)
-      .sort((a, b) => b - a);
-
-    if (parsedAmounts.length === 0) {
-      continue;
-    }
-
-    rows.push({
-      executiveName,
-      title: titleFromLine(line),
-      fiscalYear: year,
-      totalCompensationUsd: parsedAmounts[0],
-      sourceUrl: args.filing.sourceUrl,
-      accession: args.filing.accession,
-      filingDate: args.filing.filingDate,
-    });
-  }
-
-  return uniqueRows(rows);
+  return tableRows;
 }
 
 function buildHistory(rows: CompensationRow[]): CompensationHistoryPoint[] {

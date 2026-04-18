@@ -129,3 +129,42 @@ test('extractCompensationRowsForTest excludes compensation-component labels and 
   assert.equal(rows[0].executiveName, 'Jen-Hsun Huang');
   assert.equal(rows[0].fiscalYear, 2025);
 });
+
+test('extractCompensationRowsForTest excludes non-person labels like Human Rights and EVP titles', () => {
+  const sampleHtml = `
+    <table>
+      <tr>
+        <th>Name and Principal Position</th>
+        <th>Year</th>
+        <th>Salary ($)</th>
+        <th>Total ($)</th>
+      </tr>
+      <tr>
+        <td>Human Rights</td>
+        <td>2023</td>
+        <td>$1,000,000</td>
+        <td>$82,178,212</td>
+      </tr>
+      <tr>
+        <td>EVP, Worldwide Field Operations</td>
+        <td>2024</td>
+        <td>$1,500,000</td>
+        <td>$13,615,450</td>
+      </tr>
+      <tr>
+        <td>Tim Cook</td>
+        <td>2024</td>
+        <td>$3,000,000</td>
+        <td>$63,209,845</td>
+      </tr>
+    </table>
+  `;
+
+  const rows = extractCompensationRowsForTest({
+    rawHtml: sampleHtml,
+    filingDate: '2025-01-10',
+  });
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].executiveName, 'Tim Cook');
+});
