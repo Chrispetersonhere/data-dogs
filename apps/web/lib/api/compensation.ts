@@ -306,6 +306,8 @@ function parseCompensationRowsFromTables(args: {
   let currentTotalColumn: number | null = null;
   let currentYearColumn: number | null = null;
   let currentSctTable = false;
+  let currentExecutiveName: string | null = null;
+  let currentExecutiveTitle: string | null = null;
 
   for (const cells of rows) {
     const lowered = cells.map((cell) => cell.toLowerCase());
@@ -318,6 +320,8 @@ function parseCompensationRowsFromTables(args: {
       currentTotalColumn = lowered.findIndex((cell) => cell.includes('total'));
       currentYearColumn = lowered.findIndex((cell) => cell.includes('year'));
       currentSctTable = looksLikeSctHeader;
+      currentExecutiveName = null;
+      currentExecutiveTitle = null;
       continue;
     }
     if (!currentSctTable) {
@@ -325,7 +329,15 @@ function parseCompensationRowsFromTables(args: {
     }
 
     const rawNameCell = normalizeExecutiveName(cells[0] ?? '');
-    const nameCandidate = extractLikelyPersonName(rawNameCell);
+    let nameCandidate = extractLikelyPersonName(rawNameCell);
+
+    if (nameCandidate !== null) {
+      currentExecutiveName = nameCandidate;
+      currentExecutiveTitle = titleFromLine(rawNameCell);
+    } else if (rawNameCell.length === 0 || /^[-—–]+$/.test(rawNameCell)) {
+      nameCandidate = currentExecutiveName;
+    }
+
     if (nameCandidate === null) {
       continue;
     }
@@ -345,7 +357,7 @@ function parseCompensationRowsFromTables(args: {
 
     out.push({
       executiveName: nameCandidate,
-      title: titleFromLine(cells.join(' ')),
+      title: currentExecutiveTitle ?? titleFromLine(cells.join(' ')),
       fiscalYear,
       totalCompensationUsd,
       sourceUrl: args.filing.sourceUrl,

@@ -205,3 +205,37 @@ test('extractCompensationRowsForTest trims trailing title words from name cells'
   assert.equal(rows.length, 1);
   assert.equal(rows[0].executiveName, 'Luca Maestri');
 });
+
+test('extractCompensationRowsForTest carries executive name across continuation rows', () => {
+  const sampleHtml = `
+    <table>
+      <tr>
+        <th>Name and Principal Position</th>
+        <th>Year</th>
+        <th>Salary ($)</th>
+        <th>Total ($)</th>
+      </tr>
+      <tr>
+        <td>Jensen Huang President and Chief Executive Officer</td>
+        <td>2026</td>
+        <td>$1,000,000</td>
+        <td>$49,900,000</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>2025</td>
+        <td>$1,000,000</td>
+        <td>$34,200,000</td>
+      </tr>
+    </table>
+  `;
+
+  const rows = extractCompensationRowsForTest({
+    rawHtml: sampleHtml,
+    filingDate: '2026-05-13',
+  });
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].executiveName, 'Jensen Huang');
+  assert.equal(rows[0].fiscalYear, 2025);
+});
