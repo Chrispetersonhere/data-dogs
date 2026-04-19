@@ -11,8 +11,15 @@ detailed per-day contract.
 
 - [Part 1 — Days 1 to 31](./part-1-days-1-31.md) — Foundations, ingestion, admin tooling,
   issuer/security/PIT layer, fact skeleton, XBRL mapper, restatements.
-- Part 2 — Days 32 to 60 — _pending upload_
-- Part 3 — Days 61 to 90 — _pending upload_
+- [Part 2 — Days 32 to 60](./part-2-days-32-60.md) — Statement builders, ratios,
+  fundamentals stabilization, filing explorer, flagship charts, screener, peers,
+  homepage IA, docs shell, observability, Month-2 hardening, compensation schema
+  and proxy parsers.
+- [Part 3 — Days 61 to 90](./part-3-days-61-90.md) — Governance extraction, comp
+  QA, comp and insider pages, governance cards, public API read models and routes,
+  API auth, API docs and OpenAPI assets, security/perf/monitoring, first-user
+  states, invite-only beta, analytics, company/legal pages, release candidate,
+  soft-launch retrospective.
 
 ## Assumed repo contract
 
