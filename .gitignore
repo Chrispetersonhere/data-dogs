@@ -14,3 +14,4 @@ __pycache__/
 pnpm-lock.yaml
 /data-dogs-check
 data-dogs/
+.claude/worktrees/admiring-hamilton-4c70f5/
