@@ -361,7 +361,7 @@ async function getAnnualStatements(companyId: string): Promise<AnnualStatementsV
   };
 }
 
-function formatMoney(value: number | undefined): string {
+function formatMoneyExact(value: number | undefined): string {
   if (value === undefined) {
     return '\u2014';
   }
@@ -370,6 +370,45 @@ function formatMoney(value: number | undefined): string {
     currency: 'USD',
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+/**
+ * Compact magnitude format for dense financial tables: $1.23T / $391.0B /
+ * $543.2M / $12.3K / $123. The full-precision value is still available via
+ * `formatMoneyExact` and is surfaced through the `title` tooltip so no
+ * precision is lost — only the visual density changes.
+ */
+function formatMoneyCompact(value: number | undefined): string {
+  if (value === undefined) {
+    return '\u2014';
+  }
+  const sign = value < 0 ? '-' : '';
+  const abs = Math.abs(value);
+  const TRILLION = 1_000_000_000_000;
+  const BILLION = 1_000_000_000;
+  const MILLION = 1_000_000;
+  const THOUSAND = 1_000;
+
+  let scaled: number;
+  let suffix: string;
+  if (abs >= TRILLION) {
+    scaled = abs / TRILLION;
+    suffix = 'T';
+  } else if (abs >= BILLION) {
+    scaled = abs / BILLION;
+    suffix = 'B';
+  } else if (abs >= MILLION) {
+    scaled = abs / MILLION;
+    suffix = 'M';
+  } else if (abs >= THOUSAND) {
+    scaled = abs / THOUSAND;
+    suffix = 'K';
+  } else {
+    return `${sign}$${abs.toFixed(0)}`;
+  }
+
+  const precision = scaled >= 100 ? 1 : 2;
+  return `${sign}$${scaled.toFixed(precision)}${suffix}`;
 }
 
 function formatCommonSizePercent(value: number | null | undefined): string {
@@ -426,11 +465,26 @@ const responsiveGridStyle: CSSProperties = {
 const thStyle: CSSProperties = {
   textAlign: 'right',
   padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
+  fontSize: typographyTokens.fontSize.sm,
+  fontWeight: typographyTokens.fontWeight.semibold,
+  color: colorTokens.text.inverse,
+  letterSpacing: typographyTokens.letterSpacing.wide,
 };
 
 const tdStyle: CSSProperties = {
   textAlign: 'right',
   padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
+  color: colorTokens.text.inverse,
+  verticalAlign: 'top',
+  whiteSpace: 'nowrap',
+};
+
+const valueLineStyle: CSSProperties = {
+  display: 'block',
+  fontSize: typographyTokens.fontSize.md,
+  fontWeight: typographyTokens.fontWeight.semibold,
+  fontVariantNumeric: 'tabular-nums',
+  lineHeight: typographyTokens.lineHeight.tight,
   color: colorTokens.text.inverse,
 };
 
@@ -438,7 +492,10 @@ const conceptCellStyle: CSSProperties = {
   textAlign: 'left',
   padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
   color: colorTokens.accent.muted,
-  fontSize: typographyTokens.fontSize.xs,
+  fontSize: typographyTokens.fontSize.sm,
+  fontFamily: typographyTokens.fontFamily.mono,
+  wordBreak: 'break-word',
+  verticalAlign: 'top',
 };
 
 const trendCellStyle: CSSProperties = {
@@ -448,15 +505,27 @@ const trendCellStyle: CSSProperties = {
 
 const yoyLineStyle: CSSProperties = {
   display: 'block',
-  fontSize: typographyTokens.fontSize.xs,
+  fontSize: typographyTokens.fontSize.sm,
   fontWeight: typographyTokens.fontWeight.medium,
+  fontVariantNumeric: 'tabular-nums',
+  lineHeight: typographyTokens.lineHeight.tight,
   marginTop: spacingTokens['1'],
+};
+
+const rowLabelStyle: CSSProperties = {
+  textAlign: 'left',
+  padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
+  fontSize: typographyTokens.fontSize.md,
+  fontWeight: typographyTokens.fontWeight.semibold,
+  color: colorTokens.text.inverse,
+  verticalAlign: 'top',
 };
 
 const tableStyle: CSSProperties = {
   width: '100%',
   borderCollapse: 'collapse',
-  minWidth: '720px',
+  minWidth: '820px',
+  fontFamily: typographyTokens.fontFamily.sans,
 };
 
 const noteIconButtonStyle: CSSProperties = {
@@ -551,8 +620,8 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
             <p style={{ margin: `${spacingTokens['2']} 0 0`, color: statementsView.consistency.balanceCheck === 'mismatch' ? colorTokens.semantic.danger : colorTokens.accent.muted, fontSize: typographyTokens.fontSize.sm }}>
               Balance consistency: {statementsView.consistency.message}
             </p>
-            <p style={{ margin: `${spacingTokens['2']} 0 0`, color: colorTokens.accent.muted, fontSize: typographyTokens.fontSize.xs }}>
-              Source: <a href={statementsView.sourceUrl} style={{ color: colorTokens.accent.muted }}>SEC XBRL companyfacts</a> · fetched {statementsView.fetchedAt}
+            <p style={{ margin: `${spacingTokens['2']} 0 0`, color: colorTokens.text.inverse, fontSize: typographyTokens.fontSize.sm }}>
+              Source: <a href={statementsView.sourceUrl} style={{ color: colorTokens.text.inverse, textDecoration: 'underline' }}>SEC XBRL companyfacts</a> · fetched {statementsView.fetchedAt}
             </p>
           </section>
 
@@ -581,7 +650,7 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
                 Common-size
               </a>
             </div>
-            <p style={{ margin: `${spacingTokens['3']} 0 0`, color: colorTokens.accent.muted, fontSize: typographyTokens.fontSize.xs }}>
+            <p style={{ margin: `${spacingTokens['3']} 0 0`, color: colorTokens.text.inverse, fontSize: typographyTokens.fontSize.sm, lineHeight: typographyTokens.lineHeight.default }}>
               Common-size divides each income-statement line by {COMMON_SIZE_DENOMINATOR.income}, each balance-sheet line by {COMMON_SIZE_DENOMINATOR.balance}, and each cash-flow line by {COMMON_SIZE_DENOMINATOR.cashflow} for that fiscal year.
             </p>
           </section>
@@ -593,14 +662,14 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
                 <table style={tableStyle} data-export="financials-data">
                   <thead style={stickyTheadStyle}>
                     <tr style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
-                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Metric</th>
+                      <th style={{ ...thStyle, textAlign: 'left' }}>Metric</th>
                       {statementsView.years.map((year) => (
                         <th key={year} style={thStyle}>
                           FY {year}
                         </th>
                       ))}
-                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Trend</th>
-                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Source concept</th>
+                      <th style={{ ...thStyle, textAlign: 'left' }}>Trend</th>
+                      <th style={{ ...thStyle, textAlign: 'left' }}>Source concept</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -611,7 +680,7 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
 
                       return (
                         <tr key={row.label} style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
-                          <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}`, fontWeight: typographyTokens.fontWeight.semibold }}>
+                          <th scope="row" style={rowLabelStyle}>
                             {row.label}
                             {row.conceptUsed && (
                               <a
@@ -634,12 +703,16 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
                             const displayValue =
                               view === 'common-size'
                                 ? formatCommonSizePercent(commonSizeForRow[year])
-                                : formatMoney(absoluteValue);
+                                : formatMoneyCompact(absoluteValue);
+                            const exactTitle =
+                              view === 'common-size' || absoluteValue === undefined
+                                ? undefined
+                                : formatMoneyExact(absoluteValue);
                             const delta = yoyForRow[year];
                             const yoyLine = formatYoyDelta(delta?.percentChange);
                             return (
-                              <td key={year} style={tdStyle}>
-                                <span>{displayValue}</span>
+                              <td key={year} style={tdStyle} title={exactTitle}>
+                                <span style={valueLineStyle}>{displayValue}</span>
                                 {yoyLine && (
                                   <span
                                     style={{ ...yoyLineStyle, color: yoyDeltaColor(delta?.percentChange) }}
@@ -652,9 +725,9 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
                             );
                           })}
                           <td style={trendCellStyle} data-testid={`trend-${row.label.replace(/\s+/g, '-').toLowerCase()}`}>
-                            <TrendSparkline label={row.label} points={trendForRow} />
+                            <TrendSparkline label={row.label} points={trendForRow} width={120} height={36} />
                           </td>
-                          <td style={conceptCellStyle}>{row.conceptUsed ?? '\u2014'}</td>
+                          <td style={conceptCellStyle} title={row.conceptUsed ?? undefined}>{row.conceptUsed ?? '\u2014'}</td>
                         </tr>
                       );
                     })}
