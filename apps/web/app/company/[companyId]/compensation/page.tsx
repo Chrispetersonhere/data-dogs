@@ -53,7 +53,7 @@ export default async function CompanyCompensationPage({ params }: CompensationPa
               Executive compensation — {compensation.companyName}
             </h1>
             <p style={{ margin: 0, color: colorTokens.text.inverse }}>
-              Real DEF 14A filing disclosures for CIK {compensation.cik}
+              DEF 14A proxy disclosures for CIK {compensation.cik}. Every row links back to the SEC source filing.
             </p>
           </section>
 
@@ -119,7 +119,13 @@ export default async function CompanyCompensationPage({ params }: CompensationPa
                         <td style={{ padding: spacingTokens['2'] }}>{row.fiscalYear}</td>
                         <td style={{ padding: spacingTokens['2'] }}>{formatUsd(row.totalCompensationUsd)}</td>
                         <td style={{ padding: spacingTokens['2'] }}>
-                          <a href={row.latestSourceUrl} target="_blank" rel="noreferrer" style={{ color: colorTokens.accent.soft }}>
+                          <a
+                            href={row.latestSourceUrl}
+                            title={row.latestAccession}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ color: colorTokens.accent.soft }}
+                          >
                             source link
                           </a>
                         </td>
@@ -155,7 +161,7 @@ export default async function CompanyCompensationPage({ params }: CompensationPa
     return (
       <main style={shellStyle}>
         <section style={{ ...cardStyle, maxWidth: '860px', margin: '0 auto' }}>
-          <h1 style={{ marginTop: 0 }}>Compensation page unavailable</h1>
+          <h1 style={{ marginTop: 0 }}>Executive compensation unavailable</h1>
           <p style={{ margin: 0 }}>
             Live compensation data fetch failed for company id <strong>{companyId}</strong>. Please retry once SEC filings are reachable.
           </p>

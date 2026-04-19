@@ -20,6 +20,7 @@ export type CompensationHistoryPoint = {
   fiscalYear: number;
   totalCompensationUsd: number;
   latestSourceUrl: string;
+  latestAccession: string;
 };
 
 export type CompanyCompensationData = {
@@ -419,6 +420,7 @@ function buildHistory(rows: CompensationRow[]): CompensationHistoryPoint[] {
       fiscalYear: row.fiscalYear,
       totalCompensationUsd: row.totalCompensationUsd,
       latestSourceUrl: row.sourceUrl,
+      latestAccession: row.accession,
     }))
     .sort((a, b) => (a.executiveName === b.executiveName ? b.fiscalYear - a.fiscalYear : a.executiveName.localeCompare(b.executiveName)));
 }
