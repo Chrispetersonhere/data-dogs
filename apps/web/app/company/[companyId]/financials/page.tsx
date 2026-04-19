@@ -462,19 +462,25 @@ const responsiveGridStyle: CSSProperties = {
   boxSizing: 'border-box',
 };
 
+/*
+ * Statement tables render inside FinancialsTableShell, which is a white
+ * card (surface.card = #FFFFFF). Every piece of text inside the table
+ * must use the dark text.primary / text.secondary / text.muted palette —
+ * NOT text.inverse, which is near-white and disappears against white.
+ */
 const thStyle: CSSProperties = {
   textAlign: 'right',
   padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
   fontSize: typographyTokens.fontSize.sm,
   fontWeight: typographyTokens.fontWeight.semibold,
-  color: colorTokens.text.inverse,
-  letterSpacing: typographyTokens.letterSpacing.wide,
+  color: colorTokens.text.secondary,
+  letterSpacing: typographyTokens.letterSpacing.normal,
 };
 
 const tdStyle: CSSProperties = {
   textAlign: 'right',
   padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
-  color: colorTokens.text.inverse,
+  color: colorTokens.text.primary,
   verticalAlign: 'top',
   whiteSpace: 'nowrap',
 };
@@ -485,13 +491,13 @@ const valueLineStyle: CSSProperties = {
   fontWeight: typographyTokens.fontWeight.semibold,
   fontVariantNumeric: 'tabular-nums',
   lineHeight: typographyTokens.lineHeight.tight,
-  color: colorTokens.text.inverse,
+  color: colorTokens.text.primary,
 };
 
 const conceptCellStyle: CSSProperties = {
   textAlign: 'left',
   padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
-  color: colorTokens.accent.muted,
+  color: colorTokens.text.muted,
   fontSize: typographyTokens.fontSize.sm,
   fontFamily: typographyTokens.fontFamily.mono,
   wordBreak: 'break-word',
@@ -517,7 +523,7 @@ const rowLabelStyle: CSSProperties = {
   padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
   fontSize: typographyTokens.fontSize.md,
   fontWeight: typographyTokens.fontWeight.semibold,
-  color: colorTokens.text.inverse,
+  color: colorTokens.text.primary,
   verticalAlign: 'top',
 };
 
@@ -526,6 +532,7 @@ const tableStyle: CSSProperties = {
   borderCollapse: 'collapse',
   minWidth: '820px',
   fontFamily: typographyTokens.fontFamily.sans,
+  color: colorTokens.text.primary,
 };
 
 const noteIconButtonStyle: CSSProperties = {
@@ -661,7 +668,7 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
               <FinancialsTableShell key={statement.id} title={statement.title}>
                 <table style={tableStyle} data-export="financials-data">
                   <thead style={stickyTheadStyle}>
-                    <tr style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
+                    <tr style={{ borderBottom: `1px solid ${colorTokens.border.subtle}` }}>
                       <th style={{ ...thStyle, textAlign: 'left' }}>Metric</th>
                       {statementsView.years.map((year) => (
                         <th key={year} style={thStyle}>
@@ -679,7 +686,7 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
                       const trendForRow = analytics?.trend.find((t) => t.label === row.label)?.points ?? [];
 
                       return (
-                        <tr key={row.label} style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
+                        <tr key={row.label} style={{ borderBottom: `1px solid ${colorTokens.border.subtle}` }}>
                           <th scope="row" style={rowLabelStyle}>
                             {row.label}
                             {row.conceptUsed && (
