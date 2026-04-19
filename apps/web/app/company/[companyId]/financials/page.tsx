@@ -2,13 +2,26 @@ import type { CSSProperties, JSX } from 'react';
 
 import { colorTokens, spacingTokens, typographyTokens, radiusTokens } from '../../../../../../packages/ui/src/styles/tokens';
 import { FinancialsTableShell, PeriodToggle, stickyTheadStyle } from '../../../../../../packages/ui/src/components/financials';
+import { TrendSparkline } from '../../../../../../packages/ui/src/components/charts';
 import { NotesPanel } from '../../../../../../packages/ui/src/components/notes';
 import { getNotesForConcept } from '../../../../lib/api/notes';
 import type { NoteItem } from '../../../../../../packages/ui/src/components/notes';
+import {
+  buildTrendSeries,
+  computeCommonSize,
+  computeYoYDeltas,
+  parseFinancialsView,
+  COMMON_SIZE_DENOMINATOR,
+  type CommonSizeRow,
+  type FinancialsView,
+  type StatementId,
+  type TrendSeries,
+  type YoYDeltasByRow,
+} from '../../../../lib/financials/analytics';
 
 type FinancialsPageProps = {
   params: Promise<{ companyId: string }>;
-  searchParams: Promise<{ note?: string }>;
+  searchParams: Promise<{ note?: string; view?: string }>;
 };
 
 type FactPoint = {
@@ -43,7 +56,7 @@ type MetricSpec = {
 
 type StatementSpec = {
   title: string;
-  id: 'income' | 'balance' | 'cashflow';
+  id: StatementId;
   metrics: MetricSpec[];
 };
 
@@ -56,10 +69,12 @@ type StatementMetricRow = {
 type AnnualStatementsView = {
   companyName: string;
   cik: string;
+  sourceUrl: string;
+  fetchedAt: string;
   years: number[];
   statements: Array<{
     title: string;
-    id: 'income' | 'balance' | 'cashflow';
+    id: StatementId;
     rows: StatementMetricRow[];
   }>;
   consistency: {
@@ -301,6 +316,7 @@ async function getAnnualStatements(companyId: string): Promise<AnnualStatementsV
     throw new Error(`SEC companyfacts request failed (${response.status}) for CIK ${cikPadded}`);
   }
 
+  const fetchedAt = new Date().toISOString();
   const payload = (await response.json()) as CompanyFactsResponse;
   const usGaap = payload.facts?.['us-gaap'];
   if (!usGaap) {
@@ -337,6 +353,8 @@ async function getAnnualStatements(companyId: string): Promise<AnnualStatementsV
   return {
     companyName: payload.entityName ?? `CIK ${cikPadded}`,
     cik: payload.cik ?? cikPadded,
+    sourceUrl: url,
+    fetchedAt,
     years,
     statements,
     consistency: summarizeConsistency(statements, years),
@@ -345,13 +363,50 @@ async function getAnnualStatements(companyId: string): Promise<AnnualStatementsV
 
 function formatMoney(value: number | undefined): string {
   if (value === undefined) {
-    return '—';
+    return '\u2014';
   }
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function formatCommonSizePercent(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '\u2014';
+  }
+  return `${(value * 100).toFixed(1)}%`;
+}
+
+function formatYoyDelta(percentChange: number | null | undefined): string | null {
+  if (percentChange === null || percentChange === undefined || !Number.isFinite(percentChange)) {
+    return null;
+  }
+  const sign = percentChange > 0 ? '+' : percentChange < 0 ? '\u2212' : '';
+  const magnitude = Math.abs(percentChange) * 100;
+  return `${sign}${magnitude.toFixed(1)}% Y/Y`;
+}
+
+function yoyDeltaColor(percentChange: number | null | undefined): string {
+  if (percentChange === null || percentChange === undefined || !Number.isFinite(percentChange)) {
+    return colorTokens.accent.muted;
+  }
+  if (percentChange > 0) return colorTokens.signal.up;
+  if (percentChange < 0) return colorTokens.signal.down;
+  return colorTokens.signal.flat;
+}
+
+function buildLinkHref(params: { view: FinancialsView; note?: string }): string {
+  const search = new URLSearchParams();
+  if (params.view === 'common-size') {
+    search.set('view', 'common-size');
+  }
+  if (params.note) {
+    search.set('note', params.note);
+  }
+  const query = search.toString();
+  return query ? `?${query}` : '?';
 }
 
 const PERIOD_OPTIONS = [
@@ -386,10 +441,22 @@ const conceptCellStyle: CSSProperties = {
   fontSize: typographyTokens.fontSize.xs,
 };
 
+const trendCellStyle: CSSProperties = {
+  padding: `${spacingTokens['3']} ${spacingTokens['3']}`,
+  verticalAlign: 'middle',
+};
+
+const yoyLineStyle: CSSProperties = {
+  display: 'block',
+  fontSize: typographyTokens.fontSize.xs,
+  fontWeight: typographyTokens.fontWeight.medium,
+  marginTop: spacingTokens['1'],
+};
+
 const tableStyle: CSSProperties = {
   width: '100%',
   borderCollapse: 'collapse',
-  minWidth: '600px',
+  minWidth: '720px',
 };
 
 const noteIconButtonStyle: CSSProperties = {
@@ -409,20 +476,56 @@ const noteIconButtonStyle: CSSProperties = {
   marginLeft: spacingTokens['2'],
 };
 
+const viewToggleContainerStyle: CSSProperties = {
+  display: 'inline-flex',
+  gap: spacingTokens['1'],
+  padding: spacingTokens['1'],
+  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+  borderRadius: radiusTokens.lg,
+  border: `1px solid ${colorTokens.border.strong}`,
+};
+
+function viewToggleButtonStyle(active: boolean): CSSProperties {
+  return {
+    display: 'inline-block',
+    padding: `${spacingTokens['2']} ${spacingTokens['5']}`,
+    fontSize: typographyTokens.fontSize.sm,
+    fontWeight: active ? typographyTokens.fontWeight.semibold : typographyTokens.fontWeight.medium,
+    borderRadius: radiusTokens.md,
+    background: active ? colorTokens.surface.dark4 : 'transparent',
+    color: active ? colorTokens.text.inverse : colorTokens.accent.muted,
+    textDecoration: 'none',
+    border: 'none',
+  };
+}
+
 const INFO_ICON = '\u2139';
 
 export default async function CompanyAnnualFinancialsPage({ params, searchParams }: FinancialsPageProps): Promise<JSX.Element> {
   const { companyId } = await params;
-  const { note: activeNoteLabel } = await searchParams;
+  const { note: activeNoteLabel, view: rawView } = await searchParams;
+  const view = parseFinancialsView(rawView);
 
   try {
-    const view = await getAnnualStatements(companyId);
+    const statementsView = await getAnnualStatements(companyId);
+
+    const analyticsByStatement = new Map<
+      StatementId,
+      { yoy: YoYDeltasByRow[]; commonSize: CommonSizeRow[]; trend: TrendSeries[] }
+    >();
+    for (const statement of statementsView.statements) {
+      analyticsByStatement.set(statement.id, {
+        yoy: computeYoYDeltas(statement.rows, statementsView.years),
+        commonSize: computeCommonSize(statement.id, statement.rows),
+        trend: buildTrendSeries(statement.rows, statementsView.years),
+      });
+    }
 
     /* Resolve note panel data when a row label is selected via ?note= param */
     let notePanelData: { label: string; conceptUsed: string | null; notes: NoteItem[] } | null = null;
     if (activeNoteLabel) {
       const decodedLabel = decodeURIComponent(activeNoteLabel);
-      for (const statement of view.statements) {
+      for (const statement of statementsView.statements) {
         const matchedRow = statement.rows.find((r) => r.label === decodedLabel);
         if (matchedRow) {
           const result = matchedRow.conceptUsed ? getNotesForConcept(matchedRow.conceptUsed) : null;
@@ -443,10 +546,13 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
             <p style={{ margin: 0, fontSize: typographyTokens.fontSize.xs, textTransform: 'uppercase', letterSpacing: '0.08em', color: colorTokens.accent.muted }}>Premium table UX</p>
             <h1 style={{ margin: `${spacingTokens['3']} 0 ${spacingTokens['1']}`, fontSize: typographyTokens.fontSize['3xl'] }}>Annual financials</h1>
             <p style={{ margin: 0, color: colorTokens.text.inverse }}>
-              {view.companyName} · CIK {view.cik}
+              {statementsView.companyName} · CIK {statementsView.cik}
             </p>
-            <p style={{ margin: `${spacingTokens['2']} 0 0`, color: view.consistency.balanceCheck === 'mismatch' ? colorTokens.semantic.danger : colorTokens.accent.muted, fontSize: typographyTokens.fontSize.sm }}>
-              Balance consistency: {view.consistency.message}
+            <p style={{ margin: `${spacingTokens['2']} 0 0`, color: statementsView.consistency.balanceCheck === 'mismatch' ? colorTokens.semantic.danger : colorTokens.accent.muted, fontSize: typographyTokens.fontSize.sm }}>
+              Balance consistency: {statementsView.consistency.message}
+            </p>
+            <p style={{ margin: `${spacingTokens['2']} 0 0`, color: colorTokens.accent.muted, fontSize: typographyTokens.fontSize.xs }}>
+              Source: <a href={statementsView.sourceUrl} style={{ color: colorTokens.accent.muted }}>SEC XBRL companyfacts</a> · fetched {statementsView.fetchedAt}
             </p>
           </section>
 
@@ -455,49 +561,108 @@ export default async function CompanyAnnualFinancialsPage({ params, searchParams
             <PeriodToggle periods={PERIOD_OPTIONS} activePeriodId="annual" />
           </section>
 
-          {view.statements.map((statement) => (
-            <FinancialsTableShell key={statement.id} title={statement.title}>
-              <table style={tableStyle} data-export="financials-data">
-                <thead style={stickyTheadStyle}>
-                  <tr style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
-                    <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Metric</th>
-                    {view.years.map((year) => (
-                      <th key={year} style={thStyle}>
-                        FY {year}
-                      </th>
-                    ))}
-                    <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Source concept</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {statement.rows.map((row) => (
-                    <tr key={row.label} style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
-                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}`, fontWeight: typographyTokens.fontWeight.semibold }}>
-                        {row.label}
-                        {row.conceptUsed && (
-                          <a
-                            href={`?note=${encodeURIComponent(row.label)}`}
-                            style={noteIconButtonStyle}
-                            aria-label={`View notes for ${row.label}`}
-                            data-testid={`note-icon-${row.label.replace(/\s+/g, '-').toLowerCase()}`}
-                            title={`View note disclosures for ${row.label}`}
-                          >
-                            {INFO_ICON}
-                          </a>
-                        )}
-                      </th>
-                      {view.years.map((year) => (
-                        <td key={year} style={tdStyle}>
-                          {formatMoney(row.valuesByYear[year])}
-                        </td>
+          <section style={cardStyle}>
+            <h2 style={{ marginTop: 0 }}>View</h2>
+            <div role="group" aria-label="View toggle" style={viewToggleContainerStyle}>
+              <a
+                href={buildLinkHref({ view: 'absolute' })}
+                aria-current={view === 'absolute' ? 'page' : undefined}
+                data-testid="view-toggle-absolute"
+                style={viewToggleButtonStyle(view === 'absolute')}
+              >
+                Absolute
+              </a>
+              <a
+                href={buildLinkHref({ view: 'common-size' })}
+                aria-current={view === 'common-size' ? 'page' : undefined}
+                data-testid="view-toggle-common-size"
+                style={viewToggleButtonStyle(view === 'common-size')}
+              >
+                Common-size
+              </a>
+            </div>
+            <p style={{ margin: `${spacingTokens['3']} 0 0`, color: colorTokens.accent.muted, fontSize: typographyTokens.fontSize.xs }}>
+              Common-size divides each income-statement line by {COMMON_SIZE_DENOMINATOR.income}, each balance-sheet line by {COMMON_SIZE_DENOMINATOR.balance}, and each cash-flow line by {COMMON_SIZE_DENOMINATOR.cashflow} for that fiscal year.
+            </p>
+          </section>
+
+          {statementsView.statements.map((statement) => {
+            const analytics = analyticsByStatement.get(statement.id);
+            return (
+              <FinancialsTableShell key={statement.id} title={statement.title}>
+                <table style={tableStyle} data-export="financials-data">
+                  <thead style={stickyTheadStyle}>
+                    <tr style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
+                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Metric</th>
+                      {statementsView.years.map((year) => (
+                        <th key={year} style={thStyle}>
+                          FY {year}
+                        </th>
                       ))}
-                      <td style={conceptCellStyle}>{row.conceptUsed ?? '—'}</td>
+                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Trend</th>
+                      <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}` }}>Source concept</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </FinancialsTableShell>
-          ))}
+                  </thead>
+                  <tbody>
+                    {statement.rows.map((row) => {
+                      const yoyForRow = analytics?.yoy.find((y) => y.label === row.label)?.deltasByYear ?? {};
+                      const commonSizeForRow = analytics?.commonSize.find((c) => c.label === row.label)?.percentByYear ?? {};
+                      const trendForRow = analytics?.trend.find((t) => t.label === row.label)?.points ?? [];
+
+                      return (
+                        <tr key={row.label} style={{ borderBottom: `1px solid ${colorTokens.border.strong}` }}>
+                          <th style={{ textAlign: 'left', padding: `${spacingTokens['3']} ${spacingTokens['3']}`, fontWeight: typographyTokens.fontWeight.semibold }}>
+                            {row.label}
+                            {row.conceptUsed && (
+                              <a
+                                href={
+                                  view === 'common-size'
+                                    ? `?view=common-size&note=${encodeURIComponent(row.label)}`
+                                    : `?note=${encodeURIComponent(row.label)}`
+                                }
+                                style={noteIconButtonStyle}
+                                aria-label={`View notes for ${row.label}`}
+                                data-testid={`note-icon-${row.label.replace(/\s+/g, '-').toLowerCase()}`}
+                                title={`View note disclosures for ${row.label}`}
+                              >
+                                {INFO_ICON}
+                              </a>
+                            )}
+                          </th>
+                          {statementsView.years.map((year) => {
+                            const absoluteValue = row.valuesByYear[year];
+                            const displayValue =
+                              view === 'common-size'
+                                ? formatCommonSizePercent(commonSizeForRow[year])
+                                : formatMoney(absoluteValue);
+                            const delta = yoyForRow[year];
+                            const yoyLine = formatYoyDelta(delta?.percentChange);
+                            return (
+                              <td key={year} style={tdStyle}>
+                                <span>{displayValue}</span>
+                                {yoyLine && (
+                                  <span
+                                    style={{ ...yoyLineStyle, color: yoyDeltaColor(delta?.percentChange) }}
+                                    data-testid={`yoy-${row.label.replace(/\s+/g, '-').toLowerCase()}-${year}`}
+                                  >
+                                    {yoyLine}
+                                  </span>
+                                )}
+                              </td>
+                            );
+                          })}
+                          <td style={trendCellStyle} data-testid={`trend-${row.label.replace(/\s+/g, '-').toLowerCase()}`}>
+                            <TrendSparkline label={row.label} points={trendForRow} />
+                          </td>
+                          <td style={conceptCellStyle}>{row.conceptUsed ?? '\u2014'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </FinancialsTableShell>
+            );
+          })}
 
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Sticky headers</h2>
