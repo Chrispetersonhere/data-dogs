@@ -1,8 +1,13 @@
 import type { ReactNode } from 'react';
 
+import { SiteFooter, SiteTopNav } from '@data-dogs/ui';
+
+import './globals.css';
+
 export const metadata = {
-  title: 'Data Dogs',
-  description: 'Institutional design system showcase'
+  title: 'Ibis — SEC filings, verified financial facts',
+  description:
+    'Every U.S. securities filing, structured at the source. Data sourced from SEC EDGAR.'
 };
 
 type RootLayoutProps = {
@@ -12,16 +17,11 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <head>
-        <style>{`
-          @keyframes dd-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-          }
-          .dd-skeleton { animation: dd-pulse 1.5s ease-in-out infinite; }
-        `}</style>
-      </head>
-      <body style={{ margin: 0 }}>{children}</body>
+      <body>
+        <SiteTopNav />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }

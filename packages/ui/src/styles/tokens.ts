@@ -3,7 +3,12 @@ export const colorTokens = {
     page: '#F5F4F2',
     card: '#FFFFFF',
     elevated: '#FAFAF9',
-    inverse: '#101828'
+    inverse: '#101828',
+    dark1: '#0B0D0F',
+    dark2: '#101828',
+    dark3: '#111827',
+    dark4: '#1E293B',
+    darkPanel: 'rgba(15, 23, 42, 0.72)'
   },
   text: {
     primary: '#10213E',
@@ -24,6 +29,11 @@ export const colorTokens = {
     success: '#027A48',
     warning: '#B54708',
     danger: '#B42318'
+  },
+  signal: {
+    up: '#0A7F6B',
+    down: '#B45309',
+    flat: '#667085'
   }
 } as const;
 
@@ -44,7 +54,8 @@ export const spacingTokens = {
 export const typographyTokens = {
   fontFamily: {
     sans: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-    mono: "'JetBrains Mono', 'SFMono-Regular', Menlo, monospace"
+    mono: "'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace",
+    serif: "'Source Serif 4', 'Charter', Georgia, 'Times New Roman', serif"
   },
   fontSize: {
     xs: '0.75rem',
@@ -65,6 +76,12 @@ export const typographyTokens = {
     medium: 500,
     semibold: 600,
     bold: 700
+  },
+  letterSpacing: {
+    tight: '-0.01em',
+    normal: '0',
+    wide: '0.03em',
+    wider: '0.08em'
   }
 } as const;
 
@@ -96,6 +113,11 @@ export const breakpointTokens = {
   desktop: '1200px'
 } as const;
 
+export const gradientTokens = {
+  terminalShell:
+    'linear-gradient(145deg, #101828 0%, #111827 45%, #1E293B 100%)'
+} as const;
+
 export const designTokens = {
   color: colorTokens,
   spacing: spacingTokens,
@@ -103,7 +125,8 @@ export const designTokens = {
   radius: radiusTokens,
   border: borderTokens,
   shadow: shadowTokens,
-  breakpoint: breakpointTokens
+  breakpoint: breakpointTokens,
+  gradient: gradientTokens
 } as const;
 
 export type DesignTokens = typeof designTokens;
