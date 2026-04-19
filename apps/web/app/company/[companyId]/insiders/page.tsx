@@ -109,7 +109,7 @@ export default async function CompanyInsidersPage({ params, searchParams }: Insi
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Role filter</h2>
             <p style={{ margin: `0 0 ${spacingTokens['3']} 0`, color: colorTokens.accent.muted, fontSize: typographyTokens.fontSize.sm }}>
-              Filter by the reporting person&apos;s relationship to the issuer, as declared on the cover page of each Form 4.
+              Filter by the reporting person&apos;s relationship to the issuer, as declared in the reportingOwnerRelationship section of each Form 3, 4, or 5.
             </p>
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexWrap: 'wrap', gap: spacingTokens['2'] }}>
               {INSIDER_ROLE_FILTERS.map((option) => {
@@ -180,7 +180,13 @@ export default async function CompanyInsidersPage({ params, searchParams }: Insi
                         <td style={tdCellStyle}>{row.form}</td>
                         <td style={tdCellStyle}>{row.filingDate}</td>
                         <td style={tdCellStyle}>
-                          <a href={row.primaryDocUrl} target="_blank" rel="noreferrer" style={{ color: colorTokens.accent.soft }}>
+                          <a
+                            href={row.primaryDocUrl}
+                            title={row.accession}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ color: colorTokens.accent.soft }}
+                          >
                             source link
                           </a>
                         </td>
