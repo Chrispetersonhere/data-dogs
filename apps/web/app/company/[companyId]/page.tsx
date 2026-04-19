@@ -1,6 +1,7 @@
 import type { CSSProperties, JSX } from 'react';
 
 import { colorTokens, spacingTokens, typographyTokens, radiusTokens } from '../../../../../packages/ui/src/styles/tokens';
+import { GovernanceCards, summarizeGovernance } from '../../../../../packages/ui/src/components/company/governanceCards';
 import { getCompanyOverview } from '../../../lib/api/company';
 
 type CompanyPageProps = {
@@ -107,6 +108,8 @@ export default async function CompanyOverviewPage({ params }: CompanyPageProps):
               <li>Current reports (8-K/6-K): {overview.filingCountSummary.currentReportFilings}</li>
             </ul>
           </section>
+
+          <GovernanceCards {...summarizeGovernance(overview)} />
 
           <section style={cardStyle}>
             <h2 style={{ marginTop: 0 }}>Latest filings summary</h2>
