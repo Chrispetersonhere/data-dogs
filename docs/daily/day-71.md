@@ -74,3 +74,200 @@ At time of writing on this worktree: `pnpm --filter web test` reports 354 tests,
 - **Common-size denominators are hard-coded.** `Revenue`, `Total assets`, `Cash from operations` are string-matched against `STATEMENT_SPECS` labels. A label rename on the page would silently break common-size math — `COMMON_SIZE_DENOMINATOR` is exported specifically so a single future refactor can move both the label and the anchor in one edit.
 - **Trend column widens tables.** `minWidth: '720px'` is 120px wider than before. Viewports under ~768px now scroll horizontally inside `FinancialsTableShell` (they already did at 600px on the smallest phones). No layout change was needed in the shell.
 - **No quarterly / TTM integration yet.** The `Period toggle` still shows `Quarterly` as a non-navigable label. Wiring the toggle to a live route is the natural follow-up (separate day — see the 8-feature backlog).
+
+---
+
+# Day 71 (second pass) — Public API read models
+
+Date: 2026-04-20
+
+The first Day 71 pass (above) shipped the financial statement dashboard on 2026-04-19. This second pass adds a disjoint Day 71 deliverable: the stable public API read-model contracts. The two passes touch disjoint file sets and the first pass's work is not modified.
+
+## Scope
+
+- Define stable public API read-model contracts under `packages/schemas/src/api/` for five endpoints: companies, filings, financials, compensation, insiders.
+- Stamp each contract with a per-module `API_VERSION` literal so clients can detect version drift on the envelope, not the URL.
+- Design fields conservatively and do not leak internal raw-storage provenance — no checksum, parser version, ingest job id, internal fetch timestamp, or DB surrogate key escapes into the public surface.
+- Preserve point-in-time SEC traceability — every row carries public `accession`, `filingDate`, and a source URL that resolves back to the original SEC document.
+- No route handlers, no auth, no runtime code. Pure TypeScript types; acceptance is type-checks clean.
+
+## Files created / updated (second pass)
+
+- **Created** `packages/schemas/src/api/companies.ts`
+- **Updated** `packages/schemas/src/api/filings.ts` (re-shaped to the versioned envelope; no prior consumers in-tree)
+- **Created** `packages/schemas/src/api/financials.ts`
+- **Created** `packages/schemas/src/api/compensation.ts`
+- **Created** `packages/schemas/src/api/insiders.ts`
+- **Updated** `docs/daily/day-71.md` (this appended section)
+
+No other files were touched. `packages/schemas/src/api/screener.ts` and the `packages/schemas/src/domain/*` files are intentionally left alone — not in today's allow-list.
+
+## Design principles
+
+### Versioning
+
+Each module exports a local `API_VERSION` literal and a `typeof`-derived alias:
+
+```ts
+export const FINANCIALS_API_VERSION = '1' as const;
+export type FinancialsApiVersion = typeof FINANCIALS_API_VERSION;
+```
+
+The top-level response envelope for each endpoint carries `apiVersion: <ModuleApiVersion>`. This lets clients discriminate on the envelope without parsing the URL, and lets each contract evolve at its own cadence — a v2 `insiders` response can ship before a v2 `financials` response.
+
+### Conservative field design
+
+- Every response is an explicit object envelope, never a bare array. Envelopes carry `apiVersion`, `generatedAt`, and the primary payload plus any auditing echoes (`filtersApplied`, `sources`). A bare array shape would leave no room to add paging, error summaries, or schema metadata without a breaking change.
+- Nullable (`T | null`) is used for fields the underlying SEC feed legitimately omits (ticker, exchange, SIC description, share count on a grant-only Form 4 row). Optional (`T | undefined`) is reserved for inputs where the client may or may not supply a filter, not for outputs.
+- Unions are stable enums, not open strings. Where the upstream SEC form string has a long tail we do not want to enumerate exhaustively (e.g. `form` on insider rows), we use the `Type | (string & {})` idiom to keep editor autocomplete while admitting future form codes.
+- Units and currency are declared on the envelope (`currency: 'USD'`, `units: 'currency'`) rather than on each row, so rows stay lean and so a future v2 currency expansion forces the caller to notice.
+
+### No leaking internal raw-storage implementation details
+
+The following internal fields exist in the ingestion / normalizer layer (`services/market-data/src/insider_ingest.py`, `services/market-data/src/normalize_insiders.py`, and the planned `services/parse-proxy` compensation parser) but are intentionally absent from every public response:
+
+- `raw_insider_artifact_id`, `raw_artifact_id`, `rawArtifactId`
+- `source_checksum`, `checksum_sha256`, `sourceChecksum`
+- `parser_version`, `parserVersion`, `normalizer_version`, `normalizerVersion`
+- `ingest_job_id`, `ingestJobId`
+- `source_fetched_at`, `sourceFetchedAt` (that is the internal HTTP fetch time, not the SEC-public timestamp)
+- `recorded_at`, `recordedAt`, `normalized_at` (internal DB write times)
+- Internal surrogate keys: `insider_id`, `executive_id`, `comp_summary_id`, `comp_award_id`, `executive_role_history_id`, `governance_fact_id`
+- Raw XBRL concept keys (`us-gaap:Revenues`, `us-gaap:ProfitLoss`) and per-concept `FactPoint` trees; the financials contract publishes stable labels and a year map only.
+- Parser heuristics state (which regex matched, how many rows were rejected, which table shape was chosen).
+
+### Public provenance that IS preserved
+
+Every transformed fact remains traceable to its raw source via the public projection of provenance:
+
+| Contract       | Public provenance on each row                                           |
+| -------------- | ----------------------------------------------------------------------- |
+| `companies`    | `accession`, `filingDate`, `form`, `primaryDocument` on recent filings  |
+| `filings`      | `accession`, `filingDate`, `formType`, `primaryDocUrl`, `filingIndexUrl` |
+| `financials`   | envelope-level `sourceUrl` (SEC companyfacts), `fetchedAt`, `years[]`   |
+| `compensation` | `accession`, `filingDate`, `form`, `sourceUrl`                          |
+| `insiders`     | `accession`, `filingDate`, `form`, `primaryDocUrl`, `filingIndexUrl`    |
+
+All five contracts carry `generatedAt` on the envelope so a consumer can tell how fresh the server-side view is, distinct from the filing age.
+
+## Contract summary
+
+### `companies.ts`
+
+Exports:
+
+- `COMPANIES_API_VERSION`, `CompaniesApiVersion`
+- `CompanyIdentifiers` — `cik` (zero-padded) + `companyId` (digits-only)
+- `CompanyProfile` — public descriptive fields
+- `CompanyIdentityHistoryEntry` — former names with `from`/`to`
+- `CompanyFilingFootprint` — filing-count rollups
+- `CompanyRecentFilingSummary` — lightweight filing handle for lists
+- `CompanyProfileResponse` — envelope
+
+### `filings.ts`
+
+Exports:
+
+- `FILINGS_API_VERSION`, `FilingsApiVersion`
+- `FilingRecord` — one filing, including canonical `primaryDocUrl` and `filingIndexUrl` so callers never reconstruct SEC URLs
+- `FilingsQuery` — external query parameters
+- `FilingsFiltersApplied` — server-side echo of normalized filters
+- `FilingsListResponse` — envelope
+
+### `financials.ts`
+
+Exports:
+
+- `FINANCIALS_API_VERSION`, `FinancialsApiVersion`
+- `FinancialsStatementId` = `'income' | 'balance' | 'cashflow'`
+- `FinancialsMetricRow` — label + sparse `valuesByYear`
+- `FinancialsStatement` — ordered rows for one statement
+- `FinancialsProvenance` — `sourceUrl` + `fetchedAt`
+- `FinancialsConsistencyStatus`, `FinancialsConsistency` — cheap balance-sheet sanity-check projection
+- `CompanyFinancialsResponse` — envelope with envelope-level `currency`, `units`, `years[]`
+
+### `compensation.ts`
+
+Exports:
+
+- `COMPENSATION_API_VERSION`, `CompensationApiVersion`
+- `CompensationFilingForm` = `'DEF 14A' | 'DEFA14A'`
+- `CompensationRowProvenance` — public-safe provenance projection
+- `CompensationRow` — one SCT row with top-line `totalCompensationUsd`
+- `CompensationHistoryPoint` — (executive, fiscalYear) rollup + latest-filing back-link
+- `CompensationSource` — one filing the response consulted
+- `CompanyCompensationResponse` — envelope
+
+v1 publishes only the Summary-Compensation-Table total, not per-component breakdowns. Expanding to salary / bonus / stock / option / non-equity / pension / all-other components is a v2 candidate once the parser stabilises across irregular issuer layouts (see `docs/daily/day-70.md` risks).
+
+### `insiders.ts`
+
+Exports:
+
+- `INSIDERS_API_VERSION`, `InsidersApiVersion`
+- `InsiderRoleFilter`, `INSIDER_ROLE_FILTERS` (readonly tuple)
+- `InsiderRoleFlags` — all four `<reportingOwnerRelationship>` booleans
+- `InsiderAcquiredOrDisposed` = `'A' | 'D'`
+- `InsiderTransactionClass` = `'buy' | 'sell' | 'grant' | 'derivative_event' | 'holdings_change' | 'ambiguous'` — stable projection of the Day 66 normalizer; the free-text `reason` is internal and not exposed.
+- `InsiderRowProvenance` — public-safe provenance projection
+- `InsiderActivityRow` — includes `transactionClass`; `shares`, `pricePerShare`, `sharesOwnedAfter` are nullable to preserve SEC-reported nulls without synthesising values
+- `InsiderFilingSource` — one filing the response considered
+- `CompanyInsidersResponse` — envelope
+
+## Rollback rule check
+
+Rollback rule: **revert if read models expose unstable internals.**
+
+- Walked the ingestion data classes (`services/market-data/src/insider_ingest.py`) and confirmed none of `raw_insider_artifact_id`, `checksum_sha256`, `parser_version`, `ingest_job_id`, `source_fetched_at`, `recorded_at` are present on any exported type.
+- Confirmed no internal surrogate ID (`insider_id`, `executive_id`, `comp_summary_id`, `comp_award_id`, `executive_role_history_id`, `governance_fact_id`) is present.
+- Confirmed no raw XBRL concept key (`us-gaap:*`) or raw `FactPoint` shape is exposed on the financials response.
+- Confirmed no normalizer free-text `reason` is exposed on insider rows.
+- No route handler was added, no auth code was added, no runtime behavior changed.
+
+If a future change proposes to surface any of the fields on the "intentionally absent" list above, the right place is a new v2 envelope or an explicit admin-only contract, not the public v1 surface.
+
+## Explicit non-goals
+
+- **No route handlers.** These contracts describe the shape of future `/api/v1/*` responses, but the endpoints themselves are out of scope.
+- **No auth.** Not in today's list.
+- **No `packages/schemas/package.json` or `tsconfig.json`.** The package has no workspace manifest today; adding one would expand scope beyond the listed files. The contract files still type-check cleanly under the root `tsconfig.base.json` settings (verified with `tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --skipLibCheck` against the five files).
+- **No change to `packages/schemas/src/api/screener.ts` or `packages/schemas/src/domain/*`.** Not in today's list; they pre-date the versioned envelope pattern and will be reconciled on a later day.
+- **No change to any `apps/web/lib/api/*.ts` runtime module.** The web wrappers keep their current, implementation-coupled types; adapting them to the new contracts (or swapping the web shell to consume `@data-dogs/schemas/api/*`) is a separate Week 11 task.
+
+## Acceptance checks (PowerShell — copy-pasteable block)
+
+Run from the repo root in Windows PowerShell:
+
+```powershell
+git fetch origin
+git checkout claude/setup-monorepo-inspection-nMpnG
+git pull origin claude/setup-monorepo-inspection-nMpnG
+
+pnpm install
+
+pnpm lint
+pnpm typecheck
+pnpm --filter web test
+pnpm --filter web build
+
+# The contract files live outside any current workspace manifest,
+# so verify them standalone too:
+npx tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --skipLibCheck `
+  packages/schemas/src/api/companies.ts `
+  packages/schemas/src/api/filings.ts `
+  packages/schemas/src/api/financials.ts `
+  packages/schemas/src/api/compensation.ts `
+  packages/schemas/src/api/insiders.ts
+
+$env:PYTHONPATH="services/parse-proxy"; python -m pytest services/parse-proxy/tests -q
+$env:PYTHONPATH="services/market-data"; python -m pytest services/market-data/tests -q
+```
+
+The brief's acceptance test is "all response contracts exist and are type-checked"; the standalone `npx tsc` invocation above is the one that directly exercises that against the five new files. The rest of the palette is the standard Day 71 acceptance set and confirms nothing else in the monorepo regressed.
+
+## Risks / follow-ups (second pass)
+
+- **Schemas package is not yet a workspace.** `packages/schemas` has no `package.json` or `tsconfig.json`, so `pnpm typecheck` does not cover these files. The standalone `npx tsc` command above is the authoritative check today. Wiring `packages/schemas` as a first-class workspace (`@data-dogs/schemas`) with `typecheck` + `lint` scripts, and exporting the five `./api/*` subpaths the way `@data-dogs/ui` does, is a Week 11 candidate.
+- **No web wrappers have been migrated.** `apps/web/lib/api/*.ts` still declares its own ad-hoc types that partially overlap with the new contracts (e.g. `CompensationRow`, `InsiderActivityRow`). Migrating the web wrappers to re-export from `@data-dogs/schemas/api/*` will surface any mismatches; that migration should be staged endpoint-by-endpoint, not as a single sweep.
+- **`transactionClass` is not yet on the live insiders wrapper.** `apps/web/lib/api/insiders.ts` does not populate a `transactionClass` on its `InsiderActivityRow` today. The public contract includes it because the Day 66 normalizer can compute it; the web wrapper will need to invoke that normalizer (or its TypeScript port) before it can satisfy the v1 insiders response shape.
+- **Compensation component breakdowns are out of v1.** If analyst feedback demands salary / bonus / stock / option breakouts before the parser stabilises, we should add them behind a v2 envelope rather than loosening the v1 total-only contract.
