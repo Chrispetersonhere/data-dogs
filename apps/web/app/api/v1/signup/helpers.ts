@@ -94,6 +94,7 @@ import {
   readSignups,
   _resolvedPathsForTest,
 } from '../../../../lib/storage/funnelStore';
+import { notifyFunnelWebhook } from '../../../../lib/storage/funnelWebhook';
 
 export async function recordSignupRequest(
   record: SignupRequestRecord,
@@ -106,6 +107,7 @@ export async function recordSignupRequest(
     company: record.company,
     receivedAt: record.receivedAt,
   });
+  await notifyFunnelWebhook('signup', record);
 }
 
 export async function readSignupRequests(): Promise<

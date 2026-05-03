@@ -109,6 +109,7 @@ import {
   readContacts,
   _resolvedPathsForTest,
 } from '../../../../lib/storage/funnelStore';
+import { notifyFunnelWebhook } from '../../../../lib/storage/funnelWebhook';
 
 export async function recordContactRequest(
   record: ContactRequestRecord,
@@ -121,6 +122,7 @@ export async function recordContactRequest(
     company: record.company,
     receivedAt: record.receivedAt,
   });
+  await notifyFunnelWebhook('contact', record);
 }
 
 export async function readContactRequests(): Promise<

@@ -1,0 +1,14 @@
+# Don't ship Python services or local infra to Vercel — only the Next.js app.
+services/
+infra/
+docs/
+scripts/
+
+# Local data + caches
+apps/web/data/
+*.tsbuildinfo
+.turbo/
+
+# Dev tooling
+.claude/
+.github/
