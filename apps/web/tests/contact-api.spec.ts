@@ -1,5 +1,12 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
+
+process.env.FUNNEL_STORAGE_DIR = mkdtempSync(
+  join(tmpdir(), 'ibis-contact-spec-'),
+);
 
 import {
   buildContactRequest,
@@ -81,8 +88,8 @@ test('parseContactPayload rejects malformed email', () => {
   );
 });
 
-test('buildContactRequest + recordContactRequest persist a record', () => {
-  clearContactRequestsForTest();
+test('recordContactRequest persists across read calls', async () => {
+  await clearContactRequestsForTest();
   const parsed = parseContactPayload({
     email: 'cio@firm.com',
     name: 'Pat',
@@ -90,8 +97,29 @@ test('buildContactRequest + recordContactRequest persist a record', () => {
     topic: 'pricing',
     message: 'Enterprise quote please.',
   });
-  recordContactRequest(buildContactRequest(parsed, '2026-05-03T12:00:00Z'));
-  assert.equal(readContactRequests().length, 1);
-  assert.equal(readContactRequests()[0].topic, 'pricing');
-  clearContactRequestsForTest();
+  await recordContactRequest(buildContactRequest(parsed, '2026-05-03T12:00:00Z'));
+  const rows = await readContactRequests();
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].topic, 'pricing');
+  await clearContactRequestsForTest();
+});
+
+test('recordContactRequest appends multiple records', async () => {
+  await clearContactRequestsForTest();
+  for (const topic of ['pricing', 'sso', 'deployment'] as const) {
+    await recordContactRequest({
+      email: 'cio@firm.com',
+      name: 'Pat',
+      company: 'Atlas',
+      topic,
+      message: `interested in ${topic}`,
+      receivedAt: new Date().toISOString(),
+    });
+  }
+  const rows = await readContactRequests();
+  assert.deepEqual(
+    rows.map((r) => r.topic),
+    ['pricing', 'sso', 'deployment'],
+  );
+  await clearContactRequestsForTest();
 });

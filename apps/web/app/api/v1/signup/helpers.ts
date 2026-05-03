@@ -88,12 +88,17 @@ export function buildSignupRequest(
   return { ...parsed, receivedAt };
 }
 
-const memoryStore: SignupRequestRecord[] = [];
+import {
+  appendSignup,
+  clearFunnelMemoryForTest,
+  readSignups,
+  _resolvedPathsForTest,
+} from '../../../../lib/storage/funnelStore';
 
-export function recordSignupRequest(record: SignupRequestRecord): void {
-  memoryStore.push(record);
-  // In-process log so beta operators can see signups in the dev console.
-  // Replace with a real DB insert when runtime DB wiring is ready.
+export async function recordSignupRequest(
+  record: SignupRequestRecord,
+): Promise<void> {
+  await appendSignup(record);
   // eslint-disable-next-line no-console
   console.log('[signup] received', {
     plan: record.plan,
@@ -103,10 +108,19 @@ export function recordSignupRequest(record: SignupRequestRecord): void {
   });
 }
 
-export function readSignupRequests(): ReadonlyArray<SignupRequestRecord> {
-  return memoryStore.slice();
+export async function readSignupRequests(): Promise<
+  ReadonlyArray<SignupRequestRecord>
+> {
+  return readSignups();
 }
 
-export function clearSignupRequestsForTest(): void {
-  memoryStore.length = 0;
+export async function clearSignupRequestsForTest(): Promise<void> {
+  clearFunnelMemoryForTest();
+  const { signup } = _resolvedPathsForTest();
+  const { unlink } = await import('node:fs/promises');
+  try {
+    await unlink(signup);
+  } catch {
+    // Missing file — nothing to clear.
+  }
 }

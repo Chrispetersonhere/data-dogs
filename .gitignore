@@ -16,3 +16,5 @@ pnpm-lock.yaml
 data-dogs/
 .claude/worktrees/admiring-hamilton-4c70f5/
 .claude/worktrees/kind-austin-ea27ae/
+# Funnel JSONL store (signup_requests.jsonl, contact_inquiries.jsonl)
+apps/web/data/

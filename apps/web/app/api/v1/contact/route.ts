@@ -1,9 +1,11 @@
 /**
  * POST /api/v1/contact
  *
- * Beta-grade sales-inquiry endpoint. Validates and records a contact
- * request to a process-local store. Replace `recordContactRequest`
- * with a real DB / CRM hook when ready.
+ * Beta-grade sales-inquiry endpoint. Validates and persists a contact
+ * request to the JSONL-backed funnel store (see
+ * `apps/web/lib/storage/funnelStore.ts`). Falls back to in-memory if
+ * disk writes fail. Swap `appendContact` for an SQL insert when DB
+ * wiring is ready and the route handler does not change.
  */
 
 import { NextResponse } from 'next/server';
@@ -29,7 +31,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const parsed = parseContactPayload(payload);
     const record = buildContactRequest(parsed, new Date().toISOString());
-    recordContactRequest(record);
+    await recordContactRequest(record);
     return NextResponse.json(
       {
         ok: true,
