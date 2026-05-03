@@ -1,0 +1,337 @@
+.pageMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-top: 1rem;
+}
+
+/* ── HERO ─────────────────────────────────────────────── */
+
+.heroHeader {
+  text-align: center;
+  margin: 0 auto;
+  padding: 1.5rem 0 0;
+  max-width: 36rem;
+}
+
+.heroEyebrow {
+  margin: 0 0 0.625rem;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #667085;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #10213E;
+  letter-spacing: -0.01em;
+}
+
+.heroSubtitle {
+  margin: 0.625rem auto 0;
+  max-width: 32rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #344054;
+}
+
+.fineprint {
+  margin: 0.5rem auto 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #667085;
+}
+
+.fineprint a {
+  color: #10213E;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── FORM ─────────────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.75rem 1.5rem;
+  background: #FFFFFF;
+  border: 1px solid #D0D5DD;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+/* ── PLAN SELECTOR ────────────────────────────────────── */
+
+.planSelector {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.planSelectorLegend {
+  padding: 0;
+  margin: 0 0 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #667085;
+}
+
+.planSelectorList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem;
+}
+
+.planChip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid #D0D5DD;
+  border-radius: 0.5rem;
+  background: #FAFAF9;
+  text-decoration: none;
+  color: #10213E;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.planChip:hover {
+  border-color: #475467;
+}
+
+.planChip:focus-visible {
+  outline: 3px solid #475467;
+  outline-offset: 2px;
+}
+
+.planChipActive {
+  border: 1px solid #10213E;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 1px #10213E;
+}
+
+.planChipName {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #10213E;
+  letter-spacing: 0.02em;
+}
+
+.planChipPrice {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: #10213E;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.planChipCadence {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #667085;
+}
+
+.planSelectorHint {
+  margin: 0.625rem 0 0;
+  font-size: 0.75rem;
+  color: #667085;
+}
+
+.planSelectorHint a {
+  color: #10213E;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── FIELDS ───────────────────────────────────────────── */
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.fieldFull {
+  grid-column: 1 / -1;
+}
+
+.fieldLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #344054;
+}
+
+.fieldInput,
+.fieldTextarea {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.9375rem;
+  color: #10213E;
+  background: #FFFFFF;
+  border: 1px solid #98A2B3;
+  border-radius: 0.5rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fieldInput:focus,
+.fieldTextarea:focus {
+  outline: none;
+  border-color: #10213E;
+  box-shadow: 0 0 0 3px rgba(16, 33, 62, 0.18);
+}
+
+.fieldTextarea {
+  resize: vertical;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* ── SUBMIT ───────────────────────────────────────────── */
+
+.submitBtn {
+  appearance: none;
+  -webkit-appearance: none;
+  margin-top: 0.25rem;
+  padding: 0.75rem 1.25rem;
+  background: #10213E;
+  color: #F8FAFC;
+  border: 1px solid #10213E;
+  border-radius: 0.5rem;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.submitBtn:focus-visible {
+  outline: 3px solid #475467;
+  outline-offset: 3px;
+}
+
+/* ── ERRORS / SUCCESS ─────────────────────────────────── */
+
+.error {
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  background: rgba(180, 35, 24, 0.08);
+  border: 1px solid rgba(180, 35, 24, 0.4);
+  border-radius: 0.5rem;
+  color: #8A1B12;
+  font-size: 0.875rem;
+}
+
+.successPanel {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: #FFFFFF;
+  border: 1px solid #D0D5DD;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.successEyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #027A48;
+}
+
+.successTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #10213E;
+  letter-spacing: -0.005em;
+}
+
+.successBody {
+  margin: 0.625rem auto 1.25rem;
+  max-width: 32rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #344054;
+}
+
+.successEmail {
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  color: #10213E;
+}
+
+.successCtaRow {
+  display: flex;
+  justify-content: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.ctaSecondary {
+  display: inline-block;
+  padding: 0.5rem 0.875rem;
+  background: #FFFFFF;
+  color: #10213E;
+  border: 1px solid #98A2B3;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+
+.ctaSecondary:hover {
+  border-color: #475467;
+}
+
+.ctaSecondary:focus-visible {
+  outline: 3px solid #475467;
+  outline-offset: 3px;
+}
+
+/* ── BREAKPOINTS ──────────────────────────────────────── */
+
+@media (min-width: 640px) {
+  .fieldGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .heroTitle {
+    font-size: 2.25rem;
+  }
+}
