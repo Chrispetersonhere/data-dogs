@@ -24,7 +24,8 @@ const DEFAULT_LINKS: ReadonlyArray<NavLink> = [
   { href: '/screener', label: 'Screener' },
   { href: '/peers', label: 'Peers' },
   { href: '/docs/api', label: 'API' },
-  { href: '/docs/product', label: 'Docs' }
+  { href: '/docs/product', label: 'Docs' },
+  { href: '/#pricing', label: 'Pricing' }
 ];
 
 export function SiteTopNav({
