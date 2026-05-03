@@ -1,5 +1,13 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
+
+// Each spec file uses its own tmp dir so JSONL writes don't collide.
+process.env.FUNNEL_STORAGE_DIR = mkdtempSync(
+  join(tmpdir(), 'ibis-signup-spec-'),
+);
 
 import {
   buildSignupRequest,
@@ -107,9 +115,9 @@ test('buildSignupRequest stamps receivedAt', () => {
   assert.equal(record.receivedAt, '2026-05-03T12:00:00Z');
 });
 
-test('recordSignupRequest persists to in-memory store', () => {
-  clearSignupRequestsForTest();
-  recordSignupRequest({
+test('recordSignupRequest persists across read calls', async () => {
+  await clearSignupRequestsForTest();
+  await recordSignupRequest({
     email: 'jane@firm.com',
     name: 'Jane',
     company: 'Acme',
@@ -117,9 +125,30 @@ test('recordSignupRequest persists to in-memory store', () => {
     plan: 'researcher',
     receivedAt: '2026-05-03T12:00:00Z',
   });
-  assert.equal(readSignupRequests().length, 1);
-  assert.equal(readSignupRequests()[0].email, 'jane@firm.com');
-  clearSignupRequestsForTest();
+  const rows = await readSignupRequests();
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].email, 'jane@firm.com');
+  await clearSignupRequestsForTest();
+});
+
+test('recordSignupRequest appends multiple records in order', async () => {
+  await clearSignupRequestsForTest();
+  for (const email of ['a@firm.com', 'b@firm.com', 'c@firm.com']) {
+    await recordSignupRequest({
+      email,
+      name: 'Person',
+      company: 'Acme',
+      useCase: '',
+      plan: 'researcher',
+      receivedAt: new Date().toISOString(),
+    });
+  }
+  const rows = await readSignupRequests();
+  assert.deepEqual(
+    rows.map((r) => r.email),
+    ['a@firm.com', 'b@firm.com', 'c@firm.com'],
+  );
+  await clearSignupRequestsForTest();
 });
 
 test('parseSignupPayload caps absurdly long inputs', () => {

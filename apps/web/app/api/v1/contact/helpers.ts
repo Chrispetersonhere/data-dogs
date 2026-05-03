@@ -103,10 +103,17 @@ export function buildContactRequest(
   return { ...parsed, receivedAt };
 }
 
-const memoryStore: ContactRequestRecord[] = [];
+import {
+  appendContact,
+  clearFunnelMemoryForTest,
+  readContacts,
+  _resolvedPathsForTest,
+} from '../../../../lib/storage/funnelStore';
 
-export function recordContactRequest(record: ContactRequestRecord): void {
-  memoryStore.push(record);
+export async function recordContactRequest(
+  record: ContactRequestRecord,
+): Promise<void> {
+  await appendContact(record);
   // eslint-disable-next-line no-console
   console.log('[contact] received', {
     topic: record.topic,
@@ -116,10 +123,19 @@ export function recordContactRequest(record: ContactRequestRecord): void {
   });
 }
 
-export function readContactRequests(): ReadonlyArray<ContactRequestRecord> {
-  return memoryStore.slice();
+export async function readContactRequests(): Promise<
+  ReadonlyArray<ContactRequestRecord>
+> {
+  return readContacts();
 }
 
-export function clearContactRequestsForTest(): void {
-  memoryStore.length = 0;
+export async function clearContactRequestsForTest(): Promise<void> {
+  clearFunnelMemoryForTest();
+  const { contact } = _resolvedPathsForTest();
+  const { unlink } = await import('node:fs/promises');
+  try {
+    await unlink(contact);
+  } catch {
+    // Missing file — nothing to clear.
+  }
 }

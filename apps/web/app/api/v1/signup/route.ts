@@ -2,9 +2,11 @@
  * POST /api/v1/signup
  *
  * Beta-grade waitlist endpoint. Validates a trial signup payload and
- * appends it to an in-memory store. The store is intentionally
- * process-local — when a runtime database is wired, swap
- * `recordSignupRequest` for a real insert without touching the route.
+ * appends it to a JSONL-backed funnel store (see
+ * `apps/web/lib/storage/funnelStore.ts`). The store falls back to
+ * in-memory if disk writes fail. When runtime DB wiring is ready,
+ * swap the implementation of `appendSignup` for an SQL insert and
+ * the route handler does not change.
  */
 
 import { NextResponse } from 'next/server';
@@ -30,7 +32,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const parsed = parseSignupPayload(payload);
     const record = buildSignupRequest(parsed, new Date().toISOString());
-    recordSignupRequest(record);
+    await recordSignupRequest(record);
     return NextResponse.json(
       {
         ok: true,
