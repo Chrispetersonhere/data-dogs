@@ -13,6 +13,8 @@ import {
   typographyTokens
 } from '@data-dogs/ui';
 
+import { pricingPlans } from '../../lib/marketing/plans';
+
 import styles from './page.module.css';
 
 const apiEndpoints = [
@@ -56,19 +58,19 @@ const pipelineSteps = [
 
 const coverageStats = [
   {
-    label: 'Issuers indexed',
-    value: '12,847',
+    label: 'Issuer coverage',
+    value: 'All EDGAR',
     delta: 'Every SEC-registered issuer with current filings.'
   },
   {
-    label: 'Filings ingested',
-    value: '2.1M+',
-    delta: '10-K, 10-Q, 8-K, DEF 14A, Forms 3/4/5 and amendments.'
+    label: 'Filing types',
+    value: '10-K · 10-Q · 8-K · DEF 14A · 3/4/5',
+    delta: 'Annual, quarterly, current, proxy and insider reports — plus amendments.'
   },
   {
-    label: 'Median ingest latency',
-    value: '8s',
-    delta: 'EDGAR submission to queryable fact, p50 over the last 30 days.'
+    label: 'Provenance fields per fact',
+    value: '6',
+    delta: 'Source URL, accession, timestamp, checksum, parser version, job ID.'
   },
   {
     label: 'Point-in-time guarantee',
@@ -86,66 +88,6 @@ const sampleProvenance = {
   parser: 'xbrl-parse v2.4.1',
   job_id: 'ingest-7f3a9c'
 } as const;
-
-type PricingPlan = {
-  name: string;
-  price: string;
-  cadence: string;
-  tagline: string;
-  bullets: ReadonlyArray<string>;
-  cta: string;
-  href: string;
-  featured?: boolean;
-};
-
-const pricingPlans: ReadonlyArray<PricingPlan> = [
-  {
-    name: 'Researcher',
-    price: '$99',
-    cadence: '/ month',
-    tagline:
-      'Single seat. Full access to filings, fundamentals, compensation and insider data.',
-    bullets: [
-      '100,000 API requests / month',
-      'Full filing & XBRL coverage',
-      '6-field provenance on every fact',
-      'CSV exports & email support'
-    ],
-    cta: 'Start a 14-day trial',
-    href: '/signup?plan=researcher'
-  },
-  {
-    name: 'Team',
-    price: '$499',
-    cadence: '/ month',
-    tagline:
-      'Up to 5 analysts. Shared peer sets, saved screens and audit-ready exports.',
-    bullets: [
-      '1,000,000 API requests / month',
-      'Shared workspaces & saved screens',
-      'CSV / Parquet bulk exports',
-      'Priority email & Slack support'
-    ],
-    cta: 'Start a 14-day trial',
-    href: '/signup?plan=team',
-    featured: true
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    cadence: '',
-    tagline:
-      'SSO, dedicated infrastructure, custom feeds, and procurement / compliance review.',
-    bullets: [
-      'SSO (Okta, Azure AD, Google)',
-      '99.9% uptime SLA',
-      'Dedicated environment & data feeds',
-      'Procurement, security & legal review'
-    ],
-    cta: 'Talk to sales',
-    href: '/contact'
-  }
-];
 
 export default function MarketingPage() {
   return (
@@ -206,14 +148,14 @@ export default function MarketingPage() {
               Read the API docs
             </a>
           </div>
-          <ul className={styles.heroMeta} aria-label="Coverage at a glance">
-            <li>12,847 issuers indexed</li>
+          <ul className={styles.heroMeta} aria-label="At a glance">
+            <li>Live EDGAR ingest</li>
             <li aria-hidden="true">·</li>
-            <li>2.1M+ filings ingested</li>
+            <li>6-field provenance on every fact</li>
             <li aria-hidden="true">·</li>
-            <li>p50 ingest latency 8s</li>
+            <li>Restatement-aware</li>
             <li aria-hidden="true">·</li>
-            <li>SOC 2 Type II in progress</li>
+            <li>Beta — invite only</li>
           </ul>
         </section>
 
