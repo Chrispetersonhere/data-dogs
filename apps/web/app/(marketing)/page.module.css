@@ -23,9 +23,96 @@
   outline-offset: 2px;
 }
 
+/* ── HERO ───────────────────────────────────────────────── */
+
 .heroSection {
-  padding-top: 1rem;
+  position: relative;
+  padding: 2.5rem 0 1rem;
+  text-align: center;
 }
+
+.heroSection::before {
+  content: '';
+  position: absolute;
+  inset: 0 -2rem auto -2rem;
+  height: 320px;
+  background:
+    radial-gradient(
+      60% 80% at 50% 0%,
+      rgba(124, 139, 168, 0.18) 0%,
+      rgba(124, 139, 168, 0) 70%
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.heroSection > * {
+  position: relative;
+  z-index: 1;
+}
+
+.heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 auto 1.25rem;
+  padding: 0.375rem 0.75rem;
+  background-color: #FFFFFF;
+  border: 1px solid #D0D5DD;
+  border-radius: 999px;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #344054;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.heroEyebrowDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #027A48;
+  box-shadow: 0 0 0 3px rgba(2, 122, 72, 0.15);
+}
+
+.heroCtaRow {
+  display: flex;
+  gap: 0.875rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: -0.5rem;
+}
+
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: #475467;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+.heroMeta li {
+  margin: 0;
+}
+
+/* ── COVERAGE STRIP ─────────────────────────────────────── */
+
+.coverageStrip {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+/* ── DIVIDER ────────────────────────────────────────────── */
 
 .sectionDivider {
   border: none;
@@ -33,37 +120,152 @@
   margin: 0;
 }
 
-/* Real-data provenance example */
-.provenanceExample {
-  margin-top: 1.5rem;
-  border: 1px solid #D0D5DD;
+/* ── DARK PROVENANCE RECEIPT ────────────────────────────── */
+
+.receipt {
+  margin: 1.75rem 0 0;
+  background: linear-gradient(145deg, #101828 0%, #111827 45%, #1E293B 100%);
   border-radius: 0.75rem;
+  border: 1px solid #1E293B;
+  box-shadow:
+    0 12px 32px rgba(16, 24, 40, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   overflow: hidden;
-  background-color: #FAFAF9;
 }
 
-.provenanceExampleLabel {
-  margin: 0;
-  padding: 0.75rem 1.25rem;
+.receiptHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1.125rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
   font-size: 0.75rem;
-  font-weight: 600;
-  color: #344054;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid #D0D5DD;
+  color: #98A2B3;
 }
 
-.provenanceExamplePre {
+.receiptDots {
+  display: inline-flex;
+  gap: 0.375rem;
+}
+
+.receiptDots span {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.receiptDots span:nth-child(1) {
+  background: #ED6A5E;
+}
+
+.receiptDots span:nth-child(2) {
+  background: #F4BF4F;
+}
+
+.receiptDots span:nth-child(3) {
+  background: #61C554;
+}
+
+.receiptFilename {
+  color: #F8FAFC;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.receiptMetaTag {
+  margin-left: auto;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #CBD5E1;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.receiptBody {
   margin: 0;
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.125rem;
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
   font-size: 0.8125rem;
   line-height: 1.7;
-  color: #10213E;
+  color: #CBD5E1;
   overflow-x: auto;
+  white-space: pre;
+  font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 1;
+}
+
+.receiptBody code {
+  display: block;
+}
+
+.receiptLine {
+  display: flex;
+  gap: 0.875rem;
+  align-items: baseline;
+}
+
+.receiptLineNo {
+  flex-shrink: 0;
+  width: 1.5rem;
+  text-align: right;
+  color: #475467;
+  user-select: none;
+}
+
+.receiptCode {
   white-space: pre;
 }
 
-/* CTA subtle hover */
+.recK {
+  color: #93B5FF;
+}
+
+.recS {
+  color: #B6E1B0;
+}
+
+.recP {
+  color: #98A2B3;
+}
+
+.receiptFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.125rem;
+  background: rgba(0, 0, 0, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.75rem;
+  color: #98A2B3;
+}
+
+.receiptFooterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  background: rgba(2, 122, 72, 0.18);
+  border: 1px solid rgba(2, 122, 72, 0.4);
+  border-radius: 999px;
+  color: #6EE7B7;
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+}
+
+.receiptFooterMeta {
+  font-size: 0.75rem;
+  color: #98A2B3;
+}
+
+/* ── CTA BUTTONS ────────────────────────────────────────── */
+
 .ctaPrimary:hover {
   opacity: 0.88;
 }
@@ -77,6 +279,8 @@
 .ctaSecondary:hover {
   border-color: #475467 !important;
 }
+
+/* ── GRIDS ──────────────────────────────────────────────── */
 
 .statsGrid {
   display: grid;
@@ -102,9 +306,189 @@
   gap: 0.75rem;
 }
 
+/* ── PRICING ────────────────────────────────────────────── */
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.pricingCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.75rem 1.5rem 1.5rem;
+  background-color: #FFFFFF;
+  border: 1px solid #D0D5DD;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pricingCardFeatured {
+  border: 1px solid #10213E;
+  box-shadow:
+    0 8px 24px rgba(16, 24, 40, 0.12),
+    0 0 0 1px #10213E;
+  transform: translateY(-2px);
+}
+
+.pricingBadge {
+  position: absolute;
+  top: -0.6875rem;
+  left: 1.25rem;
+  padding: 0.25rem 0.625rem;
+  background: #10213E;
+  color: #F8FAFC;
+  border-radius: 999px;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pricingName {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #344054;
+}
+
+.pricingPriceRow {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+
+.pricingPrice {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #10213E;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.pricingCadence {
+  font-size: 0.875rem;
+  color: #344054;
+  font-weight: 500;
+}
+
+.pricingTagline {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #344054;
+}
+
+.pricingBullets {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.pricingBullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #344054;
+  line-height: 1.5;
+}
+
+.pricingCheck {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.125rem;
+  border-radius: 50%;
+  background: #E8ECF5;
+  color: #10213E;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.pricingCtaPrimary,
+.pricingCtaSecondary {
+  display: inline-block;
+  text-align: center;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.pricingCtaPrimary {
+  background-color: #10213E;
+  color: #F8FAFC;
+  border: 1px solid #10213E;
+}
+
+.pricingCtaPrimary:hover {
+  opacity: 0.9;
+}
+
+.pricingCtaSecondary {
+  background-color: #FFFFFF;
+  color: #10213E;
+  border: 1px solid #98A2B3;
+}
+
+.pricingCtaSecondary:hover {
+  border-color: #475467;
+}
+
+.pricingCtaPrimary:focus-visible,
+.pricingCtaSecondary:focus-visible {
+  outline: 3px solid #475467;
+  outline-offset: 3px;
+}
+
+/* ── FINAL CTA ──────────────────────────────────────────── */
+
+.finalCta {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: #FAFAF9;
+  border: 1px solid #D0D5DD;
+  border-radius: 0.75rem;
+}
+
+/* ── BREAKPOINTS ────────────────────────────────────────── */
+
 @media (min-width: 768px) {
   .pageMain {
     gap: 3rem;
+  }
+
+  .heroSection {
+    padding: 3.5rem 0 1.5rem;
+  }
+
+  .heroSection::before {
+    inset: 0 -4rem auto -4rem;
+    height: 420px;
+  }
+
+  .coverageStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .statsGrid {
@@ -122,9 +506,23 @@
   .apiGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .pricingGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .receiptBody {
+    padding: 1.25rem 1.5rem;
+    font-size: 0.875rem;
+  }
 }
 
 @media (min-width: 1200px) {
+  .coverageStrip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .statsGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
