@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 
 import { SiteFooter, SiteTopNav } from '@data-dogs/ui';
 
+import { formatLatestIngest, getStatusSnapshot } from '../lib/status/snapshot';
+
 import './globals.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.ibis.dev';
@@ -66,13 +68,23 @@ type RootLayoutProps = {
   children: ReactNode;
 };
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
+  const snapshot = await getStatusSnapshot();
+  const ingestTimestamp = formatLatestIngest(snapshot.latestIngestAt, {
+    now: new Date(snapshot.generatedAt),
+  });
   return (
     <html lang="en">
       <body>
-        <SiteTopNav />
+        <SiteTopNav
+          ingestTimestamp={ingestTimestamp}
+          medianLatencySeconds={snapshot.medianLatencySeconds}
+        />
         {children}
-        <SiteFooter />
+        <SiteFooter
+          latestIngest={ingestTimestamp}
+          medianLatencySeconds={snapshot.medianLatencySeconds}
+        />
       </body>
     </html>
   );

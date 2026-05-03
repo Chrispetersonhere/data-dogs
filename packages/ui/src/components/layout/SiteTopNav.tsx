@@ -117,7 +117,12 @@ export function SiteTopNav({
           );
         })}
       </ul>
-      <div style={freshnessStyle} aria-label="EDGAR ingest freshness">
+      <a
+        href="/status"
+        style={{ ...freshnessStyle, textDecoration: 'none' }}
+        aria-label={`EDGAR ingest freshness: ${ingestTimestamp}, median ${medianLatencySeconds}s. Open status page.`}
+        title="Open the ingest status page"
+      >
         <span
           aria-hidden="true"
           style={{
@@ -131,7 +136,7 @@ export function SiteTopNav({
         <span>
           Latest EDGAR ingest · {ingestTimestamp} · median {medianLatencySeconds}s
         </span>
-      </div>
+      </a>
     </nav>
   );
 }
