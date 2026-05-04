@@ -22,6 +22,7 @@ const featuredCompanies = [
   { ticker: 'MSFT', cik: '0000789019', name: 'Microsoft Corp.' },
   { ticker: 'GOOGL', cik: '0001652044', name: 'Alphabet Inc.' },
   { ticker: 'NVDA', cik: '0001045810', name: 'NVIDIA Corp.' },
+  { ticker: 'META', cik: '0001326801', name: 'Meta Platforms Inc.' },
 ] as const;
 
 const surfaces = [
@@ -35,11 +36,11 @@ const surfaces = [
   },
   {
     title: 'Company',
-    href: '/company/0000320193',
-    eyebrow: 'Issuer profile · multi-tab view',
+    href: '/company/AAPL',
+    eyebrow: 'Issuer profile · live SEC data',
     description:
-      'Per-issuer overview with fundamentals, compensation and insider tabs. Every fact carries six fields of provenance and a link to the source disclosure.',
-    cta: 'See an example issuer →',
+      'Per-issuer overview with live fundamentals, compensation and insider tabs — every figure pulled from SEC EDGAR with a clickable link to the filing it came from.',
+    cta: 'See AAPL live →',
   },
   {
     title: 'Screener',
@@ -106,7 +107,7 @@ export default function OverviewPage() {
           <ul className={styles.featuredList}>
             {featuredCompanies.map((c) => (
               <li key={c.cik}>
-                <a className={styles.featuredChip} href={`/company/${c.cik}`}>
+                <a className={styles.featuredChip} href={`/company/${c.ticker}`}>
                   <span className={styles.featuredTicker}>{c.ticker}</span>
                   <span className={styles.featuredName}>{c.name}</span>
                 </a>
