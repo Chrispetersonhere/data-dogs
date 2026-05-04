@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "packageManager": "pnpm@10.17.1",
+  "engines": {
+    "node": ">=20.0.0 <24.0.0"
+  },
   "scripts": {
     "lint": "turbo run lint --continue",
     "typecheck": "turbo run typecheck --continue",
